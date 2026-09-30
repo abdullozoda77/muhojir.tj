@@ -59,8 +59,8 @@ REST_FRAMEWORK = {
     'DEFAULT_THROTTLE_RATES': {
         'anon': '1000/hour',
         'user': '5000/hour',
-        # Each code costs an SMS, so asking for codes is limited much harder than the rest of the API.
-        'sms': '5/hour',
+        # Asking for login codes sends emails, so it is limited much harder than the rest of the API.
+        'login_code': '5/hour',
     },
 }
 
@@ -164,11 +164,40 @@ MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-# SMS login codes. While SMS_BACKEND is "console" the code is printed in the Django log instead of being sent,
-# which is enough for development; plug a real provider into accounts/sms.py before going live.
-SMS_BACKEND = os.getenv('SMS_BACKEND', 'console')
-SMS_CODE_LIFETIME = timedelta(minutes=5)
-SMS_CODE_MAX_ATTEMPTS = 5
+# Login codes are sent by email. With EMAIL_HOST, EMAIL_HOST_USER and EMAIL_HOST_PASSWORD in .env they go
+# through that SMTP server, for example Gmail: EMAIL_HOST=smtp.gmail.com, EMAIL_PORT=587, EMAIL_USE_TLS=True and an
+# app password. Until all three are filled in, letters are only printed in the Django console (development).
+# (Lower-case name: Django 6.1 refuses the old EMAIL_* settings next to MAILERS.)
+smtp_host = os.getenv('EMAIL_HOST', '')
+if smtp_host and os.getenv('EMAIL_HOST_USER') and os.getenv('EMAIL_HOST_PASSWORD'):
+    MAILERS = {
+        'default': {
+            'BACKEND': 'django.core.mail.backends.smtp.EmailBackend',
+            'OPTIONS': {
+                'host': smtp_host,
+                'port': int(os.getenv('EMAIL_PORT', '587')),
+                'username': os.getenv('EMAIL_HOST_USER', ''),
+                'password': os.getenv('EMAIL_HOST_PASSWORD', ''),
+                'use_tls': os.getenv('EMAIL_USE_TLS', 'True') == 'True',
+                'use_ssl': os.getenv('EMAIL_USE_SSL', 'False') == 'True',
+                'timeout': 15,
+            },
+        },
+    }
+else:
+    MAILERS = {
+        'default': {
+            'BACKEND': 'django.core.mail.backends.console.EmailBackend',
+        },
+    }
+
+# Gmail and most SMTP servers only send "from" the account itself, so it is used by default.
+DEFAULT_FROM_EMAIL = os.getenv(
+    'DEFAULT_FROM_EMAIL', f'"Muhojir.tj" <{os.getenv("EMAIL_HOST_USER") or "noreply@muhojir.tj"}>'
+)
+
+LOGIN_CODE_LIFETIME = timedelta(minutes=10)
+LOGIN_CODE_MAX_ATTEMPTS = 5
 
 # Days before a document runs out when the owner gets a reminder.
 REMINDER_DAYS = (30, 7, 3, 1)

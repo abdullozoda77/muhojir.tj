@@ -21,19 +21,19 @@ def normalize_phone(value):
 class UserManager(BaseUserManager):
     use_in_migrations = True
 
-    def create_user(self, phone, password=None, **extra):
-        user = self.model(phone=normalize_phone(phone), **extra)
+    def create_user(self, email, password=None, **extra):
+        user = self.model(email=self.normalize_email(email).lower(), **extra)
         if password:
             user.set_password(password)
         else:
-            # Normal users log in with an SMS code, so they have no password at all.
+            # Normal users log in with a code sent to their email, so they have no password at all.
             user.set_unusable_password()
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, phone, password=None, **extra):
+    def create_superuser(self, email, password=None, **extra):
         extra.update(is_staff=True, is_superuser=True, role="admin")
-        return self.create_user(phone, password, **extra)
+        return self.create_user(email, password, **extra)
 
 
 class User(AbstractBaseUser, PermissionsMixin):
@@ -43,44 +43,50 @@ class User(AbstractBaseUser, PermissionsMixin):
     ROLES = (("migrant", "Migrant"), ("employer", "Employer"), ("admin", "Admin"))
     LANGUAGES = (("tg", "Тоҷикӣ"), ("ru", "Русский"))
 
-    phone = models.CharField(max_length=16, unique=True)
+    email = models.EmailField(unique=True)
+    # Contact number shown to employers on the resume; not used for login.
+    phone = models.CharField(max_length=16, unique=True, blank=True, null=True)
     full_name = models.CharField(max_length=150, blank=True)
     role = models.CharField(max_length=20, choices=ROLES, default="migrant")
     language = models.CharField(max_length=2, choices=LANGUAGES, default="tg")
     # City in Russia where the person lives now; jobs and news are shown for it first.
     city = models.CharField(max_length=100, blank=True)
-    sms_reminders = models.BooleanField(default=True)
+    email_reminders = models.BooleanField(default=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     date_joined = models.DateTimeField(default=timezone.now)
 
     objects = UserManager()
 
-    USERNAME_FIELD = "phone"
+    USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
 
     def clean(self):
         super().clean()
+        self.email = self.email.lower()
+        if not self.phone:
+            self.phone = None  # several users without a phone must not clash on the unique field
+            return
         try:
             self.phone = normalize_phone(self.phone)
         except ValidationError as e:
             raise ValidationError({"phone": e.messages})
 
     def __str__(self):
-        return self.full_name or self.phone
+        return self.full_name or self.email
 
 
-class PhoneCode(models.Model):
-    """The 6-digit login code sent by SMS. Only a hash is stored, like a password; asking for a new code
-    replaces the old one. It is keyed by phone, not user, because the first code creates the account."""
+class EmailCode(models.Model):
+    """The 6-digit login code sent by email. Only a hash is stored, like a password; asking for a new code
+    replaces the old one. It is keyed by email, not user, because the first code creates the account."""
 
-    phone = models.CharField(max_length=16, unique=True)
+    email = models.EmailField(unique=True)
     code_hash = models.CharField(max_length=128)
     sent_at = models.DateTimeField()
     attempts = models.PositiveSmallIntegerField(default=0)  # wrong tries with this code
 
     def __str__(self):
-        return self.phone
+        return self.email
 
 
 class Notification(models.Model):

@@ -26,7 +26,7 @@ class RegionAdmin(admin.ModelAdmin):
 class UserDocumentAdmin(admin.ModelAdmin):
     list_display = ["user", "document_type", "expires_at", "region"]
     list_filter = ["document_type", "region"]
-    search_fields = ["user__phone", "user__full_name", "number"]
+    search_fields = ["user__email", "user__full_name", "number"]
     date_hierarchy = "expires_at"
 
 

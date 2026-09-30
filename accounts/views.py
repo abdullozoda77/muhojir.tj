@@ -1,7 +1,5 @@
-import secrets
-
 from django.conf import settings
-from django.contrib.auth.hashers import check_password, make_password
+from django.contrib.auth.hashers import check_password
 from django.db import transaction
 from django.utils import timezone
 from drf_yasg.utils import swagger_auto_schema
@@ -14,13 +12,13 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .models import Notification, PhoneCode, User
+from .emails import send_login_code
+from .models import EmailCode, Notification, User
 from .serializers import (
     LogoutSerializer, NotificationSerializer, SendCodeSerializer, UserSerializer, VerifyCodeSerializer,
 )
-from .sms import send_sms
 
-# A new code can be asked for the same number at most once a minute.
+# A new code can be asked for the same email at most once a minute.
 RESEND_PAUSE_SECONDS = 60
 
 
@@ -30,32 +28,33 @@ def tokens_for(user):
 
 
 class SendCodeView(APIView):
-    """Step 1 of login and sign-up: sends a 6-digit code by SMS to the phone number."""
+    """Step 1 of login and sign-up: sends a 6-digit code to the email address."""
 
     permission_classes = [permissions.AllowAny]
     throttle_classes = [ScopedRateThrottle]
-    throttle_scope = "sms"
+    throttle_scope = "login_code"
 
     @swagger_auto_schema(request_body=SendCodeSerializer)
     def post(self, request):
         serializer = SendCodeSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        phone = serializer.validated_data["phone"]
+        email = serializer.validated_data["email"]
 
-        existing = PhoneCode.objects.filter(phone=phone).first()
+        existing = EmailCode.objects.filter(email=email).first()
         if existing and (timezone.now() - existing.sent_at).total_seconds() < RESEND_PAUSE_SECONDS:
             return Response(
                 {"detail": "A code was just sent. Wait a minute before asking for a new one."},
                 status=status.HTTP_429_TOO_MANY_REQUESTS,
             )
 
-        code = f"{secrets.randbelow(10**6):06d}"
-        PhoneCode.objects.update_or_create(
-            phone=phone,
-            defaults={"code_hash": make_password(code), "sent_at": timezone.now(), "attempts": 0},
-        )
-        send_sms(phone, f"Муҳоҷир: рамзи воридшавӣ {code}")
-        return Response({"detail": "Code sent.", "is_new_user": not User.objects.filter(phone=phone).exists()})
+        try:
+            send_login_code(email)
+        except OSError:  # SMTP server down or refused the login
+            return Response(
+                {"detail": "The email could not be sent. Try again in a few minutes."},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
+        return Response({"detail": "Code sent.", "is_new_user": not User.objects.filter(email=email).exists()})
 
 
 class VerifyCodeView(APIView):
@@ -68,13 +67,13 @@ class VerifyCodeView(APIView):
         serializer = VerifyCodeSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
-        phone = data["phone"]
+        email = data["email"]
 
         with transaction.atomic():
-            entry = PhoneCode.objects.select_for_update().filter(phone=phone).first()
-            if entry is None or timezone.now() - entry.sent_at > settings.SMS_CODE_LIFETIME:
+            entry = EmailCode.objects.select_for_update().filter(email=email).first()
+            if entry is None or timezone.now() - entry.sent_at > settings.LOGIN_CODE_LIFETIME:
                 return Response({"detail": "The code has expired. Ask for a new one."}, status=status.HTTP_400_BAD_REQUEST)
-            if entry.attempts >= settings.SMS_CODE_MAX_ATTEMPTS:
+            if entry.attempts >= settings.LOGIN_CODE_MAX_ATTEMPTS:
                 return Response({"detail": "Too many wrong tries. Ask for a new code."}, status=status.HTTP_400_BAD_REQUEST)
             if not check_password(data["code"], entry.code_hash):
                 entry.attempts += 1
@@ -83,7 +82,7 @@ class VerifyCodeView(APIView):
             entry.delete()
 
             user, created = User.objects.get_or_create(
-                phone=phone,
+                email=email,
                 defaults={"full_name": data.get("full_name", ""), "role": data["role"]},
             )
             if created:

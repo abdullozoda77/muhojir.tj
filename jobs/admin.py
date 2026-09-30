@@ -8,7 +8,7 @@ class EmployerAdmin(admin.ModelAdmin):
     list_display = ["name", "city", "owner", "is_verified", "is_blacklisted", "created_at"]
     list_filter = ["is_verified", "is_blacklisted", "city"]
     list_editable = ["is_verified", "is_blacklisted"]
-    search_fields = ["name", "inn", "owner__phone"]
+    search_fields = ["name", "inn", "owner__email"]
 
 
 @admin.register(Job)
@@ -28,7 +28,7 @@ class EmployerReviewAdmin(admin.ModelAdmin):
 class ResumeAdmin(admin.ModelAdmin):
     list_display = ["full_name", "profession", "city", "industry", "has_patent", "is_visible"]
     list_filter = ["industry", "has_patent", "is_visible"]
-    search_fields = ["full_name", "profession", "user__phone"]
+    search_fields = ["full_name", "profession", "user__email"]
 
 
 @admin.register(JobApplication)
