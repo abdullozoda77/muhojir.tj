@@ -62,7 +62,7 @@ export default function Company() {
             <p className="text-label-lg">{t("Ширкат тасдиқ шудааст")}</p>
           </div>
         ) : (
-          <div className="flex items-center gap-3 rounded-2xl bg-secondary-fixed p-4 text-on-secondary-fixed">
+          <div className="flex items-center gap-3 rounded-2xl bg-warning-fixed p-4 text-on-warning-fixed">
             <Hourglass className="h-6 w-6" aria-hidden />
             <p className="text-label-lg">{t("Дар санҷиши админ. Эълонҳо ҳоло ҳам намоёнанд, аммо бе нишони «Тасдиқшуда».")}</p>
           </div>

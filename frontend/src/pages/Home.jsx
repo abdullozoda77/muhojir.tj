@@ -139,7 +139,7 @@ function GuestHome() {
             {t("Мӯҳлати патент ва бақайдгириро фаромӯш накунед, нархи патентро ҳисоб кунед ва корро аз корфармоёни санҷидашуда ёбед. Ҳамааш бепул ва бо забони тоҷикӣ.")}
           </p>
           <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-            <Link to="/login" className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl bg-surface-container-lowest px-6 text-label-lg text-primary shadow-sm hover:bg-primary-fixed">
+            <Link to="/login" className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl bg-secondary px-6 text-label-lg text-on-secondary shadow-sm hover:bg-secondary-container">
               {t("Оғоз кардан — бепул")}
               <ArrowRight className="h-5 w-5" aria-hidden />
             </Link>
@@ -209,10 +209,10 @@ function MigrantHome({ user }) {
           </div>
         </div>
         <div className="flex items-center gap-2 rounded-xl bg-surface-container-low px-4 py-2.5">
-          {needAttention ? <ShieldAlert className="h-5 w-5 text-secondary" aria-hidden /> : <ShieldCheck className="h-5 w-5 text-tertiary" aria-hidden />}
+          {needAttention ? <ShieldAlert className="h-5 w-5 text-warning" aria-hidden /> : <ShieldCheck className="h-5 w-5 text-tertiary" aria-hidden />}
           <div className="flex flex-col">
             <span className="text-label-sm text-on-surface-variant">{t("Ҳолати ҳуҷҷатҳо")}</span>
-            <span className={`text-label-md ${needAttention ? "text-secondary" : "text-tertiary"}`}>
+            <span className={`text-label-md ${needAttention ? "text-warning" : "text-tertiary"}`}>
               {loading ? "…" : needAttention ? t("{0} ҳуҷҷат диққат талаб мекунад", needAttention) : docs.length ? t("Ҳамааш тартиб аст") : t("Ҳуҷҷат илова нашудааст")}
             </span>
           </div>
@@ -342,7 +342,7 @@ function EmployerHome({ user }) {
               {t("Ширкат тасдиқ шудааст")}
             </span>
           ) : (
-            <span className="inline-flex items-center gap-2 rounded-xl bg-secondary-fixed px-4 py-2.5 text-label-md text-on-secondary-fixed">
+            <span className="inline-flex items-center gap-2 rounded-xl bg-warning-fixed px-4 py-2.5 text-label-md text-on-warning-fixed">
               <ShieldAlert className="h-5 w-5" aria-hidden />
               {t("Дар санҷиши админ")}
             </span>

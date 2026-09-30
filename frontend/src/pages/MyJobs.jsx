@@ -69,7 +69,7 @@ export default function MyJobs() {
                 </label>
               </div>
               <p className="text-label-lg text-primary">{salary(job)}</p>
-              {job.is_active && !isOpen(job) && <p className="text-body-sm text-secondary">{t("Мӯҳлати эълон гузашт — санаро нав кунед.")}</p>}
+              {job.is_active && !isOpen(job) && <p className="text-body-sm text-warning">{t("Мӯҳлати эълон гузашт — санаро нав кунед.")}</p>}
               <div className="flex flex-wrap gap-2">
                 <Button variant="soft" icon={Pencil} onClick={() => setEditing(job)}>{t("Таҳрир")}</Button>
                 <Link to={`/inbox?job=${job.id}`} className="inline-flex min-h-[48px] items-center gap-2 rounded-xl bg-surface-container-low px-4 text-label-md hover:bg-surface-container">

@@ -1,24 +1,32 @@
 import forms from "@tailwindcss/forms";
 
 // Colors, sizes and type scale from the Muhojir.tj design (Material 3 style token names).
+// Blue is the main color and red the accent; "warning" (amber) is only for deadlines that end soon,
+// so they never look like "expired" (error red).
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ["./index.html", "./src/**/*.{js,jsx}"],
   theme: {
     extend: {
       colors: {
-        primary: "#005c55",
+        primary: "#1447a8",
         "on-primary": "#ffffff",
-        "primary-container": "#0f766e",
-        "on-primary-container": "#a3faef",
-        "primary-fixed": "#9cf2e8",
-        "on-primary-fixed": "#00201d",
-        secondary: "#904d00",
+        "primary-container": "#1e63d6",
+        "on-primary-container": "#e3ecff",
+        "primary-fixed": "#dbe6ff",
+        "on-primary-fixed": "#001a43",
+        secondary: "#c1121f",
         "on-secondary": "#ffffff",
-        "secondary-container": "#fe932c",
-        "on-secondary-container": "#663500",
-        "secondary-fixed": "#ffdcc3",
-        "on-secondary-fixed": "#2f1500",
+        "secondary-container": "#e5484d",
+        "on-secondary-container": "#ffffff",
+        "secondary-fixed": "#ffe1e3",
+        "on-secondary-fixed": "#410006",
+        warning: "#8a5100",
+        "on-warning": "#ffffff",
+        "warning-container": "#f59e0b",
+        "on-warning-container": "#3d2400",
+        "warning-fixed": "#ffe8c7",
+        "on-warning-fixed": "#2e1800",
         tertiary: "#005f26",
         "on-tertiary": "#ffffff",
         "tertiary-container": "#007a33",

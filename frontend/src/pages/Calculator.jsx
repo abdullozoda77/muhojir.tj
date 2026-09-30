@@ -98,7 +98,7 @@ export default function Calculator() {
                   <SoonButton icon={CreditCard} className="self-start">{t("Пардохти онлайн")}</SoonButton>
                 </div>
                 <div className="flex items-start gap-3 rounded-lg bg-surface-container-lowest p-4 shadow-sm">
-                  <Info className="mt-0.5 h-5 w-5 shrink-0 text-secondary" aria-hidden />
+                  <Info className="mt-0.5 h-5 w-5 shrink-0 text-warning" aria-hidden />
                   <p className="text-body-sm">
                     {t("Ин ҳисоби тахминӣ аст. Нархи дақиқро ҳангоми пардохт дар чек санҷед. Пардохтро якчанд рӯз пеш аз анҷоми мӯҳлат кунед, то пул сари вақт расад.")}
                   </p>

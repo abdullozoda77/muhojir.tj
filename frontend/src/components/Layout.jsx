@@ -107,7 +107,7 @@ function Badge({ kind, counts }) {
   const n = counts[kind];
   if (!n) return null;
   return (
-    <span className={`inline-flex min-w-[20px] items-center justify-center rounded-full px-1.5 py-0.5 text-label-sm ${kind === "docs" ? "bg-secondary-container text-on-secondary-container" : "bg-error text-on-error"}`}>
+    <span className={`inline-flex min-w-[20px] items-center justify-center rounded-full px-1.5 py-0.5 text-label-sm ${kind === "docs" ? "bg-warning-container text-on-warning-container" : "bg-error text-on-error"}`}>
       {n}
     </span>
   );
@@ -227,7 +227,7 @@ export default function Layout() {
                     <i.icon className="h-5 w-5" aria-hidden />
                   </span>
                   <span className="max-w-full truncate px-1">{i.short}</span>
-                  {i.badge && counts[i.badge] > 0 && <span className="absolute right-[18%] top-1.5 h-2.5 w-2.5 rounded-full bg-secondary-container ring-2 ring-surface-container-lowest" />}
+                  {i.badge && counts[i.badge] > 0 && <span className="absolute right-[18%] top-1.5 h-2.5 w-2.5 rounded-full bg-warning-container ring-2 ring-surface-container-lowest" />}
                 </>
               )}
             </NavLink>

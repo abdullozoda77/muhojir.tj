@@ -50,7 +50,7 @@ export default function Notifications() {
               return (
                 <div key={n.id} className={`card flex items-start gap-3 p-4 ${n.is_read ? "" : "ring-1 ring-primary/30"}`}>
                   <button type="button" onClick={() => markRead(n)} className="flex flex-1 items-start gap-3 text-left">
-                    <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${n.kind === "reminder" ? "bg-secondary-fixed text-secondary" : "bg-primary-fixed text-primary"}`}>
+                    <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${n.kind === "reminder" ? "bg-warning-fixed text-warning" : "bg-primary-fixed text-primary"}`}>
                       <Icon className="h-5 w-5" aria-hidden />
                     </span>
                     <span className="flex-1">

@@ -9,7 +9,7 @@ import { Button, EmptyState, ErrorBox, PageHeader, STATUS, Skeleton, SoonTag, St
 
 const FILTERS = [
   { key: "all", label: () => t("Ҳама") },
-  { key: "expiring", label: () => t("Наздик ба анҷом"), icon: Clock, tone: "text-secondary" },
+  { key: "expiring", label: () => t("Наздик ба анҷом"), icon: Clock, tone: "text-warning" },
   { key: "expired", label: () => t("Мӯҳлат гузашта"), icon: XCircle, tone: "text-error" },
   { key: "valid", label: () => t("Эътибор дорад"), icon: CheckCircle2, tone: "text-tertiary" },
 ];

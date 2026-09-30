@@ -54,7 +54,7 @@ export function SoonButton({ icon: Icon, children, className = "" }) {
 // Document status: always color + icon + text, never color alone.
 export const STATUS = {
   expired: { box: "bg-error-container text-on-error-container", bar: "bg-error", icon: XCircle, accent: "text-error" },
-  expiring: { box: "bg-secondary-fixed text-on-secondary-fixed", bar: "bg-secondary-container", icon: Clock, accent: "text-secondary" },
+  expiring: { box: "bg-warning-fixed text-on-warning-fixed", bar: "bg-warning-container", icon: Clock, accent: "text-warning" },
   valid: { box: "bg-tertiary-fixed text-on-tertiary-fixed", bar: "bg-tertiary-container", icon: CheckCircle2, accent: "text-tertiary" },
 };
 
