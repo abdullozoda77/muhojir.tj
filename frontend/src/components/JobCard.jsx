@@ -88,3 +88,30 @@ export default function JobCard({ job, onApply, compact }) {
     </article>
   );
 }
+
+// The short one-line job of the home page: letter, title, company and perks, salary on the right.
+export function JobRow({ job }) {
+  const perks = [
+    job.housing_provided && t("манзил"),
+    job.meals_provided && t("хӯрок"),
+    job.helps_with_documents && t("ёрӣ бо ҳуҷҷатҳо"),
+  ].filter(Boolean);
+  return (
+    <Link to={`/jobs/${job.id}`} className="grid grid-cols-[44px_1fr_auto] items-center gap-4 rounded-2xl px-3 py-4 transition-colors hover:bg-surface-container-low">
+      <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary-fixed text-headline-sm font-bold text-primary" aria-hidden>
+        {job.title[0]}
+      </span>
+      <span className="flex min-w-0 flex-col gap-1">
+        <span className="flex items-center gap-2 text-body-lg font-semibold">
+          <span className="truncate">{job.title}</span>
+          {isPromoted(job) && <span className="rounded-md bg-secondary px-2 py-0.5 text-label-sm text-on-secondary">TOP</span>}
+        </span>
+        <span className="flex min-w-0 items-center gap-1.5 text-body-sm text-on-surface-variant">
+          {job.employer.is_verified && <BadgeCheck className="h-4 w-4 shrink-0 text-tertiary-container" aria-label={t("Тасдиқшуда")} />}
+          <span className="truncate">{[job.employer.name, ...perks].join(" · ")}</span>
+        </span>
+      </span>
+      <span className="text-right text-body-lg font-bold text-primary">{salary(job)}</span>
+    </Link>
+  );
+}

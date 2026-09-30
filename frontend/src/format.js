@@ -60,3 +60,11 @@ export function monthTitle(yearMonth) {
   if (lang === "ru") return new Date(y, m - 1, 1).toLocaleDateString("ru-RU", { month: "long", year: "numeric" });
   return `${MONTHS_TG[m - 1]} ${y}`;
 }
+
+const WEEKDAYS_TG = ["Якшанбе", "Душанбе", "Сешанбе", "Чоршанбе", "Панҷшанбе", "Ҷумъа", "Шанбе"];
+
+// "Панҷшанбе, 1 октябр" — today's date for the greeting banner.
+export function todayTitle(now = new Date()) {
+  if (lang === "ru") return now.toLocaleDateString("ru-RU", { weekday: "long", day: "numeric", month: "long" });
+  return `${WEEKDAYS_TG[now.getDay()]}, ${now.getDate()} ${MONTHS_TG[now.getMonth()].toLowerCase()}`;
+}
