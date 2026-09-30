@@ -145,7 +145,7 @@ export function PageHeader({ eyebrow, title, text, children }) {
     <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
       <div>
         {eyebrow && <p className="mb-1 text-label-sm uppercase tracking-wider text-primary">{eyebrow}</p>}
-        <h1 className="text-headline-lg md:text-headline-xl">{title}</h1>
+        <h1 className="font-display text-headline-lg font-bold md:text-headline-xl">{title}</h1>
         {text && <p className="mt-1 max-w-2xl text-body-md text-on-surface-variant">{text}</p>}
       </div>
       {children && <div className="flex shrink-0 flex-wrap gap-2">{children}</div>}

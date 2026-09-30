@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import {
   ArrowRight, Bell, BookOpen, Briefcase, Building2, Calculator, ClipboardList, FileUser, Home, Inbox, LifeBuoy, LogIn,
-  ReceiptText, Scale, Send, Settings, ShieldCheck, User, Users,
+  ReceiptText, Scale, Send, Settings, ShieldCheck, Users,
 } from "lucide-react";
 import { api, apiAll } from "../api.js";
 import { useAuth } from "../auth.jsx";
@@ -63,12 +63,15 @@ function useCounters(user) {
   return counts;
 }
 
-function Logo() {
+// light: white text for the dark sidebar.
+function Logo({ light = false }) {
   return (
-    <Link to="/" className="flex items-center gap-2" aria-label="Muhojir.tj">
-      <img src="/logo.svg" alt="" className="h-8 w-8" />
-      <span className="text-headline-sm font-bold tracking-tight text-primary">
-        Muhojir<span className="text-secondary">.tj</span>
+    <Link to="/" className="flex items-center gap-2.5" aria-label="Muhojir.tj">
+      <span className={`flex h-9 w-9 items-center justify-center rounded-[10px] ${light ? "bg-white" : "bg-primary"}`}>
+        <ShieldCheck className={`h-5 w-5 ${light ? "text-secondary" : "text-white"}`} strokeWidth={2.4} aria-hidden />
+      </span>
+      <span className={`font-display text-[22px] font-bold ${light ? "text-white" : "text-navy"}`}>
+        Muhojir<span className={light ? "text-[#ff8a8f]" : "text-secondary"}>.tj</span>
       </span>
     </Link>
   );
@@ -107,7 +110,7 @@ function Badge({ kind, counts }) {
   const n = counts[kind];
   if (!n) return null;
   return (
-    <span className={`inline-flex min-w-[20px] items-center justify-center rounded-full px-1.5 py-0.5 text-label-sm ${kind === "docs" ? "bg-warning-container text-on-warning-container" : "bg-error text-on-error"}`}>
+    <span className={`inline-flex min-w-[20px] items-center justify-center rounded-full px-1.5 py-0.5 text-label-sm ${kind === "docs" ? "bg-warning-container text-on-warning-container" : "bg-secondary text-white"}`}>
       {n}
     </span>
   );
@@ -128,10 +131,10 @@ export default function Layout() {
   return (
     <div className="min-h-screen">
       {/* Sidebar: desktop only */}
-      <aside className="fixed left-0 top-0 z-50 hidden h-full w-[260px] flex-col justify-between bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] lg:flex">
+      <aside className="fixed left-0 top-0 z-50 hidden h-full w-[260px] flex-col justify-between bg-navy lg:flex">
         <div className="flex flex-1 flex-col overflow-hidden">
-          <div className="flex h-16 items-center px-4">
-            <Logo />
+          <div className="flex h-[72px] items-center px-5">
+            <Logo light />
           </div>
           <nav className="flex flex-1 flex-col gap-1 overflow-y-auto px-2 py-2" aria-label={t("Менюи асосӣ")}>
             {items
@@ -142,8 +145,8 @@ export default function Layout() {
                   to={i.to}
                   end={i.end}
                   className={({ isActive }) =>
-                    `flex min-h-[48px] items-center justify-between rounded-lg px-4 py-3 text-label-lg transition-colors ${
-                      isActive ? "bg-primary-container font-bold text-on-primary" : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"
+                    `flex min-h-[48px] items-center justify-between rounded-xl px-4 py-3 text-label-lg transition-colors ${
+                      isActive ? "bg-primary-container font-bold text-white" : "text-on-navy hover:bg-white/10 hover:text-white"
                     }`
                   }
                 >
@@ -156,14 +159,14 @@ export default function Layout() {
               ))}
           </nav>
         </div>
-        <div className="p-2">
-          <NavLink to="/help" className={({ isActive }) => `flex flex-col gap-1 rounded-xl p-4 transition-colors ${isActive ? "bg-secondary-fixed" : "bg-surface-container-low hover:bg-surface-container"}`}>
-            <span className="flex items-center gap-1.5 text-label-md text-secondary">
-              <Scale className="h-4 w-4" aria-hidden />
+        <div className="p-3">
+          <NavLink to="/help" className={({ isActive }) => `flex flex-col gap-1.5 rounded-2xl bg-secondary p-4 text-white transition-shadow hover:shadow-lg ${isActive ? "ring-2 ring-white" : ""}`}>
+            <span className="flex items-center gap-2 text-label-lg font-bold">
+              <Scale className="h-5 w-5" aria-hidden />
               {t("Маркази ёрии ҳуқуқӣ")}
             </span>
-            <span className="text-body-sm text-on-surface-variant">{t("Рақамҳои ёрӣ ва саволи ройгон ба ҳуқуқшинос")}</span>
-            <span className="mt-1 inline-flex items-center gap-1 text-label-md text-primary">
+            <span className="text-body-sm text-secondary-fixed">{t("Рақамҳои ёрӣ ва саволи ройгон ба ҳуқуқшинос")}</span>
+            <span className="mt-1 inline-flex items-center gap-1 text-label-md">
               {t("Кушодан")}
               <ArrowRight className="h-4 w-4" aria-hidden />
             </span>
@@ -172,7 +175,7 @@ export default function Layout() {
       </aside>
 
       <div className="lg:pl-[260px]">
-        <header className="fixed left-0 right-0 top-0 z-40 flex h-16 items-center justify-between gap-2 bg-surface-container-lowest/90 px-4 shadow-[0_1px_8px_rgba(0,0,0,0.04)] backdrop-blur-xl lg:left-[260px] lg:px-8">
+        <header className="fixed left-0 right-0 top-0 z-40 flex h-16 items-center lg:h-[72px] justify-between gap-2 bg-surface-container-lowest/90 px-4 shadow-[0_1px_8px_rgba(0,0,0,0.04)] backdrop-blur-xl lg:left-[260px] lg:px-8">
           <div className="lg:hidden">
             <Logo />
           </div>
@@ -191,8 +194,8 @@ export default function Layout() {
                   )}
                 </Link>
                 <Link to="/profile" className="hidden items-center gap-2 rounded-full bg-surface-container-low py-1 pl-1 pr-3 hover:bg-surface-container-high sm:flex">
-                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-on-primary">
-                    <User className="h-4 w-4" aria-hidden />
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary font-bold text-on-primary" aria-hidden>
+                    {(firstName || "?")[0].toUpperCase()}
                   </span>
                   <span className="flex flex-col leading-tight">
                     <span className="max-w-[140px] truncate text-label-md">{firstName}</span>
@@ -209,7 +212,7 @@ export default function Layout() {
           </div>
         </header>
 
-        <main className="min-h-screen pb-24 pt-16 lg:pb-0">
+        <main className="min-h-screen pb-24 pt-16 lg:pb-0 lg:pt-[72px]">
           <div className="mx-auto max-w-6xl px-4 py-6 md:px-8 md:py-8">
             <Outlet />
           </div>

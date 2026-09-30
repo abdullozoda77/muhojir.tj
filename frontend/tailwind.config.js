@@ -9,6 +9,10 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Dark blue of the sidebar and the patterned banners.
+        navy: "#0d2f73",
+        "on-navy": "#dbe6ff",
+        "navy-muted": "#b9cdf6",
         primary: "#1447a8",
         "on-primary": "#ffffff",
         "primary-container": "#1e63d6",
@@ -36,7 +40,7 @@ export default {
         "on-error": "#ffffff",
         "error-container": "#ffdad6",
         "on-error-container": "#93000a",
-        background: "#f8f9ff",
+        background: "#f4f6fb",
         surface: "#f8f9ff",
         "on-surface": "#0b1c30",
         "on-surface-variant": "#3e4947",
@@ -52,6 +56,8 @@ export default {
       },
       fontFamily: {
         sans: ['"Noto Sans"', "system-ui", "sans-serif"],
+        // Headings and big numbers (design "Нақш"). Noto has every Tajik letter: ӣ ӯ ҳ қ ғ ҷ.
+        display: ['"Noto Serif Display"', "Georgia", "serif"],
       },
       fontSize: {
         "label-sm": ["11px", { lineHeight: "16px", letterSpacing: "0.04em", fontWeight: "700" }],
