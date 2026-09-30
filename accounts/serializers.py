@@ -31,11 +31,18 @@ class VerifyCodeSerializer(serializers.Serializer):
 
 class UserSerializer(serializers.ModelSerializer):
     phone = PhoneField(required=False, allow_null=True, allow_blank=True)
+    telegram_connected = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ["id", "email", "phone", "full_name", "role", "language", "city", "email_reminders", "date_joined"]
+        fields = [
+            "id", "email", "phone", "full_name", "role", "language", "city", "email_reminders", "telegram_connected",
+            "date_joined",
+        ]
         read_only_fields = ["id", "email", "role", "date_joined"]
+
+    def get_telegram_connected(self, obj):
+        return bool(obj.telegram_chat_id)
 
     def validate_phone(self, phone):
         if not phone:
