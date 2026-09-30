@@ -13,6 +13,7 @@ from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .emails import send_login_code
+from .filters import NotificationFilter
 from .models import EmailCode, Notification, User
 from .serializers import (
     LogoutSerializer, NotificationSerializer, SendCodeSerializer, UserSerializer, VerifyCodeSerializer,
@@ -124,7 +125,7 @@ class NotificationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixi
                           mixins.DestroyModelMixin, viewsets.GenericViewSet):
     serializer_class = NotificationSerializer
     permission_classes = [permissions.IsAuthenticated]
-    filterset_fields = ["kind", "is_read"]
+    filterset_class = NotificationFilter
     http_method_names = ["get", "patch", "post", "delete"]
 
     def get_queryset(self):

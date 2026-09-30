@@ -45,9 +45,10 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
     ),
+    # Filters and ?search= are written in each app's filters.py (a FilterSet per list), so DRF's own
+    # SearchFilter is not used; OrderingFilter gives ?ordering=.
     'DEFAULT_FILTER_BACKENDS': (
         'django_filters.rest_framework.DjangoFilterBackend',
-        'rest_framework.filters.SearchFilter',
         'rest_framework.filters.OrderingFilter',
     ),
     'DEFAULT_PAGINATION_CLASS': 'core.pagination.StandardPagination',

@@ -4,6 +4,7 @@ from rest_framework import permissions, viewsets
 from rest_framework.exceptions import PermissionDenied, ValidationError
 
 from core.permissions import IsEmployer, IsOwnerOrAdminOrReadOnly, is_admin
+from .filters import EmployerFilter, EmployerReviewFilter, JobApplicationFilter, JobFilter, ResumeFilter
 from .models import Employer, EmployerReview, Job, JobApplication, Resume
 from .serializers import (
     EmployerReviewSerializer, EmployerSerializer, JobApplicationSerializer, JobSerializer, ResumeSerializer,
@@ -19,8 +20,7 @@ class EmployerViewSet(viewsets.ModelViewSet):
     queryset = Employer.objects.all()
     serializer_class = EmployerSerializer
     owner_field = "owner_id"
-    filterset_fields = ["owner", "city", "is_verified", "is_blacklisted"]
-    search_fields = ["name", "description"]
+    filterset_class = EmployerFilter
 
     def get_permissions(self):
         if self.action == "create":
@@ -39,10 +39,7 @@ class JobViewSet(viewsets.ModelViewSet):
     serializer_class = JobSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrAdminOrReadOnly]
     owner_field = "employer.owner_id"
-    filterset_fields = [
-        "city", "industry", "employer", "housing_provided", "meals_provided", "helps_with_documents", "is_active",
-    ]
-    search_fields = ["title", "description"]
+    filterset_class = JobFilter
     ordering_fields = ["created_at", "salary_from", "salary_to"]
 
     def get_queryset(self):
@@ -69,7 +66,7 @@ class EmployerReviewViewSet(viewsets.ModelViewSet):
     serializer_class = EmployerReviewSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrAdminOrReadOnly]
     owner_field = "author_id"
-    filterset_fields = ["employer", "rating", "salary_not_paid"]
+    filterset_class = EmployerReviewFilter
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -82,8 +79,7 @@ class ResumeViewSet(viewsets.ModelViewSet):
     serializer_class = ResumeSerializer
     permission_classes = [permissions.IsAuthenticated, IsOwnerOrAdminOrReadOnly]
     owner_field = "user_id"
-    filterset_fields = ["city", "industry", "has_patent"]
-    search_fields = ["profession", "about"]
+    filterset_class = ResumeFilter
 
     def get_queryset(self):
         if getattr(self, "swagger_fake_view", False):
@@ -108,7 +104,7 @@ class JobApplicationViewSet(viewsets.ModelViewSet):
 
     serializer_class = JobApplicationSerializer
     permission_classes = [permissions.IsAuthenticated]
-    filterset_fields = ["job", "status"]
+    filterset_class = JobApplicationFilter
 
     def get_queryset(self):
         if getattr(self, "swagger_fake_view", False):

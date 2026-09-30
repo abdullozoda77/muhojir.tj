@@ -2,6 +2,7 @@ from django.utils import timezone
 from rest_framework import permissions, viewsets
 
 from core.permissions import IsAdminOrReadOnly, is_admin
+from .filters import DocumentTypeFilter, GuideStepFilter, LawNewsFilter, RegionFilter, UserDocumentFilter
 from .models import DocumentType, GuideStep, LawNews, Region, UserDocument
 from .serializers import (
     DocumentTypeSerializer, GuideStepSerializer, LawNewsSerializer, RegionSerializer, UserDocumentSerializer,
@@ -12,21 +13,21 @@ class DocumentTypeViewSet(viewsets.ModelViewSet):
     queryset = DocumentType.objects.all()
     serializer_class = DocumentTypeSerializer
     permission_classes = [IsAdminOrReadOnly]
-    search_fields = ["title", "description"]
+    filterset_class = DocumentTypeFilter
 
 
 class GuideStepViewSet(viewsets.ModelViewSet):
     queryset = GuideStep.objects.all()
     serializer_class = GuideStepSerializer
     permission_classes = [IsAdminOrReadOnly]
-    filterset_fields = ["document_type"]
+    filterset_class = GuideStepFilter
 
 
 class RegionViewSet(viewsets.ModelViewSet):
     queryset = Region.objects.all()
     serializer_class = RegionSerializer
     permission_classes = [IsAdminOrReadOnly]
-    search_fields = ["name"]
+    filterset_class = RegionFilter
 
 
 class UserDocumentViewSet(viewsets.ModelViewSet):
@@ -34,7 +35,8 @@ class UserDocumentViewSet(viewsets.ModelViewSet):
 
     serializer_class = UserDocumentSerializer
     permission_classes = [permissions.IsAuthenticated]
-    filterset_fields = ["document_type", "region"]
+    filterset_class = UserDocumentFilter
+    ordering_fields = ["expires_at", "created_at"]
 
     def get_queryset(self):
         if getattr(self, "swagger_fake_view", False):
@@ -58,7 +60,7 @@ class LawNewsViewSet(viewsets.ModelViewSet):
 
     serializer_class = LawNewsSerializer
     permission_classes = [IsAdminOrReadOnly]
-    search_fields = ["title", "summary"]
+    filterset_class = LawNewsFilter
 
     def get_queryset(self):
         qs = LawNews.objects.all()
