@@ -1,0 +1,63 @@
+import forms from "@tailwindcss/forms";
+
+// Colors, sizes and type scale from the Muhojir.tj design (Material 3 style token names).
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: ["./index.html", "./src/**/*.{js,jsx}"],
+  theme: {
+    extend: {
+      colors: {
+        primary: "#005c55",
+        "on-primary": "#ffffff",
+        "primary-container": "#0f766e",
+        "on-primary-container": "#a3faef",
+        "primary-fixed": "#9cf2e8",
+        "on-primary-fixed": "#00201d",
+        secondary: "#904d00",
+        "on-secondary": "#ffffff",
+        "secondary-container": "#fe932c",
+        "on-secondary-container": "#663500",
+        "secondary-fixed": "#ffdcc3",
+        "on-secondary-fixed": "#2f1500",
+        tertiary: "#005f26",
+        "on-tertiary": "#ffffff",
+        "tertiary-container": "#007a33",
+        "tertiary-fixed": "#7ffc97",
+        "on-tertiary-fixed": "#002109",
+        error: "#ba1a1a",
+        "on-error": "#ffffff",
+        "error-container": "#ffdad6",
+        "on-error-container": "#93000a",
+        background: "#f8f9ff",
+        surface: "#f8f9ff",
+        "on-surface": "#0b1c30",
+        "on-surface-variant": "#3e4947",
+        "surface-container-lowest": "#ffffff",
+        "surface-container-low": "#eff4ff",
+        "surface-container": "#e5eeff",
+        "surface-container-high": "#dce9ff",
+        "surface-container-highest": "#d3e4fe",
+        "inverse-surface": "#213145",
+        "inverse-on-surface": "#eaf1ff",
+        outline: "#6e7977",
+        "outline-variant": "#bdc9c6",
+      },
+      fontFamily: {
+        sans: ['"Noto Sans"', "system-ui", "sans-serif"],
+      },
+      fontSize: {
+        "label-sm": ["11px", { lineHeight: "16px", letterSpacing: "0.04em", fontWeight: "700" }],
+        "label-md": ["13px", { lineHeight: "18px", fontWeight: "600" }],
+        "label-lg": ["15px", { lineHeight: "20px", fontWeight: "600" }],
+        "body-sm": ["13px", { lineHeight: "18px" }],
+        "body-md": ["15px", { lineHeight: "22px" }],
+        "body-lg": ["16px", { lineHeight: "24px" }],
+        "headline-sm": ["18px", { lineHeight: "24px", fontWeight: "600" }],
+        "headline-md": ["22px", { lineHeight: "28px", fontWeight: "600" }],
+        "headline-lg": ["28px", { lineHeight: "36px", fontWeight: "700" }],
+        "headline-xl": ["36px", { lineHeight: "44px", fontWeight: "700" }],
+      },
+    },
+  },
+  plugins: [forms],
+};
