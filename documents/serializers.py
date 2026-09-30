@@ -29,12 +29,14 @@ class UserDocumentSerializer(serializers.ModelSerializer):
     region_name = serializers.CharField(source="region.name", read_only=True, default=None)
     days_left = serializers.IntegerField(read_only=True)
     status = serializers.CharField(read_only=True)
+    # The photo itself is at /my-documents/<id>/photo/ and only for the owner.
+    has_photo = serializers.SerializerMethodField()
 
     class Meta:
         model = UserDocument
         fields = [
             "id", "document_type", "document_type_title", "region", "region_name", "number", "issued_at",
-            "expires_at", "note", "days_left", "status", "created_at", "updated_at",
+            "expires_at", "note", "remind_days_before", "has_photo", "days_left", "status", "created_at", "updated_at",
         ]
         read_only_fields = ["id", "created_at", "updated_at"]
 
@@ -44,6 +46,16 @@ class UserDocumentSerializer(serializers.ModelSerializer):
         if issued and expires and expires <= issued:
             raise serializers.ValidationError({"expires_at": "The end date must be after the issue date."})
         return attrs
+
+    def get_has_photo(self, obj):
+        return bool(obj.photo)
+
+
+class DocumentPhotoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserDocument
+        fields = ["photo"]
+        extra_kwargs = {"photo": {"required": True, "allow_empty_file": False}}
 
 
 class LawNewsSerializer(serializers.ModelSerializer):

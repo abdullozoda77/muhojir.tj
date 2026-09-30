@@ -4,6 +4,8 @@ from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.db import models
 
+from core.files import document_photo_path, file_validators, private_storage
+
 
 class DocumentType(models.Model):
     """A kind of paper a migrant needs: patent, migration registration, migration card, insurance, medical check."""
@@ -59,6 +61,8 @@ class Region(models.Model):
 class UserDocument(models.Model):
     """A document the user holds, with its end date. Reminders are sent before it runs out."""
 
+    REMIND_CHOICES = [(30, "30 days before"), (14, "14 days before"), (7, "7 days before"), (3, "3 days before"), (1, "1 day before")]
+
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="documents")
     document_type = models.ForeignKey(DocumentType, on_delete=models.PROTECT, related_name="user_documents")
     region = models.ForeignKey(Region, on_delete=models.SET_NULL, blank=True, null=True, related_name="user_documents")
@@ -66,6 +70,9 @@ class UserDocument(models.Model):
     issued_at = models.DateField(blank=True, null=True)
     expires_at = models.DateField()
     note = models.CharField(max_length=255, blank=True)
+    # The owner's reminder comes this many days before the end date, and one more the day before.
+    remind_days_before = models.PositiveSmallIntegerField(choices=REMIND_CHOICES, default=7)
+    photo = models.FileField(upload_to=document_photo_path, storage=private_storage, validators=file_validators, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

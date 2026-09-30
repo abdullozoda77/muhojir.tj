@@ -1,11 +1,16 @@
+from django.http import FileResponse, Http404
 from django.utils import timezone
 from rest_framework import permissions, viewsets
+from rest_framework.decorators import action
+from rest_framework.parsers import MultiPartParser
+from rest_framework.response import Response
 
 from core.permissions import IsAdminOrReadOnly, is_admin
 from .filters import DocumentTypeFilter, GuideStepFilter, LawNewsFilter, RegionFilter, UserDocumentFilter
 from .models import DocumentType, GuideStep, LawNews, Region, UserDocument
 from .serializers import (
-    DocumentTypeSerializer, GuideStepSerializer, LawNewsSerializer, RegionSerializer, UserDocumentSerializer,
+    DocumentPhotoSerializer, DocumentTypeSerializer, GuideStepSerializer, LawNewsSerializer, RegionSerializer,
+    UserDocumentSerializer,
 )
 
 
@@ -45,6 +50,27 @@ class UserDocumentViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+    def perform_destroy(self, document):
+        document.photo.delete(save=False)
+        document.delete()
+
+    @action(detail=True, methods=["get", "post", "delete"], parser_classes=[MultiPartParser])
+    def photo(self, request, pk=None):
+        """GET: the photo of the document (only for its owner). POST: upload a new one. DELETE: remove it."""
+        document = self.get_object()
+        if request.method == "GET":
+            if not document.photo:
+                raise Http404
+            return FileResponse(document.photo.open("rb"))
+        if request.method == "DELETE":
+            document.photo.delete(save=True)
+            return Response(status=204)
+        serializer = DocumentPhotoSerializer(document, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        document.photo.delete(save=False)  # the old photo is not kept
+        serializer.save()
+        return Response(UserDocumentSerializer(document).data)
 
 
 def publish_date(serializer):
