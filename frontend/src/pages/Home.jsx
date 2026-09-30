@@ -4,13 +4,13 @@ import {
   PlusCircle, ShieldAlert, Users, Wallet,
 } from "lucide-react";
 import { useAuth } from "../auth.jsx";
-import { useApi } from "../hooks.js";
+import { useApi, useDocuments } from "../hooks.js";
 import { t } from "../i18n.js";
 import { date, todayTitle, usedPercent } from "../format.js";
 import { JobRow } from "../components/JobCard.jsx";
 import Pattern, { Hero, Overlap } from "../components/Pattern.jsx";
-import { useDocuments } from "./Documents.jsx";
 import { STATUS, Skeleton, statusText } from "../components/ui.jsx";
+import { CountUp, EASE, Stagger, StaggerItem, m, startShown } from "../components/motion.jsx";
 
 const LIFTED = "shadow-[0_20px_40px_-20px_rgba(13,47,115,0.35)]";
 
@@ -23,10 +23,10 @@ function Ring({ days, pct, tone, size = 132 }) {
     <div className="relative shrink-0" style={{ width: size, height: size }}>
       <svg className="h-full w-full -rotate-90" viewBox={`0 0 ${size} ${size}`} aria-hidden>
         <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="currentColor" strokeWidth={stroke} className="text-surface-container" />
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="currentColor" strokeWidth={stroke} strokeLinecap="round" strokeDasharray={c} strokeDashoffset={c * (1 - (pct ?? 100) / 100)} className={tone} />
+        <m.circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="currentColor" strokeWidth={stroke} strokeLinecap="round" strokeDasharray={c} initial={startShown() ? false : { strokeDashoffset: c }} animate={{ strokeDashoffset: c * (1 - (pct ?? 100) / 100) }} transition={{ duration: 1, ease: EASE, delay: 0.15 }} className={tone} />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-        <span className={`font-display font-bold leading-none ${small ? "text-[28px]" : "text-[42px]"}`}>{Math.abs(days)}</span>
+        <span className={`font-display font-bold leading-none ${small ? "text-[28px]" : "text-[42px]"}`}><CountUp value={Math.abs(days)} /></span>
         <span className={`mt-1 text-on-surface-variant ${small ? "text-[11px] leading-3" : "text-body-sm"}`}>{days < 0 ? t("рӯз пеш") : t("рӯз монд")}</span>
       </div>
     </div>
@@ -38,7 +38,7 @@ const TILE_BAR = { expired: "border-t-error", expiring: "border-t-warning-contai
 
 function DocTile({ doc }) {
   return (
-    <Link to="/documents" className={`flex flex-col gap-2 rounded-[20px] border-t-[5px] bg-surface-container-lowest p-5 shadow-sm transition-shadow hover:shadow-md ${TILE_BAR[doc.status]}`}>
+    <Link to="/documents" className={`flex w-full flex-col gap-2 rounded-[20px] border-t-[5px] bg-surface-container-lowest p-5 shadow-sm transition-shadow hover:shadow-md ${TILE_BAR[doc.status]}`}>
       <span className={`text-label-md ${STATUS[doc.status].accent}`}>{statusText(doc)}</span>
       <span className="text-body-lg font-semibold">{doc.document_type_title}</span>
       <span className="text-body-sm text-on-surface-variant">{t("то {0}", date(doc.expires_at))}</span>
@@ -71,11 +71,13 @@ function JobsPanel({ city }) {
       {cityJobs.loading || anyJobs.loading ? (
         <Skeleton className="h-48" />
       ) : jobs?.results?.length ? (
-        <div className="flex flex-col divide-y divide-surface-container">
+        <Stagger className="flex flex-col divide-y divide-surface-container">
           {jobs.results.map((job) => (
-            <JobRow key={job.id} job={job} />
+            <StaggerItem key={job.id}>
+              <JobRow job={job} />
+            </StaggerItem>
           ))}
-        </div>
+        </Stagger>
       ) : (
         <p className="px-3 py-6 text-body-md text-on-surface-variant">{t("Ҳоло эълони кор нест. Ба наздикӣ илова мешавад.")}</p>
       )}
@@ -242,17 +244,21 @@ function MigrantHome({ user }) {
         )}
 
         {docs.length > 0 && (
-          <section className="grid grid-cols-2 gap-4 lg:grid-cols-4" aria-label={t("Ҳолати ҳуҷҷатҳо")}>
+          <Stagger as="section" className="grid grid-cols-2 gap-4 lg:grid-cols-4" aria-label={t("Ҳолати ҳуҷҷатҳо")}>
             {sorted.slice(1, 4).map((d) => (
-              <DocTile key={d.id} doc={d} />
+              <StaggerItem key={d.id} className="flex">
+                <DocTile doc={d} />
+              </StaggerItem>
             ))}
-            <Link to="/documents" className="flex min-h-[120px] flex-col items-center justify-center gap-2 rounded-[20px] border-2 border-dashed border-outline-variant p-5 text-center text-label-lg text-primary hover:bg-surface-container-lowest">
-              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-fixed">
-                <Plus className="h-5 w-5" aria-hidden />
-              </span>
-              {t("Ҳуҷҷат илова кардан")}
-            </Link>
-          </section>
+            <StaggerItem className="flex">
+              <Link to="/documents" className="flex min-h-[120px] w-full flex-col items-center justify-center gap-2 rounded-[20px] border-2 border-dashed border-outline-variant p-5 text-center text-label-lg text-primary hover:bg-surface-container-lowest">
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-fixed">
+                  <Plus className="h-5 w-5" aria-hidden />
+                </span>
+                {t("Ҳуҷҷат илова кардан")}
+              </Link>
+            </StaggerItem>
+          </Stagger>
         )}
 
         <JobsAndSide city={user.city} />

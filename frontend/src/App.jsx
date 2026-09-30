@@ -1,27 +1,30 @@
+import { lazy } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import Layout from "./components/Layout.jsx";
 import { useAuth } from "./auth.jsx";
-import Applications from "./pages/Applications.jsx";
-import Calculator from "./pages/Calculator.jsx";
-import Company from "./pages/Company.jsx";
-import Documents from "./pages/Documents.jsx";
-import EmployerPage from "./pages/EmployerPage.jsx";
-import Guides from "./pages/Guides.jsx";
-import Help from "./pages/Help.jsx";
 import Home from "./pages/Home.jsx";
-import Inbox from "./pages/Inbox.jsx";
-import JobDetail from "./pages/JobDetail.jsx";
-import Jobs from "./pages/Jobs.jsx";
 import Login from "./pages/Login.jsx";
-import MyJobs from "./pages/MyJobs.jsx";
-import NewsDetail from "./pages/NewsDetail.jsx";
 import NotFound from "./pages/NotFound.jsx";
-import Notifications from "./pages/Notifications.jsx";
-import Payments from "./pages/Payments.jsx";
-import Profile from "./pages/Profile.jsx";
-import Resume from "./pages/Resume.jsx";
-import Resumes from "./pages/Resumes.jsx";
+
+// Every other page is downloaded only when it is opened, so the first visit on a slow phone is lighter.
+const Applications = lazy(() => import("./pages/Applications.jsx"));
+const Calculator = lazy(() => import("./pages/Calculator.jsx"));
+const Company = lazy(() => import("./pages/Company.jsx"));
+const Documents = lazy(() => import("./pages/Documents.jsx"));
+const EmployerPage = lazy(() => import("./pages/EmployerPage.jsx"));
+const Guides = lazy(() => import("./pages/Guides.jsx"));
+const Help = lazy(() => import("./pages/Help.jsx"));
+const Inbox = lazy(() => import("./pages/Inbox.jsx"));
+const JobDetail = lazy(() => import("./pages/JobDetail.jsx"));
+const Jobs = lazy(() => import("./pages/Jobs.jsx"));
+const MyJobs = lazy(() => import("./pages/MyJobs.jsx"));
+const NewsDetail = lazy(() => import("./pages/NewsDetail.jsx"));
+const Notifications = lazy(() => import("./pages/Notifications.jsx"));
+const Payments = lazy(() => import("./pages/Payments.jsx"));
+const Profile = lazy(() => import("./pages/Profile.jsx"));
+const Resume = lazy(() => import("./pages/Resume.jsx"));
+const Resumes = lazy(() => import("./pages/Resumes.jsx"));
 
 // Pages that need a login; role limits them to migrants or employers.
 function Private({ role, children }) {

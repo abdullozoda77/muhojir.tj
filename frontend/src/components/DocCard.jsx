@@ -32,7 +32,7 @@ export default function DocCard({ doc, slug, onEdit, onPay }) {
   const Icon = docIcon(slug);
   const pct = usedPercent(doc);
   return (
-    <article className="card flex flex-col overflow-hidden">
+    <article className="card flex w-full flex-col overflow-hidden">
       <div className={`h-2 w-full ${s.bar}`} />
       <div className="flex flex-1 flex-col justify-between gap-4 p-4 md:p-6">
         <div className="flex flex-col gap-4">

@@ -7,6 +7,7 @@ import { t } from "../i18n.js";
 import { INDUSTRIES } from "../constants.js";
 import ApplyDrawer from "../components/ApplyDrawer.jsx";
 import { JobRow } from "../components/JobCard.jsx";
+import { Stagger, StaggerItem } from "../components/motion.jsx";
 import { Button, EmptyState, ErrorBox, PageHeader, Skeleton } from "../components/ui.jsx";
 
 const TOGGLES = [
@@ -230,11 +231,13 @@ export default function Jobs() {
             <EmptyState icon={Briefcase} title={t("Чунин ҷойи кор ёфт нашуд")} text={t("Филтрҳоро кам кунед ё шаҳри дигарро нависед.")} />
           ) : (
             <>
-              <div className="flex flex-col divide-y divide-surface-container rounded-3xl bg-surface-container-lowest p-2 shadow-sm md:p-3">
+              <Stagger key={query} className="flex flex-col divide-y divide-surface-container rounded-3xl bg-surface-container-lowest p-2 shadow-sm md:p-3">
                 {jobs.map((job) => (
-                  <JobRow key={job.id} job={job} onApply={setApplying} />
+                  <StaggerItem key={job.id}>
+                    <JobRow job={job} onApply={setApplying} />
+                  </StaggerItem>
                 ))}
-              </div>
+              </Stagger>
               {page.next && (
                 <Button variant="soft" loading={more} onClick={loadMore} className="self-center">
                   {t("Боз нишон додан")}

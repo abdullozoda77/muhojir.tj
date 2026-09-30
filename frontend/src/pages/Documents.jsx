@@ -1,13 +1,13 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { ArrowRight, CalendarDays, CheckCircle2, Clock, ExternalLink, FilePlus2, Gavel, LayoutList, ReceiptText, Send, ShieldCheck, XCircle } from "lucide-react";
-import { apiAll } from "../api.js";
-import { useApi } from "../hooks.js";
+import { useApi, useDocuments } from "../hooks.js";
 import { t } from "../i18n.js";
 import { date, monthTitle } from "../format.js";
 import DocCard from "../components/DocCard.jsx";
 import DocForm from "../components/DocForm.jsx";
 import PaymentDrawer from "../components/PaymentDrawer.jsx";
+import { Stagger, StaggerItem } from "../components/motion.jsx";
 import { Button, EmptyState, ErrorBox, PageHeader, STATUS, Skeleton, StatusBadge } from "../components/ui.jsx";
 
 const FILTERS = [
@@ -16,27 +16,6 @@ const FILTERS = [
   { key: "expired", label: () => t("Мӯҳлат гузашта"), icon: XCircle, tone: "text-error" },
   { key: "valid", label: () => t("Эътибор дорад"), icon: CheckCircle2, tone: "text-tertiary" },
 ];
-
-// Loads everything the documents screens need: the user's documents, document types and regions.
-export function useDocuments() {
-  const [state, setState] = useState({ docs: [], types: [], regions: [], loading: true, error: null });
-  const load = useCallback(async () => {
-    try {
-      const [docs, types, regions] = await Promise.all([
-        apiAll("/documents/my-documents/"),
-        apiAll("/documents/document-types/"),
-        apiAll("/documents/regions/"),
-      ]);
-      setState({ docs, types, regions, loading: false, error: null });
-    } catch (error) {
-      setState((s) => ({ ...s, loading: false, error }));
-    }
-  }, []);
-  useEffect(() => {
-    load();
-  }, [load]);
-  return { ...state, reload: load };
-}
 
 function Calendar({ docs, onEdit }) {
   // Grouped by month of the end date, nearest first.
@@ -187,11 +166,13 @@ export default function Documents() {
       ) : shown.length === 0 ? (
         <EmptyState icon={CheckCircle2} title={t("Дар ин бахш ҳуҷҷат нест")} />
       ) : (
-        <div className="grid gap-6 lg:grid-cols-2">
+        <Stagger key={filter} className="grid gap-6 lg:grid-cols-2">
           {shown.map((d) => (
-            <DocCard key={d.id} doc={d} slug={slugOf(d)} onEdit={setEditing} onPay={setPaying} />
+            <StaggerItem key={d.id} className="flex">
+              <DocCard doc={d} slug={slugOf(d)} onEdit={setEditing} onPay={setPaying} />
+            </StaggerItem>
           ))}
-        </div>
+        </Stagger>
       )}
 
       <div className="grid gap-4 md:grid-cols-3">

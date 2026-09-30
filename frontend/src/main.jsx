@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App.jsx";
 import { AuthProvider } from "./auth.jsx";
+import { MotionProvider } from "./components/motion.jsx";
 import { lang } from "./i18n.js";
 import "./index.css";
 
@@ -12,7 +13,9 @@ createRoot(document.getElementById("root")).render(
   <StrictMode>
     <BrowserRouter>
       <AuthProvider>
-        <App />
+        <MotionProvider>
+          <App />
+        </MotionProvider>
       </AuthProvider>
     </BrowserRouter>
   </StrictMode>,

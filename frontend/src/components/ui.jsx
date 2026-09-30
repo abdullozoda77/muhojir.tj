@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { AnimatePresence, m } from "motion/react";
 import { AlertTriangle, CheckCircle2, Clock, Loader2, X, XCircle } from "lucide-react";
 import { t } from "../i18n.js";
 import { daysText } from "../format.js";
@@ -117,30 +118,34 @@ export function Drawer({ open, onClose, title, subtitle, icon: Icon, children })
     };
   }, [open, onClose]);
 
-  if (!open) return null;
+  // The panel slides in from the right while the dark backdrop fades in; both animate out on close.
   return (
-    <div className="fixed inset-0 z-[60] flex justify-end" role="dialog" aria-modal="true" aria-label={title}>
-      <div className="absolute inset-0 bg-inverse-surface/50 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative flex h-full w-full max-w-xl flex-col overflow-y-auto bg-surface-container-lowest shadow-2xl">
-        <div className="sticky top-0 z-10 flex items-center justify-between gap-3 bg-surface-container p-4 shadow-sm md:p-6">
-          <div className="flex items-center gap-3">
-            {Icon && (
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-on-primary">
-                <Icon className="h-5 w-5" aria-hidden />
+    <AnimatePresence>
+      {open && (
+        <m.div key="drawer" className="fixed inset-0 z-[60] flex justify-end" role="dialog" aria-modal="true" aria-label={title} exit={{ opacity: 1 }}>
+          <m.div className="absolute inset-0 bg-inverse-surface/50 backdrop-blur-sm" onClick={onClose} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} />
+          <m.div className="relative flex h-full w-full max-w-xl flex-col overflow-y-auto bg-surface-container-lowest shadow-2xl" initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ type: "spring", stiffness: 380, damping: 38 }}>
+            <div className="sticky top-0 z-10 flex items-center justify-between gap-3 bg-surface-container p-4 shadow-sm md:p-6">
+              <div className="flex items-center gap-3">
+                {Icon && (
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-on-primary">
+                    <Icon className="h-5 w-5" aria-hidden />
+                  </div>
+                )}
+                <div>
+                  <h2 className="text-headline-sm">{title}</h2>
+                  {subtitle && <p className="text-body-sm text-on-surface-variant">{subtitle}</p>}
+                </div>
               </div>
-            )}
-            <div>
-              <h2 className="text-headline-sm">{title}</h2>
-              {subtitle && <p className="text-body-sm text-on-surface-variant">{subtitle}</p>}
+              <button type="button" onClick={onClose} aria-label={t("Пӯшидан")} className="flex h-11 w-11 items-center justify-center rounded-full bg-surface-container-high hover:bg-surface-container-highest">
+                <X className="h-5 w-5" />
+              </button>
             </div>
-          </div>
-          <button type="button" onClick={onClose} aria-label={t("Пӯшидан")} className="flex h-11 w-11 items-center justify-center rounded-full bg-surface-container-high hover:bg-surface-container-highest">
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-        <div className="flex-1 p-4 md:p-6">{children}</div>
-      </div>
-    </div>
+            <div className="flex-1 p-4 md:p-6">{children}</div>
+          </m.div>
+        </m.div>
+      )}
+    </AnimatePresence>
   );
 }
 

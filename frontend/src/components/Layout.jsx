@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import {
   ArrowRight, Bell, BookOpen, Briefcase, Building2, Calculator, ClipboardList, FileUser, Home, Inbox, LifeBuoy, LogIn,
@@ -8,6 +8,9 @@ import { api, apiAll } from "../api.js";
 import { useAuth } from "../auth.jsx";
 import { lang, setLang, t } from "../i18n.js";
 import { useTheme } from "../theme.js";
+import { AnimatePresence, m } from "motion/react";
+import { PageTransition } from "./motion.jsx";
+import { Skeleton } from "./ui.jsx";
 
 function navFor(user) {
   if (!user) {
@@ -117,7 +120,12 @@ function ThemeToggle() {
       title={dark ? t("Мавзӯи равшан") : t("Мавзӯи торик")}
       className="rounded-full p-2 text-white hover:bg-white/10 lg:text-on-surface-variant lg:hover:bg-surface-container-high"
     >
-      {dark ? <Sun className="h-6 w-6" /> : <Moon className="h-6 w-6" />}
+      {/* The icon turns while the sun and the moon swap. */}
+      <AnimatePresence mode="wait" initial={false}>
+        <m.span key={dark ? "sun" : "moon"} className="block" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.2 }}>
+          {dark ? <Sun className="h-6 w-6" /> : <Moon className="h-6 w-6" />}
+        </m.span>
+      </AnimatePresence>
     </button>
   );
 }
@@ -208,7 +216,10 @@ export default function Layout() {
                 <Link to="/notifications" className="relative rounded-full p-2 text-white hover:bg-white/10 lg:text-on-surface-variant lg:hover:bg-surface-container-high" aria-label={t("Огоҳиҳо")}>
                   <Bell className="h-6 w-6" />
                   {counts.unread > 0 && (
-                    <span className="absolute right-0.5 top-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-error px-1 text-[10px] font-bold text-on-error">{counts.unread}</span>
+                    // Pops in again whenever the number changes.
+                    <m.span key={counts.unread} initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 500, damping: 18 }} className="absolute right-0.5 top-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-error px-1 text-[10px] font-bold text-on-error">
+                      {counts.unread}
+                    </m.span>
                   )}
                 </Link>
                 <Link to="/profile" className="hidden items-center gap-2 rounded-full bg-surface-container-low py-1 pl-1 pr-3 hover:bg-surface-container-high sm:flex">
@@ -232,7 +243,12 @@ export default function Layout() {
 
         <main className="min-h-screen pb-24 pt-16 lg:pb-0 lg:pt-[72px]">
           <div className="mx-auto max-w-6xl px-4 py-6 md:px-8 md:py-8">
-            <Outlet />
+            {/* A page that is still downloading shows a placeholder; the menu and header stay. */}
+            <Suspense fallback={<Skeleton className="h-64" />}>
+              <PageTransition pageKey={pathname}>
+                <Outlet />
+              </PageTransition>
+            </Suspense>
           </div>
         </main>
       </div>
