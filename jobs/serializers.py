@@ -7,10 +7,10 @@ class EmployerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Employer
         fields = [
-            "id", "name", "inn", "city", "phone", "description", "is_verified", "verified_at", "is_blacklisted",
+            "id", "owner", "name", "inn", "city", "phone", "description", "is_verified", "verified_at", "is_blacklisted",
             "blacklist_reason", "created_at",
         ]
-        read_only_fields = ["id", "is_verified", "verified_at", "is_blacklisted", "blacklist_reason", "created_at"]
+        read_only_fields = ["id", "owner", "is_verified", "verified_at", "is_blacklisted", "blacklist_reason", "created_at"]
 
 
 class EmployerShortSerializer(serializers.ModelSerializer):
@@ -44,11 +44,17 @@ class JobSerializer(serializers.ModelSerializer):
 
 class EmployerReviewSerializer(serializers.ModelSerializer):
     author_name = serializers.SerializerMethodField()
+    # Lets the site show edit/delete on the viewer's own review without revealing who wrote the others.
+    is_mine = serializers.SerializerMethodField()
 
     class Meta:
         model = EmployerReview
-        fields = ["id", "employer", "author_name", "rating", "text", "salary_not_paid", "created_at"]
+        fields = ["id", "employer", "author_name", "is_mine", "rating", "text", "salary_not_paid", "created_at"]
         read_only_fields = ["id", "created_at"]
+
+    def get_is_mine(self, obj):
+        request = self.context.get("request")
+        return bool(request and request.user.is_authenticated and obj.author_id == request.user.id)
 
     def get_author_name(self, obj):
         # Only the first name: workers are afraid of employers finding out who complained.
@@ -83,8 +89,16 @@ class JobApplicationSerializer(serializers.ModelSerializer):
     job_title = serializers.CharField(source="job.title", read_only=True)
     employer_name = serializers.CharField(source="job.employer.name", read_only=True)
     resume = ResumeSerializer(source="applicant.resume", read_only=True, default=None)
+    # Only the worker and the job's employer ever see an application, and by applying the worker asked
+    # that employer to contact them, so the contacts are there even when the worker has no resume.
+    applicant_name = serializers.CharField(source="applicant.full_name", read_only=True)
+    applicant_phone = serializers.CharField(source="applicant.phone", read_only=True, default=None)
+    applicant_email = serializers.EmailField(source="applicant.email", read_only=True)
 
     class Meta:
         model = JobApplication
-        fields = ["id", "job", "job_title", "employer_name", "resume", "message", "status", "created_at", "updated_at"]
+        fields = [
+            "id", "job", "job_title", "employer_name", "applicant_name", "applicant_phone", "applicant_email", "resume",
+            "message", "status", "created_at", "updated_at",
+        ]
         read_only_fields = ["id", "created_at", "updated_at"]

@@ -19,7 +19,7 @@ class EmployerViewSet(viewsets.ModelViewSet):
     queryset = Employer.objects.all()
     serializer_class = EmployerSerializer
     owner_field = "owner_id"
-    filterset_fields = ["city", "is_verified", "is_blacklisted"]
+    filterset_fields = ["owner", "city", "is_verified", "is_blacklisted"]
     search_fields = ["name", "description"]
 
     def get_permissions(self):
@@ -39,7 +39,9 @@ class JobViewSet(viewsets.ModelViewSet):
     serializer_class = JobSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrAdminOrReadOnly]
     owner_field = "employer.owner_id"
-    filterset_fields = ["city", "industry", "employer", "housing_provided", "is_active"]
+    filterset_fields = [
+        "city", "industry", "employer", "housing_provided", "meals_provided", "helps_with_documents", "is_active",
+    ]
     search_fields = ["title", "description"]
     ordering_fields = ["created_at", "salary_from", "salary_to"]
 
