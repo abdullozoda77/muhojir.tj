@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import {
-  Bell, BookOpen, Briefcase, Building2, Calculator, ClipboardList, FileUser, Home, Inbox, LogIn, Scale, Send, Settings,
-  ShieldCheck, User, Users,
+  ArrowRight, Bell, BookOpen, Briefcase, Building2, Calculator, ClipboardList, FileUser, Home, Inbox, LifeBuoy, LogIn,
+  ReceiptText, Scale, Send, Settings, ShieldCheck, User, Users,
 } from "lucide-react";
 import { api, apiAll } from "../api.js";
 import { useAuth } from "../auth.jsx";
 import { lang, setLang, t } from "../i18n.js";
-import { SoonTag } from "./ui.jsx";
 
 function navFor(user) {
   if (!user) {
@@ -38,6 +37,7 @@ function navFor(user) {
     { to: "/guides", icon: BookOpen, label: t("Роҳнамо ва қонунҳо"), short: t("Роҳнамо") },
     { to: "/resume", icon: FileUser, label: t("Резюмеи ман"), desktopOnly: true },
     { to: "/applications", icon: Send, label: t("Аризаҳои ман"), desktopOnly: true },
+    { to: "/payments", icon: ReceiptText, label: t("Архиви чекҳо"), desktopOnly: true },
     { to: "/notifications", icon: Bell, label: t("Огоҳиҳо"), badge: "unread", desktopOnly: true },
     { to: "/profile", icon: Settings, label: t("Профил ва танзимот"), short: t("Профил") },
   ];
@@ -157,14 +157,17 @@ export default function Layout() {
           </nav>
         </div>
         <div className="p-2">
-          <div className="flex flex-col gap-1 rounded-xl bg-surface-container-low p-4">
-            <div className="flex items-center gap-1.5 text-label-md text-primary">
+          <NavLink to="/help" className={({ isActive }) => `flex flex-col gap-1 rounded-xl p-4 transition-colors ${isActive ? "bg-secondary-fixed" : "bg-surface-container-low hover:bg-surface-container"}`}>
+            <span className="flex items-center gap-1.5 text-label-md text-secondary">
               <Scale className="h-4 w-4" aria-hidden />
               {t("Маркази ёрии ҳуқуқӣ")}
-            </div>
-            <p className="text-body-sm text-on-surface-variant">{t("Машварати ҳуқуқшинос барои муҳоҷирон")}</p>
-            <SoonTag className="mt-1 self-start" />
-          </div>
+            </span>
+            <span className="text-body-sm text-on-surface-variant">{t("Рақамҳои ёрӣ ва саволи ройгон ба ҳуқуқшинос")}</span>
+            <span className="mt-1 inline-flex items-center gap-1 text-label-md text-primary">
+              {t("Кушодан")}
+              <ArrowRight className="h-4 w-4" aria-hidden />
+            </span>
+          </NavLink>
         </div>
       </aside>
 
@@ -176,6 +179,9 @@ export default function Layout() {
           <div className="hidden lg:block" />
           <div className="flex items-center gap-2 md:gap-4">
             <LangSwitch />
+            <Link to="/help" className="rounded-full p-2 text-secondary hover:bg-secondary-fixed" aria-label={t("Маркази ёрии ҳуқуқӣ")} title={t("Маркази ёрии ҳуқуқӣ")}>
+              <LifeBuoy className="h-6 w-6" />
+            </Link>
             {user ? (
               <>
                 <Link to="/notifications" className="relative rounded-full p-2 text-on-surface-variant hover:bg-surface-container-high" aria-label={t("Огоҳиҳо")}>

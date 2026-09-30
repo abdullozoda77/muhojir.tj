@@ -1,11 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { CalendarDays, CheckCircle2, Clock, FilePlus2, Gavel, LayoutList, MessageSquareText, ReceiptText, ShieldCheck, XCircle } from "lucide-react";
+import { Link, useSearchParams } from "react-router-dom";
+import { ArrowRight, CalendarDays, CheckCircle2, Clock, ExternalLink, FilePlus2, Gavel, LayoutList, ReceiptText, Send, ShieldCheck, XCircle } from "lucide-react";
 import { apiAll } from "../api.js";
+import { useApi } from "../hooks.js";
 import { t } from "../i18n.js";
 import { date, monthTitle } from "../format.js";
 import DocCard from "../components/DocCard.jsx";
 import DocForm from "../components/DocForm.jsx";
-import { Button, EmptyState, ErrorBox, PageHeader, STATUS, Skeleton, SoonTag, StatusBadge } from "../components/ui.jsx";
+import PaymentDrawer from "../components/PaymentDrawer.jsx";
+import { Button, EmptyState, ErrorBox, PageHeader, STATUS, Skeleton, StatusBadge } from "../components/ui.jsx";
 
 const FILTERS = [
   { key: "all", label: () => t("Ҳама") },
@@ -76,9 +79,9 @@ function Calendar({ docs, onEdit }) {
 }
 
 const SERVICES = [
-  { icon: MessageSquareText, title: () => t("Ёдраскунӣ бо SMS ва Telegram"), text: () => t("Ҳоло ёдраскунӣ ба почтаи электронӣ меояд. SMS ва Telegram ба наздикӣ.") },
-  { icon: Gavel, title: () => t("Ёрии ҳуқуқшинос"), text: () => t("Агар патент бекор шуда бошад ё мушкили дигар дошта бошед.") },
-  { icon: ReceiptText, title: () => t("Архиви чекҳо"), text: () => t("Ҳамаи чекҳои пардохт дар як ҷо нигоҳ дошта мешаванд.") },
+  { to: "/profile", icon: Send, title: () => t("Ёдраскунӣ дар Telegram"), text: () => t("Бепул. Дар профил Telegram-ро пайваст кунед — ёдраскуниҳо ба он ҷо ҳам меоянд.") },
+  { to: "/help", icon: Gavel, title: () => t("Ёрии ҳуқуқшинос"), text: () => t("Агар патент бекор шуда бошад ё мушкили дигар дошта бошед, савол диҳед.") },
+  { to: "/payments", icon: ReceiptText, title: () => t("Архиви чекҳо"), text: () => t("Ҳамаи чекҳои пардохт дар як ҷо нигоҳ дошта мешаванд.") },
 ];
 
 export default function Documents() {
@@ -86,6 +89,22 @@ export default function Documents() {
   const [filter, setFilter] = useState("all");
   const [view, setView] = useState("list");
   const [editing, setEditing] = useState(null);
+  const [paying, setPaying] = useState(null);
+  const [params, setParams] = useSearchParams();
+  // The official MVD check page, if an admin has added it in the help contacts.
+  const mvdCheck = useApi("/help/contacts/?kind=mvd_check&page_size=1").data?.results?.[0];
+
+  // /documents?pay=<id> (from the home page or the calculator) opens the payment form for that document.
+  useEffect(() => {
+    const id = Number(params.get("pay"));
+    const doc = id && docs.find((d) => d.id === id);
+    if (doc) {
+      setPaying(doc);
+      setParams({}, { replace: true });
+    }
+  }, [params, docs, setParams]);
+
+  const priceOf = (doc) => Number(regions.find((r) => r.id === doc?.region)?.patent_monthly_price || 0);
 
   const slugOf = (doc) => types.find((x) => x.id === doc.document_type)?.slug;
   const counts = { all: docs.length, expiring: 0, expired: 0, valid: 0 };
@@ -110,9 +129,12 @@ export default function Documents() {
             </p>
           </div>
         </div>
-        <span className="inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-surface-container-lowest px-4 text-label-md text-on-surface-variant">
-          {t("Санҷиш дар базаи ВКД")} <SoonTag />
-        </span>
+        {mvdCheck?.website && (
+          <a href={mvdCheck.website} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-surface-container-lowest px-4 text-label-md text-primary shadow-sm hover:bg-surface">
+            {t("Санҷиш дар базаи ВКД")}
+            <ExternalLink className="h-4 w-4" aria-hidden />
+          </a>
+        )}
       </div>
 
       <PageHeader eyebrow={t("Муҳоҷирати бехатар")} title={t("Ҳуҷҷатҳои ман")} text={t("Ҳуҷҷатҳоро сари вақт нав кунед ва аз ҷарима ва ихроҷ эмин бошед.")}>
@@ -166,14 +188,14 @@ export default function Documents() {
       ) : (
         <div className="grid gap-6 lg:grid-cols-2">
           {shown.map((d) => (
-            <DocCard key={d.id} doc={d} slug={slugOf(d)} onEdit={setEditing} />
+            <DocCard key={d.id} doc={d} slug={slugOf(d)} onEdit={setEditing} onPay={setPaying} />
           ))}
         </div>
       )}
 
       <div className="grid gap-4 md:grid-cols-3">
         {SERVICES.map((s) => (
-          <div key={s.title()} className="card flex flex-col gap-3 p-4 md:p-6">
+          <Link key={s.to} to={s.to} className="card flex flex-col gap-3 p-4 transition-shadow hover:shadow-md md:p-6">
             <div className="flex items-start gap-3">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-surface-container text-primary">
                 <s.icon className="h-5 w-5" aria-hidden />
@@ -183,8 +205,11 @@ export default function Documents() {
                 <p className="mt-1 text-body-sm text-on-surface-variant">{s.text()}</p>
               </div>
             </div>
-            <SoonTag className="self-start" />
-          </div>
+            <span className="inline-flex items-center gap-1 self-end text-label-md text-primary">
+              {t("Кушодан")}
+              <ArrowRight className="h-4 w-4" aria-hidden />
+            </span>
+          </Link>
         ))}
       </div>
 
@@ -195,6 +220,15 @@ export default function Documents() {
         onClose={() => setEditing(null)}
         onSaved={() => {
           setEditing(null);
+          reload();
+        }}
+      />
+      <PaymentDrawer
+        doc={paying}
+        monthlyPrice={priceOf(paying)}
+        onClose={() => setPaying(null)}
+        onSaved={() => {
+          setPaying(null);
           reload();
         }}
       />

@@ -1,8 +1,9 @@
 import { Link } from "react-router-dom";
-import { AlertOctagon, BookOpen, CreditCard, FileText, HeartPulse, House, IdCard, Pencil, PlaneLanding, Stethoscope, Wallet } from "lucide-react";
+import { AlertOctagon, BookOpen, Camera, FileText, HeartPulse, House, IdCard, Pencil, PlaneLanding, Stethoscope, Wallet } from "lucide-react";
+import { openPrivateFile } from "../api.js";
 import { t } from "../i18n.js";
 import { date, usedPercent } from "../format.js";
-import { STATUS, SoonButton, StatusBadge } from "./ui.jsx";
+import { STATUS, StatusBadge } from "./ui.jsx";
 
 // Icons by the document type's slug (set by admins); unknown slugs get a plain document icon.
 const ICONS = [
@@ -26,7 +27,7 @@ function Meta({ label, value, className = "" }) {
   );
 }
 
-export default function DocCard({ doc, slug, onEdit }) {
+export default function DocCard({ doc, slug, onEdit, onPay }) {
   const s = STATUS[doc.status] || STATUS.valid;
   const Icon = docIcon(slug);
   const pct = usedPercent(doc);
@@ -88,9 +89,17 @@ export default function DocCard({ doc, slug, onEdit }) {
             <BookOpen className="h-4 w-4" aria-hidden />
             {t("Роҳнамо")}
           </Link>
-          {/patent/.test(slug || "") && <SoonButton icon={Wallet} className="w-full">{t("Пардохти патент")}</SoonButton>}
-          {!/patent/.test(slug || "") && doc.status === "expired" && /insur|dms|polis/.test(slug || "") && (
-            <SoonButton icon={CreditCard} className="w-full">{t("Суғуртаи нав харидан")}</SoonButton>
+          {doc.has_photo && (
+            <button type="button" onClick={() => openPrivateFile(`/documents/my-documents/${doc.id}/photo/`).catch(() => {})} className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-surface-container-low px-4 text-label-md text-primary hover:bg-surface-container">
+              <Camera className="h-4 w-4" aria-hidden />
+              {t("Сурат")}
+            </button>
+          )}
+          {/patent/.test(slug || "") && (
+            <button type="button" onClick={() => onPay(doc)} className="inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl bg-secondary px-4 text-label-md text-on-secondary hover:bg-secondary-container">
+              <Wallet className="h-4 w-4" aria-hidden />
+              {t("Пардохти патентро сабт кардан")}
+            </button>
           )}
         </div>
       </div>

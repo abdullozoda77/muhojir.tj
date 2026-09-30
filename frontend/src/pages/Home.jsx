@@ -10,7 +10,7 @@ import { date, daysText, usedPercent } from "../format.js";
 import JobCard from "../components/JobCard.jsx";
 import { docIcon } from "../components/DocCard.jsx";
 import { useDocuments } from "./Documents.jsx";
-import { STATUS, Skeleton, SoonButton, StatusBadge } from "../components/ui.jsx";
+import { STATUS, Skeleton, StatusBadge } from "../components/ui.jsx";
 
 function SectionTitle({ icon: Icon, title, text, to, linkText }) {
   return (
@@ -247,7 +247,12 @@ function MigrantHome({ user }) {
                 {t("Ҳуҷҷатҳои ман")}
                 <ArrowRight className="h-5 w-5" aria-hidden />
               </Link>
-              <SoonButton icon={Wallet}>{t("Ҳозир пардохтан")}</SoonButton>
+              {/patent/.test(types.find((x) => x.id === next.document_type)?.slug || "") && (
+                <Link to={`/documents?pay=${next.id}`} className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-secondary px-4 text-label-lg text-on-secondary hover:bg-secondary-container">
+                  <Wallet className="h-5 w-5" aria-hidden />
+                  {t("Пардохтро сабт кардан")}
+                </Link>
+              )}
             </div>
           </div>
         </section>

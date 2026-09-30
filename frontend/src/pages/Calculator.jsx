@@ -1,18 +1,20 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, BadgeCheck, BellRing, Calculator as CalcIcon, CreditCard, Download, Info, ListChecks, MapPinned } from "lucide-react";
+import { ArrowRight, BadgeCheck, BellRing, Calculator as CalcIcon, Clock, ExternalLink, Info, ListChecks, MapPinned, Phone, Printer, Wallet } from "lucide-react";
 import { apiAll } from "../api.js";
 import { useAuth } from "../auth.jsx";
 import { t } from "../i18n.js";
 import { num, rub } from "../format.js";
 import { Checklist, papersOf } from "../components/GuideSteps.jsx";
-import { EmptyState, ErrorBox, Skeleton, SoonButton, SoonTag } from "../components/ui.jsx";
+import { useApi } from "../hooks.js";
+import { Button, EmptyState, ErrorBox, Skeleton } from "../components/ui.jsx";
 
 export default function Calculator() {
   const { user } = useAuth();
   const [regions, setRegions] = useState([]);
   const [patent, setPatent] = useState(null);
   const [steps, setSteps] = useState([]);
+  const [myPatent, setMyPatent] = useState(null); // the worker's own patent, to record a payment for it
   const [regionId, setRegionId] = useState("");
   const [months, setMonths] = useState(3);
   const [loading, setLoading] = useState(true);
@@ -28,17 +30,23 @@ export default function Calculator() {
         const type = types.find((x) => /patent/.test(x.slug));
         setPatent(type || null);
         if (type) setSteps(await apiAll(`/documents/guide-steps/?document_type=${type.id}`));
+        if (type && user?.role === "migrant") {
+          const mine = await apiAll(`/documents/my-documents/?document_type=${type.id}`);
+          setMyPatent(mine[0] || null);
+        }
       } catch (err) {
         setError(err);
       } finally {
         setLoading(false);
       }
     })();
-  }, []);
+  }, [user]);
 
   const region = regions.find((r) => String(r.id) === regionId);
   const price = Number(region?.patent_monthly_price || 0);
   const papers = useMemo(() => [...new Set(steps.flatMap(papersOf))], [steps]);
+  const centers = useApi(regionId ? `/documents/centers/?region=${regionId}&page_size=50` : null);
+  const payLink = myPatent ? `/documents?pay=${myPatent.id}` : user ? "/documents" : "/login";
 
   return (
     <div className="flex flex-col gap-6">
@@ -95,7 +103,10 @@ export default function Calculator() {
                       <span className="text-body-sm text-on-surface-variant">{num(price)} ₽ × {t("{0} моҳ", months)}</span>
                     </div>
                   </div>
-                  <SoonButton icon={CreditCard} className="self-start">{t("Пардохти онлайн")}</SoonButton>
+                  <Link to={payLink} className="inline-flex min-h-[48px] items-center justify-center gap-2 self-start rounded-xl bg-secondary px-5 text-label-lg text-on-secondary hover:bg-secondary-container">
+                    <Wallet className="h-5 w-5" aria-hidden />
+                    {myPatent ? t("Пардохтро сабт кардан") : t("Патентро илова кунед ва пардохтро сабт кунед")}
+                  </Link>
                 </div>
                 <div className="flex items-start gap-3 rounded-lg bg-surface-container-lowest p-4 shadow-sm">
                   <Info className="mt-0.5 h-5 w-5 shrink-0 text-warning" aria-hidden />
@@ -126,7 +137,7 @@ export default function Calculator() {
               <div className="flex-1">
                 <p className="text-label-lg">{t("Пардохти навбатиро фаромӯш накунед")}</p>
                 <p className="text-body-sm text-on-surface-variant">
-                  {t("Патентро дар «Ҳуҷҷатҳои ман» илова кунед — пеш аз анҷоми мӯҳлат ба почтаи шумо ёдраскунӣ меояд. SMS ва Telegram ба наздикӣ.")}
+                  {t("Патентро дар «Ҳуҷҷатҳои ман» илова кунед — пеш аз анҷоми мӯҳлат ба почта ва Telegram ёдраскунӣ меояд.")}
                 </p>
               </div>
               <Link to={user ? "/documents" : "/login"} className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-primary px-5 text-label-lg text-on-primary">
@@ -136,7 +147,7 @@ export default function Calculator() {
           </div>
 
           <div className="grid gap-6 md:grid-cols-2 xl:col-span-5 xl:flex xl:flex-col">
-            <div className="card flex flex-col gap-4 p-4 md:p-6">
+            <div id="print-area" className="card flex flex-col gap-4 p-4 md:p-6">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2.5">
                   <span className="flex h-9 w-9 items-center justify-center rounded-full bg-surface-container-high text-primary">
@@ -150,21 +161,33 @@ export default function Calculator() {
                 {papers.length > 0 && <span className="rounded bg-surface-container-high px-2 py-1 text-label-sm text-primary">{papers.length}</span>}
               </div>
               {papers.length ? <Checklist items={papers} /> : <p className="text-body-sm text-on-surface-variant">{t("Рӯйхат ба наздикӣ илова мешавад.")}</p>}
-              <div className="flex items-center justify-between rounded-lg bg-surface-container p-4 opacity-70">
-                <span className="flex items-center gap-2 text-label-md">
-                  <Download className="h-5 w-5 text-primary" aria-hidden />
-                  {t("Рӯйхати чопшаванда (PDF)")}
-                </span>
-                <SoonTag />
-              </div>
+              {papers.length > 0 && (
+                <Button variant="soft" icon={Printer} onClick={() => window.print()} className="no-print self-start">
+                  {t("Чоп кардан ё PDF")}
+                </Button>
+              )}
             </div>
             <div className="card flex flex-col gap-2 p-4 md:p-6">
               <h2 className="flex items-center gap-2 text-headline-sm">
                 <MapPinned className="h-6 w-6 text-secondary" aria-hidden />
                 {t("Марказҳои муҳоҷират")}
               </h2>
-              <p className="text-body-sm text-on-surface-variant">{t("Суроға ва вақти кори марказҳо дар ҳар минтақа.")}</p>
-              <SoonTag className="self-start" />
+              <p className="text-body-sm text-on-surface-variant">{t("Дар минтақаи {0}:", region?.name || "")}</p>
+              {centers.data?.results?.length ? (
+                centers.data.results.map((c) => (
+                  <div key={c.id} className="flex flex-col gap-1 rounded-lg bg-surface-container-low p-3">
+                    <span className="text-label-lg">{c.name}</span>
+                    <span className="text-body-sm text-on-surface-variant">{c.address}</span>
+                    <span className="flex flex-wrap gap-x-3 gap-y-1 text-body-sm">
+                      {c.working_hours && <span className="inline-flex items-center gap-1"><Clock className="h-3.5 w-3.5 text-tertiary" aria-hidden />{c.working_hours}</span>}
+                      {c.phone && <a href={`tel:${c.phone.replace(/[^\d+]/g, "")}`} className="inline-flex items-center gap-1 text-primary"><Phone className="h-3.5 w-3.5" aria-hidden />{c.phone}</a>}
+                      {c.website && <a href={c.website} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-primary">{t("Сайт")}<ExternalLink className="h-3.5 w-3.5" aria-hidden /></a>}
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <p className="text-body-sm text-on-surface-variant">{t("Барои ин минтақа ҳоло марказ илова нашудааст.")}</p>
+              )}
             </div>
             {patent && (
               <Link to={`/guides?type=${patent.id}`} className="flex min-h-[64px] items-center justify-between gap-3 rounded-2xl bg-gradient-to-br from-primary to-primary-container p-4 text-on-primary shadow-sm md:p-6">

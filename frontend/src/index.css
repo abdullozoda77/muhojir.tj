@@ -37,3 +37,22 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* "Print or PDF" on the calculator prints only the checklist (#print-area). */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #print-area,
+  #print-area * {
+    visibility: visible;
+  }
+  #print-area {
+    position: absolute;
+    inset: 0 0 auto 0;
+    box-shadow: none;
+  }
+  #print-area .no-print {
+    display: none;
+  }
+}

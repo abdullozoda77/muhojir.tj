@@ -8,6 +8,7 @@ import Company from "./pages/Company.jsx";
 import Documents from "./pages/Documents.jsx";
 import EmployerPage from "./pages/EmployerPage.jsx";
 import Guides from "./pages/Guides.jsx";
+import Help from "./pages/Help.jsx";
 import Home from "./pages/Home.jsx";
 import Inbox from "./pages/Inbox.jsx";
 import JobDetail from "./pages/JobDetail.jsx";
@@ -17,6 +18,7 @@ import MyJobs from "./pages/MyJobs.jsx";
 import NewsDetail from "./pages/NewsDetail.jsx";
 import NotFound from "./pages/NotFound.jsx";
 import Notifications from "./pages/Notifications.jsx";
+import Payments from "./pages/Payments.jsx";
 import Profile from "./pages/Profile.jsx";
 import Resume from "./pages/Resume.jsx";
 import Resumes from "./pages/Resumes.jsx";
@@ -49,10 +51,12 @@ export default function App() {
         <Route path="calculator" element={<Calculator />} />
         <Route path="guides" element={<Guides />} />
         <Route path="news/:id" element={<NewsDetail />} />
+        <Route path="help" element={<Help />} />
 
         <Route path="documents" element={<Private role="migrant"><Documents /></Private>} />
         <Route path="resume" element={<Private role="migrant"><Resume /></Private>} />
         <Route path="applications" element={<Private role="migrant"><Applications /></Private>} />
+        <Route path="payments" element={<Private role="migrant"><Payments /></Private>} />
 
         <Route path="company" element={<Private role="employer"><Company /></Private>} />
         <Route path="my-jobs" element={<Private role="employer"><MyJobs /></Private>} />

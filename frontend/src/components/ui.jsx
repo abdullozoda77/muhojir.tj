@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { AlertTriangle, CheckCircle2, Clock, Hourglass, Loader2, X, XCircle } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Clock, Loader2, X, XCircle } from "lucide-react";
 import { t } from "../i18n.js";
 import { daysText } from "../format.js";
 
@@ -21,32 +21,6 @@ export function Button({ variant = "primary", icon: Icon, loading, className = "
     >
       {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : Icon && <Icon className="h-5 w-5 shrink-0" aria-hidden />}
       {children}
-    </button>
-  );
-}
-
-// Grey label for parts of the design that the backend cannot do yet.
-export function SoonTag({ className = "" }) {
-  return (
-    <span className={`inline-flex items-center gap-1 rounded-full bg-surface-container-high px-2 py-0.5 text-label-sm text-on-surface-variant ${className}`}>
-      <Hourglass className="h-3 w-3" aria-hidden />
-      {t("Ба наздикӣ")}
-    </span>
-  );
-}
-
-// A button that is shown but does nothing yet.
-export function SoonButton({ icon: Icon, children, className = "" }) {
-  return (
-    <button
-      type="button"
-      disabled
-      title={t("Ин имконият ба наздикӣ илова мешавад")}
-      className={`inline-flex min-h-[48px] cursor-not-allowed items-center justify-center gap-2 rounded-xl bg-surface-container-low px-4 py-2.5 text-label-md text-on-surface-variant opacity-70 ${className}`}
-    >
-      {Icon && <Icon className="h-5 w-5 shrink-0" aria-hidden />}
-      <span>{children}</span>
-      <SoonTag />
     </button>
   );
 }

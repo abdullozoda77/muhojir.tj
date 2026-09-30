@@ -7,7 +7,7 @@ import { t } from "../i18n.js";
 import { INDUSTRIES } from "../constants.js";
 import ApplyDrawer from "../components/ApplyDrawer.jsx";
 import JobCard from "../components/JobCard.jsx";
-import { Button, EmptyState, ErrorBox, Skeleton, SoonTag } from "../components/ui.jsx";
+import { Button, EmptyState, ErrorBox, Skeleton } from "../components/ui.jsx";
 
 const TOGGLES = [
   ["housing_provided", BedDouble, () => t("Манзил медиҳанд")],
@@ -253,14 +253,14 @@ export default function Jobs() {
         <aside className="grid gap-4 md:grid-cols-2 xl:col-span-4 xl:flex xl:flex-col">
           <Blacklist />
           <HowWeVerify />
-          <div className="flex flex-col gap-2 rounded-2xl bg-primary-container p-4 text-on-primary shadow-sm md:p-6">
-            <div className="flex items-center gap-2">
+          <Link to="/help" className="flex flex-col gap-2 rounded-2xl bg-primary-container p-4 text-on-primary shadow-sm transition-shadow hover:shadow-md md:p-6">
+            <span className="flex items-center gap-2">
               <PhoneCall className="h-6 w-6" aria-hidden />
               <span className="text-headline-sm font-bold">{t("Хати ёрӣ барои муҳоҷирон")}</span>
-            </div>
-            <p className="text-body-sm text-on-primary-container">{t("Агар дар ҷойи кор мушкил пеш ояд, бо ҳуқуқшинос маслиҳат кунед.")}</p>
-            <SoonTag className="self-start bg-surface-container-lowest text-primary" />
-          </div>
+            </span>
+            <span className="text-body-sm text-on-primary-container">{t("Агар дар ҷойи кор мушкил пеш ояд, бо ҳуқуқшинос маслиҳат кунед.")}</span>
+            <span className="inline-flex min-h-[44px] items-center justify-center self-start rounded-xl bg-surface-container-lowest px-4 text-label-md text-primary">{t("Рақамҳо ва савол ба ҳуқуқшинос")}</span>
+          </Link>
         </aside>
       </div>
 

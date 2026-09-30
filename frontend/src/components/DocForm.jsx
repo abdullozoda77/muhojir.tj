@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { Camera, FilePlus2, Save, Trash2 } from "lucide-react";
-import { api } from "../api.js";
+import { Camera, Eye, FilePlus2, Save, Trash2 } from "lucide-react";
+import { api, fileProblem, openPrivateFile } from "../api.js";
 import { t } from "../i18n.js";
-import { Button, Drawer, ErrorBox, Field, SoonTag } from "./ui.jsx";
+import { Button, Drawer, ErrorBox, Field } from "./ui.jsx";
 
-const EMPTY = { document_type: "", region: "", number: "", issued_at: "", expires_at: "", note: "" };
+const EMPTY = { document_type: "", region: "", number: "", issued_at: "", expires_at: "", note: "", remind_days_before: 7 };
+const REMIND_OPTIONS = [30, 14, 7, 3, 1];
 
 // Pure date math in UTC: local midnight in Moscow (UTC+3) would turn into the previous day in toISOString().
 function addDays(isoDate, days) {
@@ -15,6 +16,7 @@ function addDays(isoDate, days) {
 // Add or edit one of the user's documents. doc = null: closed, {}: new, a document: edit it.
 export default function DocForm({ doc, types, regions, onClose, onSaved }) {
   const [form, setForm] = useState(EMPTY);
+  const [photo, setPhoto] = useState(null); // a newly chosen file, uploaded on save
   const [errors, setErrors] = useState({});
   const [error, setError] = useState(null);
   const [busy, setBusy] = useState(false);
@@ -23,6 +25,7 @@ export default function DocForm({ doc, types, regions, onClose, onSaved }) {
   useEffect(() => {
     if (!doc) return;
     setForm(doc.id ? { ...EMPTY, ...doc, region: doc.region ?? "", issued_at: doc.issued_at ?? "" } : { ...EMPTY, ...doc });
+    setPhoto(null);
     setErrors({});
     setError(null);
   }, [doc]);
@@ -32,6 +35,13 @@ export default function DocForm({ doc, types, regions, onClose, onSaved }) {
   // A new registration is usually 90 days and so on: suggest the end date from the issue date when it is empty.
   const type = types.find((x) => String(x.id) === String(form.document_type));
   const suggest = type?.default_validity_days && form.issued_at && !form.expires_at ? addDays(form.issued_at, type.default_validity_days) : null;
+
+  const choosePhoto = (e) => {
+    const file = e.target.files[0] || null;
+    const problem = fileProblem(file);
+    setErrors((x) => ({ ...x, photo: problem }));
+    setPhoto(problem ? null : file);
+  };
 
   const submit = async (e) => {
     e.preventDefault();
@@ -45,9 +55,15 @@ export default function DocForm({ doc, types, regions, onClose, onSaved }) {
       issued_at: form.issued_at || null,
       expires_at: form.expires_at,
       note: form.note.trim(),
+      remind_days_before: Number(form.remind_days_before),
     };
     try {
-      await api(editing ? `/documents/my-documents/${doc.id}/` : "/documents/my-documents/", { method: editing ? "PATCH" : "POST", body });
+      const saved = await api(editing ? `/documents/my-documents/${doc.id}/` : "/documents/my-documents/", { method: editing ? "PATCH" : "POST", body });
+      if (photo) {
+        const data = new FormData();
+        data.append("photo", photo);
+        await api(`/documents/my-documents/${saved.id}/photo/`, { method: "POST", body: data });
+      }
       onSaved();
     } catch (err) {
       if (err.status === 400 && err.data && !err.data.detail) setErrors(err.data);
@@ -66,6 +82,16 @@ export default function DocForm({ doc, types, regions, onClose, onSaved }) {
     } catch (err) {
       setError(err);
       setBusy(false);
+    }
+  };
+
+  const removePhoto = async () => {
+    if (!window.confirm(t("Сурати ҳуҷҷатро нест кунем?"))) return;
+    try {
+      await api(`/documents/my-documents/${doc.id}/photo/`, { method: "DELETE" });
+      onSaved();
+    } catch (err) {
+      setError(err);
     }
   };
 
@@ -111,20 +137,41 @@ export default function DocForm({ doc, types, regions, onClose, onSaved }) {
           </button>
         )}
 
-        <div>
-          <span className="label flex items-center gap-2">{t("Кай ёдрас кунем?")} <SoonTag /></span>
-          <div className="grid grid-cols-3 gap-2 opacity-60">
-            {[t("30 рӯз пеш"), t("7 рӯз пеш"), t("1 рӯз пеш")].map((x) => (
-              <span key={x} className="flex min-h-[48px] items-center justify-center rounded-lg bg-surface-container-low text-center text-label-md">{x}</span>
+        <div role="radiogroup" aria-label={t("Кай ёдрас кунем?")}>
+          <span className="label">{t("Кай ёдрас кунем?")}</span>
+          <div className="grid grid-cols-5 gap-2">
+            {REMIND_OPTIONS.map((days) => (
+              <button
+                key={days}
+                type="button"
+                role="radio"
+                aria-checked={Number(form.remind_days_before) === days}
+                onClick={() => setForm((f) => ({ ...f, remind_days_before: days }))}
+                className={`flex min-h-[48px] flex-col items-center justify-center rounded-lg text-center text-label-md ${Number(form.remind_days_before) === days ? "bg-primary text-on-primary" : "bg-surface-container-low hover:bg-surface-container"}`}
+              >
+                <span className="text-label-lg">{days}</span>
+                <span className="text-label-sm font-normal">{t("рӯз қабл")}</span>
+              </button>
             ))}
           </div>
+          <span className="mt-1 block text-body-sm text-on-surface-variant">{t("Ва як бори дигар як рӯз пеш аз анҷом.")}</span>
         </div>
+
         <div>
-          <span className="label flex items-center gap-2">{t("Сурати ҳуҷҷат (нусхаи эҳтиётӣ)")} <SoonTag /></span>
-          <div className="flex min-h-[96px] cursor-not-allowed flex-col items-center justify-center rounded-xl bg-surface-container-low p-4 text-center opacity-60">
+          <span className="label">{t("Сурати ҳуҷҷат (нусхаи эҳтиётӣ)")}</span>
+          {editing && doc.has_photo && !photo && (
+            <div className="mb-2 flex flex-wrap gap-2">
+              <Button variant="soft" icon={Eye} onClick={() => openPrivateFile(`/documents/my-documents/${doc.id}/photo/`).catch(setError)}>{t("Дидани сурат")}</Button>
+              <Button variant="ghost" icon={Trash2} onClick={removePhoto}>{t("Нест кардан")}</Button>
+            </div>
+          )}
+          <label className="flex min-h-[96px] cursor-pointer flex-col items-center justify-center rounded-xl bg-surface-container-low p-4 text-center hover:bg-surface-container">
             <Camera className="mb-1 h-7 w-7 text-primary" aria-hidden />
-            <span className="text-label-md">{t("Сурати ҳуҷҷатро интихоб кунед")}</span>
-          </div>
+            <span className="text-label-md">{photo ? photo.name : editing && doc.has_photo ? t("Сурати навро интихоб кунед") : t("Сурати ҳуҷҷатро интихоб кунед")}</span>
+            <span className="text-body-sm text-on-surface-variant">{t("JPG, PNG ё PDF, то 10 МБ. Сурат пӯшида нигоҳ дошта мешавад — танҳо шумо мебинед.")}</span>
+            <input type="file" accept="image/jpeg,image/png,image/webp,application/pdf" className="sr-only" onChange={choosePhoto} />
+          </label>
+          {errors.photo && <span className="mt-1 block text-body-sm text-error">{[].concat(errors.photo).join(" ")}</span>}
         </div>
 
         <Field label={t("Ёддошти шахсӣ")} error={errors.note}>

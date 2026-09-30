@@ -90,15 +90,18 @@ export function errorText(data) {
   return Object.values(data).map(errorText).join(" ");
 }
 
-// api("/jobs/jobs/") or api("/documents/my-documents/", { method: "POST", body: {...} }). Bodies are sent as JSON.
-export async function api(path, { method = "GET", body } = {}) {
+// api("/jobs/jobs/") or api("/documents/my-documents/", { method: "POST", body: {...} }).
+// body is sent as JSON, or as it is when it is FormData (for files: photos, receipts).
+// raw: true returns the Response itself (for downloading files).
+export async function api(path, { method = "GET", body, raw = false } = {}) {
+  const isForm = body instanceof FormData;
   let sentWith = null;
   const send = () => {
     const headers = { "Accept-Language": lang === "ru" ? "ru" : "tg" };
-    if (body) headers["Content-Type"] = "application/json";
+    if (body && !isForm) headers["Content-Type"] = "application/json";
     sentWith = tokens.access;
     if (sentWith) headers.Authorization = `Bearer ${sentWith}`;
-    return fetch(API + path, { method, headers, ...(body ? { body: JSON.stringify(body) } : {}) });
+    return fetch(API + path, { method, headers, ...(body ? { body: isForm ? body : JSON.stringify(body) } : {}) });
   };
 
   let res;
@@ -123,6 +126,7 @@ export async function api(path, { method = "GET", body } = {}) {
     }
   }
 
+  if (raw && res.ok) return res;
   const data = res.status === 204 ? null : await res.json().catch(() => null);
   if (!res.ok) {
     const message = res.status === 401 && !path.startsWith("/auth/") ? t("Лутфан аз нав ворид шавед.") : errorText(data);
@@ -144,4 +148,27 @@ export async function apiAll(path) {
     results.push(...page.results);
   }
   return results;
+}
+
+// Private files (document photos, receipts) need the login token, so a plain <a href> can not open them.
+// This downloads the file and opens it in a new tab.
+export async function openPrivateFile(path) {
+  const tab = window.open("", "_blank"); // opened right away, so the browser does not block it as a pop-up
+  try {
+    const res = await api(path, { raw: true });
+    const url = URL.createObjectURL(await res.blob());
+    if (tab) tab.location.href = url;
+    else window.location.href = url;
+  } catch (err) {
+    tab?.close();
+    throw err;
+  }
+}
+
+// Checks a chosen file before uploading: the same limits as the server (jpg, png, webp, pdf; 10 MB).
+export function fileProblem(file) {
+  if (!file) return null;
+  if (!/\.(jpe?g|png|webp|pdf)$/i.test(file.name)) return t("Танҳо сурат (jpg, png, webp) ё PDF.");
+  if (file.size > 10 * 1024 * 1024) return t("Файл аз 10 МБ калон аст.");
+  return null;
 }
