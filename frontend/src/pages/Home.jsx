@@ -246,7 +246,7 @@ function MigrantHome({ user }) {
             {sorted.slice(1, 4).map((d) => (
               <DocTile key={d.id} doc={d} />
             ))}
-            <Link to="/documents" className="flex min-h-[120px] flex-col items-center justify-center gap-2 rounded-[20px] border-2 border-dashed border-[#b7c6e6] p-5 text-center text-label-lg text-primary hover:bg-surface-container-lowest">
+            <Link to="/documents" className="flex min-h-[120px] flex-col items-center justify-center gap-2 rounded-[20px] border-2 border-dashed border-outline-variant p-5 text-center text-label-lg text-primary hover:bg-surface-container-lowest">
               <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-fixed">
                 <Plus className="h-5 w-5" aria-hidden />
               </span>

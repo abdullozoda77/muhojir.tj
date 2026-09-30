@@ -5,13 +5,13 @@ import { daysText } from "../format.js";
 import Pattern, { EDGE_TO_EDGE } from "./Pattern.jsx";
 
 const BUTTON = {
-  primary: "bg-primary text-on-primary hover:bg-primary-container shadow-sm",
+  primary: "bg-primary text-on-primary hover:brightness-110 shadow-sm",
   soft: "bg-surface-container-low text-primary hover:bg-surface-container-high",
   plain: "bg-surface-container-low text-on-surface hover:bg-surface-container",
   danger: "bg-error text-on-error hover:opacity-90",
   // For the blue patterned banners: red main action, white secondary one.
   accent: "bg-secondary text-on-secondary hover:bg-secondary-container shadow-sm",
-  light: "bg-white text-primary hover:bg-primary-fixed shadow-sm",
+  light: "bg-white text-banner hover:bg-white/90 shadow-sm",
   ghost: "text-on-surface-variant hover:bg-surface-container-low",
 };
 
@@ -147,7 +147,7 @@ export function Drawer({ open, onClose, title, subtitle, icon: Icon, children })
 // The page title on a blue banner with the ornament. children: buttons on the right (use "accent" / "light").
 export function PageHeader({ eyebrow, title, text, children }) {
   return (
-    <section className={`${EDGE_TO_EDGE} relative overflow-hidden bg-primary px-6 py-7 text-on-primary md:px-10 md:py-9`}>
+    <section className={`${EDGE_TO_EDGE} relative overflow-hidden bg-banner px-6 py-7 text-white md:px-10 md:py-9`}>
       <Pattern />
       <div className="relative flex flex-col justify-between gap-5 md:flex-row md:items-end">
         <div className="flex flex-col gap-1.5">

@@ -187,10 +187,10 @@ export default function Calculator() {
               )}
             </div>
             {patent && (
-              <Link to={`/guides?type=${patent.id}`} className="flex min-h-[64px] items-center justify-between gap-3 rounded-2xl bg-gradient-to-br from-primary to-primary-container p-4 text-on-primary shadow-sm md:p-6">
+              <Link to={`/guides?type=${patent.id}`} className="flex min-h-[64px] items-center justify-between gap-3 rounded-2xl bg-banner p-4 text-white shadow-sm md:p-6">
                 <span>
                   <span className="block text-headline-sm">{t("Роҳнамои қадам ба қадам")}</span>
-                  <span className="text-body-sm text-on-primary-container">{t("Гирифтани патент: {0} қадам", steps.length)}</span>
+                  <span className="text-body-sm text-on-navy">{t("Гирифтани патент: {0} қадам", steps.length)}</span>
                 </span>
                 <ArrowRight className="h-6 w-6 shrink-0" aria-hidden />
               </Link>

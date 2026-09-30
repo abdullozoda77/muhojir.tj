@@ -81,7 +81,7 @@ export default function DocCard({ doc, slug, onEdit, onPay }) {
         </div>
 
         <div className="flex flex-wrap gap-2">
-          <button type="button" onClick={() => onEdit(doc)} className="inline-flex min-h-[48px] flex-1 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-label-md text-on-primary hover:bg-primary-container">
+          <button type="button" onClick={() => onEdit(doc)} className="inline-flex min-h-[48px] flex-1 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-label-md text-on-primary hover:brightness-110">
             <Pencil className="h-4 w-4" aria-hidden />
             {t("Таҳрир / нав кардан")}
           </button>

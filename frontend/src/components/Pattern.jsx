@@ -34,7 +34,7 @@ export const EDGE_TO_EDGE = "-mx-4 -mt-6 rounded-b-[28px] md:mx-0 md:mt-0 md:rou
 // wrapped in <Overlap>.
 export function Hero({ eyebrow, title, text, children, tall = false }) {
   return (
-    <section className={`${EDGE_TO_EDGE} relative overflow-hidden bg-primary px-6 pt-8 text-on-primary md:px-10 md:pt-10 ${tall ? "pb-28 md:pb-32" : "pb-8 md:pb-10"}`}>
+    <section className={`${EDGE_TO_EDGE} relative overflow-hidden bg-banner px-6 pt-8 text-white md:px-10 md:pt-10 ${tall ? "pb-28 md:pb-32" : "pb-8 md:pb-10"}`}>
       <Pattern />
       <div className="relative flex max-w-3xl flex-col gap-2">
         {eyebrow && <span className="text-label-md uppercase tracking-wider text-navy-muted">{eyebrow}</span>}

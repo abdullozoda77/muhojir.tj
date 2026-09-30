@@ -2,14 +2,117 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Colors as RGB channels, so Tailwind can add opacity (bg-primary/10). html.dark switches to the dark set. */
+:root {
+  --c-banner: 20 71 168;
+  --c-navy: 13 47 115;
+  --c-on-navy: 219 230 255;
+  --c-navy-muted: 185 205 246;
+  --c-primary: 20 71 168;
+  --c-on-primary: 255 255 255;
+  --c-primary-container: 30 99 214;
+  --c-on-primary-container: 227 236 255;
+  --c-primary-fixed: 219 230 255;
+  --c-on-primary-fixed: 0 26 67;
+  --c-secondary: 193 18 31;
+  --c-on-secondary: 255 255 255;
+  --c-secondary-container: 229 72 77;
+  --c-on-secondary-container: 255 255 255;
+  --c-secondary-fixed: 255 225 227;
+  --c-on-secondary-fixed: 65 0 6;
+  --c-warning: 138 81 0;
+  --c-on-warning: 255 255 255;
+  --c-warning-container: 245 158 11;
+  --c-on-warning-container: 61 36 0;
+  --c-warning-fixed: 255 232 199;
+  --c-on-warning-fixed: 46 24 0;
+  --c-tertiary: 0 95 38;
+  --c-on-tertiary: 255 255 255;
+  --c-tertiary-container: 0 122 51;
+  --c-tertiary-fixed: 127 252 151;
+  --c-on-tertiary-fixed: 0 33 9;
+  --c-error: 186 26 26;
+  --c-on-error: 255 255 255;
+  --c-error-container: 255 218 214;
+  --c-on-error-container: 147 0 10;
+  --c-background: 244 246 251;
+  --c-surface: 248 249 255;
+  --c-on-surface: 11 28 48;
+  --c-on-surface-variant: 62 73 71;
+  --c-surface-container-lowest: 255 255 255;
+  --c-surface-container-low: 239 244 255;
+  --c-surface-container: 229 238 255;
+  --c-surface-container-high: 220 233 255;
+  --c-surface-container-highest: 211 228 254;
+  --c-inverse-surface: 33 49 69;
+  --c-inverse-on-surface: 234 241 255;
+  --c-outline: 110 121 119;
+  --c-outline-variant: 189 201 198;
+  color-scheme: light;
+}
+
+html.dark {
+  --c-banner: 22 53 122;
+  --c-navy: 10 21 48;
+  --c-on-navy: 201 214 240;
+  --c-navy-muted: 143 166 214;
+  --c-primary: 138 180 255;
+  --c-on-primary: 6 36 87;
+  --c-primary-container: 45 91 184;
+  --c-on-primary-container: 219 230 255;
+  --c-primary-fixed: 28 52 98;
+  --c-on-primary-fixed: 215 227 255;
+  --c-secondary: 220 63 70;
+  --c-on-secondary: 255 255 255;
+  --c-secondary-container: 232 84 90;
+  --c-on-secondary-container: 255 255 255;
+  --c-secondary-fixed: 74 21 25;
+  --c-on-secondary-fixed: 255 217 219;
+  --c-warning: 255 185 92;
+  --c-on-warning: 46 24 0;
+  --c-warning-container: 245 158 11;
+  --c-on-warning-container: 46 24 0;
+  --c-warning-fixed: 74 49 0;
+  --c-on-warning-fixed: 255 221 176;
+  --c-tertiary: 110 227 154;
+  --c-on-tertiary: 0 33 13;
+  --c-tertiary-container: 31 157 85;
+  --c-tertiary-fixed: 16 64 42;
+  --c-on-tertiary-fixed: 182 245 201;
+  --c-error: 255 107 107;
+  --c-on-error: 45 0 0;
+  --c-error-container: 77 20 20;
+  --c-on-error-container: 255 218 214;
+  --c-background: 11 18 32;
+  --c-surface: 15 23 40;
+  --c-on-surface: 230 236 247;
+  --c-on-surface-variant: 169 182 204;
+  --c-surface-container-lowest: 17 26 46;
+  --c-surface-container-low: 22 34 56;
+  --c-surface-container: 27 42 68;
+  --c-surface-container-high: 34 50 79;
+  --c-surface-container-highest: 42 59 92;
+  --c-inverse-surface: 0 0 0;
+  --c-inverse-on-surface: 230 236 247;
+  --c-outline: 125 138 163;
+  --c-outline-variant: 58 74 102;
+  color-scheme: dark;
+}
+
 @layer base {
   html {
     -webkit-tap-highlight-color: transparent;
   }
-  /* Design "Нақш": page and section headings in the serif display font. */
+  /* Page and section headings: the display font, extra bold and a little tighter. */
   h1,
   h2 {
     @apply font-display;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+  /* Checkboxes of @tailwindcss/forms follow the theme instead of staying white in dark mode. */
+  [type="checkbox"] {
+    @apply border-outline bg-surface-container-lowest;
   }
   :focus-visible {
     @apply outline-none ring-2 ring-primary ring-offset-2;

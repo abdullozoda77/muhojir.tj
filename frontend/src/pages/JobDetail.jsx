@@ -85,7 +85,7 @@ export default function JobDetail() {
             </div>
           </Link>
           {!own && !closed && (
-            <button type="button" onClick={() => setApplying(job)} className="fixed bottom-[76px] left-4 right-4 z-40 inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl bg-primary text-label-lg text-on-primary shadow-lg hover:bg-primary-container lg:static lg:shadow-sm">
+            <button type="button" onClick={() => setApplying(job)} className="fixed bottom-[76px] left-4 right-4 z-40 inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl bg-primary text-label-lg text-on-primary shadow-lg hover:brightness-110 lg:static lg:shadow-sm">
               <Send className="h-5 w-5" aria-hidden />
               {t("Ариза додан")}
             </button>

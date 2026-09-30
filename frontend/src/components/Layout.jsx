@@ -2,11 +2,12 @@ import { useEffect, useState } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import {
   ArrowRight, Bell, BookOpen, Briefcase, Building2, Calculator, ClipboardList, FileUser, Home, Inbox, LifeBuoy, LogIn,
-  ReceiptText, Scale, Send, Settings, ShieldCheck, Users,
+  Moon, ReceiptText, Scale, Send, Settings, ShieldCheck, Sun, Users,
 } from "lucide-react";
 import { api, apiAll } from "../api.js";
 import { useAuth } from "../auth.jsx";
 import { lang, setLang, t } from "../i18n.js";
+import { useTheme } from "../theme.js";
 
 function navFor(user) {
   if (!user) {
@@ -67,7 +68,7 @@ function useCounters(user) {
 function Logo({ light = false }) {
   return (
     <Link to="/" className="flex items-center gap-2.5" aria-label="Muhojir.tj">
-      <span className={`flex h-9 w-9 items-center justify-center rounded-[10px] ${light ? "bg-white" : "bg-primary"}`}>
+      <span className={`flex h-9 w-9 items-center justify-center rounded-[10px] ${light ? "bg-white" : "bg-banner"}`}>
         <ShieldCheck className={`h-5 w-5 ${light ? "text-secondary" : "text-white"}`} strokeWidth={2.4} aria-hidden />
       </span>
       <span className={`font-display text-[22px] font-bold ${light ? "text-white" : "text-navy"}`}>
@@ -103,6 +104,21 @@ function LangSwitch() {
         </button>
       ))}
     </div>
+  );
+}
+
+function ThemeToggle() {
+  const { dark, toggle } = useTheme();
+  return (
+    <button
+      type="button"
+      onClick={toggle}
+      aria-label={dark ? t("Мавзӯи равшан") : t("Мавзӯи торик")}
+      title={dark ? t("Мавзӯи равшан") : t("Мавзӯи торик")}
+      className="rounded-full p-2 text-white hover:bg-white/10 lg:text-on-surface-variant lg:hover:bg-surface-container-high"
+    >
+      {dark ? <Sun className="h-6 w-6" /> : <Moon className="h-6 w-6" />}
+    </button>
   );
 }
 
@@ -176,13 +192,14 @@ export default function Layout() {
 
       <div className="lg:pl-[260px]">
         {/* Phones: blue, joined to the blue banner below. Desktop: white, next to the dark sidebar. */}
-        <header className="fixed left-0 right-0 top-0 z-40 flex h-16 items-center justify-between gap-2 bg-primary px-4 lg:left-[260px] lg:h-[72px] lg:bg-surface-container-lowest/90 lg:px-8 lg:shadow-[0_1px_8px_rgba(0,0,0,0.04)] lg:backdrop-blur-xl">
+        <header className="fixed left-0 right-0 top-0 z-40 flex h-16 items-center justify-between gap-2 bg-banner px-4 lg:left-[260px] lg:h-[72px] lg:bg-surface-container-lowest/90 lg:px-8 lg:shadow-[0_1px_8px_rgba(0,0,0,0.04)] lg:backdrop-blur-xl">
           <div className="lg:hidden">
             <Logo light />
           </div>
           <div className="hidden lg:block" />
           <div className="flex items-center gap-2 md:gap-4">
             <LangSwitch />
+            <ThemeToggle />
             <Link to="/help" className="rounded-full bg-secondary p-2 text-white hover:bg-secondary-container lg:bg-transparent lg:text-secondary lg:hover:bg-secondary-fixed" aria-label={t("Маркази ёрии ҳуқуқӣ")} title={t("Маркази ёрии ҳуқуқӣ")}>
               <LifeBuoy className="h-6 w-6" />
             </Link>
@@ -205,7 +222,7 @@ export default function Layout() {
                 </Link>
               </>
             ) : (
-              <Link to="/login" className="hidden min-h-[40px] items-center gap-2 rounded-xl bg-secondary px-4 text-label-md text-on-secondary hover:bg-secondary-container sm:inline-flex lg:bg-primary lg:text-on-primary lg:hover:bg-primary-container">
+              <Link to="/login" className="hidden min-h-[40px] items-center gap-2 rounded-xl bg-secondary px-4 text-label-md text-on-secondary hover:bg-secondary-container sm:inline-flex lg:bg-primary lg:text-on-primary lg:hover:brightness-110">
                 <LogIn className="h-4 w-4" aria-hidden />
                 {t("Ворид шудан")}
               </Link>

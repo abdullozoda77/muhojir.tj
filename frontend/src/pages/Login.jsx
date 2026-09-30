@@ -65,11 +65,11 @@ function RoleCard({ active, icon: Icon, title, text, onClick }) {
       type="button"
       onClick={onClick}
       aria-pressed={active}
-      className={`flex flex-1 flex-col items-start gap-2 rounded-2xl p-4 text-left transition-all ${active ? "bg-primary-container text-on-primary shadow-md" : "bg-surface-container-low hover:bg-surface-container"}`}
+      className={`flex flex-1 flex-col items-start gap-2 rounded-2xl p-4 text-left transition-all ${active ? "bg-primary-container text-white shadow-md" : "bg-surface-container-low hover:bg-surface-container"}`}
     >
       <Icon className="h-7 w-7" aria-hidden />
       <span className="text-label-lg">{title}</span>
-      <span className={`text-body-sm ${active ? "text-on-primary-container" : "text-on-surface-variant"}`}>{text}</span>
+      <span className={`text-body-sm ${active ? "text-white/85" : "text-on-surface-variant"}`}>{text}</span>
     </button>
   );
 }
@@ -132,23 +132,23 @@ export default function Login() {
 
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
-      <div className="relative hidden flex-col justify-between overflow-hidden bg-gradient-to-br from-primary to-primary-container p-12 text-on-primary lg:flex">
+      <div className="relative hidden flex-col justify-between overflow-hidden bg-banner p-12 text-white lg:flex">
         <Link to="/" className="flex items-center gap-2">
-          <img src="/logo.svg" alt="" className="h-10 w-10 rounded-xl ring-2 ring-on-primary/30" />
+          <img src="/logo.svg" alt="" className="h-10 w-10 rounded-xl ring-2 ring-white/30" />
           <span className="text-headline-md font-bold">Muhojir.tj</span>
         </Link>
         <div>
           <h1 className="text-headline-xl">{t("Ҳуҷҷатҳо сари вақт. Кори боэътимод.")}</h1>
-          <ul className="mt-8 space-y-4 text-body-lg text-on-primary-container">
+          <ul className="mt-8 space-y-4 text-body-lg text-on-navy">
             {[t("Ёдраскунӣ пеш аз тамом шудани мӯҳлати ҳуҷҷатҳо"), t("Роҳнамои қадам ба қадам бо забони тоҷикӣ"), t("Корфармоёни тасдиқшуда ва рӯйхати сиёҳ")].map((line) => (
               <li key={line} className="flex items-start gap-3">
-                <CheckCircle2 className="mt-0.5 h-6 w-6 shrink-0 text-tertiary-fixed" aria-hidden />
+                <CheckCircle2 className="mt-0.5 h-6 w-6 shrink-0 text-emerald-300" aria-hidden />
                 {line}
               </li>
             ))}
           </ul>
         </div>
-        <p className="text-body-sm text-on-primary-container/80">{t("Бепул. Бе парол — рамз ба почтаи электронӣ меояд.")}</p>
+        <p className="text-body-sm text-on-navy/80">{t("Бепул. Бе парол — рамз ба почтаи электронӣ меояд.")}</p>
       </div>
 
       <div className="flex flex-col justify-center px-4 py-10 sm:px-10">

@@ -76,7 +76,7 @@ export function JobRow({ job, onApply }) {
         {details}
       </span>
       <span className="col-start-2 text-body-lg font-bold text-primary md:col-start-auto md:text-right">{salary(job)}</span>
-      <button type="button" onClick={() => onApply(job)} className="col-span-2 inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-primary px-5 text-label-lg text-on-primary shadow-sm hover:bg-primary-container md:col-span-1">
+      <button type="button" onClick={() => onApply(job)} className="col-span-2 inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-primary px-5 text-label-lg text-on-primary shadow-sm hover:brightness-110 md:col-span-1">
         <Send className="h-4 w-4" aria-hidden />
         {t("Ариза додан")}
       </button>
