@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import DocumentType, GuideStep, LawNews, Region, ReminderLog, UserDocument
+from .models import DocumentType, GuideStep, LawNews, MigrationCenter, Payment, Region, ReminderLog, UserDocument
 
 
 class GuideStepInline(admin.StackedInline):
@@ -41,3 +41,20 @@ class LawNewsAdmin(admin.ModelAdmin):
     list_filter = ["is_published", "document_types"]
     search_fields = ["title", "summary"]
     filter_horizontal = ["document_types"]
+
+
+@admin.register(Payment)
+class PaymentAdmin(admin.ModelAdmin):
+    list_display = ["document", "user", "months", "amount", "paid_at"]
+    list_filter = ["paid_at"]
+    search_fields = ["user__email", "note"]
+    # Receipts are private files; admins see only whether one was attached.
+    exclude = ["receipt"]
+
+
+@admin.register(MigrationCenter)
+class MigrationCenterAdmin(admin.ModelAdmin):
+    list_display = ["name", "region", "address", "working_hours", "phone", "order"]
+    list_filter = ["region"]
+    list_editable = ["order"]
+    search_fields = ["name", "address"]

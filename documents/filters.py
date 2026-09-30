@@ -1,7 +1,7 @@
 import django_filters
 from django.db.models import Q
 
-from .models import DocumentType, GuideStep, LawNews, Region, UserDocument
+from .models import DocumentType, GuideStep, LawNews, MigrationCenter, Payment, Region, UserDocument
 
 # Every filter has ?search=... that looks for the words in the main text fields (case does not matter).
 
@@ -62,3 +62,24 @@ class LawNewsFilter(django_filters.FilterSet):
 
     def filter_search(self, queryset, name, value):
         return queryset.filter(Q(title__icontains=value) | Q(summary__icontains=value) | Q(body__icontains=value))
+
+
+class PaymentFilter(django_filters.FilterSet):
+    search = django_filters.CharFilter(field_name="note", lookup_expr="icontains")
+    paid_after = django_filters.DateFilter(field_name="paid_at", lookup_expr="gte")
+    paid_before = django_filters.DateFilter(field_name="paid_at", lookup_expr="lte")
+
+    class Meta:
+        model = Payment
+        fields = ["document"]
+
+
+class MigrationCenterFilter(django_filters.FilterSet):
+    search = django_filters.CharFilter(method="filter_search")
+
+    class Meta:
+        model = MigrationCenter
+        fields = ["region"]
+
+    def filter_search(self, queryset, name, value):
+        return queryset.filter(Q(name__icontains=value) | Q(address__icontains=value))

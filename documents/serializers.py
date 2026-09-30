@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import DocumentType, GuideStep, LawNews, Region, UserDocument
+from .models import DocumentType, GuideStep, LawNews, MigrationCenter, Payment, Region, UserDocument
 
 
 class GuideStepSerializer(serializers.ModelSerializer):
@@ -66,3 +66,35 @@ class LawNewsSerializer(serializers.ModelSerializer):
             "created_at",
         ]
         read_only_fields = ["id", "created_at"]
+
+
+class PaymentSerializer(serializers.ModelSerializer):
+    document_title = serializers.CharField(source="document.document_type.title", read_only=True)
+    # The document's end date after this payment (it moves forward by the months paid).
+    document_expires_at = serializers.DateField(source="document.expires_at", read_only=True)
+    has_receipt = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Payment
+        fields = [
+            "id", "document", "document_title", "document_expires_at", "months", "amount", "paid_at", "receipt",
+            "has_receipt", "note", "created_at",
+        ]
+        read_only_fields = ["id", "created_at"]
+        extra_kwargs = {"receipt": {"write_only": True, "required": False}}
+
+    def get_has_receipt(self, obj):
+        return bool(obj.receipt)
+
+    def validate_document(self, document):
+        if document.user_id != self.context["request"].user.id:
+            raise serializers.ValidationError("This is not your document.")
+        return document
+
+
+class MigrationCenterSerializer(serializers.ModelSerializer):
+    region_name = serializers.CharField(source="region.name", read_only=True, default=None)
+
+    class Meta:
+        model = MigrationCenter
+        fields = ["id", "region", "region_name", "name", "address", "working_hours", "phone", "website", "order"]

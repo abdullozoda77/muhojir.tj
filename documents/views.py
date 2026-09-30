@@ -2,15 +2,17 @@ from django.http import FileResponse, Http404
 from django.utils import timezone
 from rest_framework import permissions, viewsets
 from rest_framework.decorators import action
-from rest_framework.parsers import MultiPartParser
+from rest_framework.parsers import JSONParser, MultiPartParser
 from rest_framework.response import Response
 
 from core.permissions import IsAdminOrReadOnly, is_admin
-from .filters import DocumentTypeFilter, GuideStepFilter, LawNewsFilter, RegionFilter, UserDocumentFilter
-from .models import DocumentType, GuideStep, LawNews, Region, UserDocument
+from .filters import (
+    DocumentTypeFilter, GuideStepFilter, LawNewsFilter, MigrationCenterFilter, PaymentFilter, RegionFilter, UserDocumentFilter,
+)
+from .models import DocumentType, GuideStep, LawNews, MigrationCenter, Payment, Region, UserDocument, add_months
 from .serializers import (
-    DocumentPhotoSerializer, DocumentTypeSerializer, GuideStepSerializer, LawNewsSerializer, RegionSerializer,
-    UserDocumentSerializer,
+    DocumentPhotoSerializer, DocumentTypeSerializer, GuideStepSerializer, LawNewsSerializer, MigrationCenterSerializer,
+    PaymentSerializer, RegionSerializer, UserDocumentSerializer,
 )
 
 
@@ -71,6 +73,47 @@ class UserDocumentViewSet(viewsets.ModelViewSet):
         document.photo.delete(save=False)  # the old photo is not kept
         serializer.save()
         return Response(UserDocumentSerializer(document).data)
+
+
+class PaymentViewSet(viewsets.ModelViewSet):
+    """The user's payments and receipts (the receipts archive). Send as multipart to attach the receipt file.
+    A new payment moves the document's end date forward by the months paid."""
+
+    serializer_class = PaymentSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    parser_classes = [JSONParser, MultiPartParser]
+    filterset_class = PaymentFilter
+    http_method_names = ["get", "post", "delete"]
+
+    def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):
+            return Payment.objects.none()
+        return Payment.objects.filter(user=self.request.user).select_related("document__document_type")
+
+    def perform_create(self, serializer):
+        payment = serializer.save(user=self.request.user)
+        document = payment.document
+        document.expires_at = add_months(document.expires_at, payment.months)
+        document.save(update_fields=["expires_at", "updated_at"])
+
+    def perform_destroy(self, payment):
+        payment.receipt.delete(save=False)
+        payment.delete()
+
+    @action(detail=True, methods=["get"])
+    def receipt(self, request, pk=None):
+        """The receipt file of the payment (only for its owner)."""
+        payment = self.get_object()
+        if not payment.receipt:
+            raise Http404
+        return FileResponse(payment.receipt.open("rb"))
+
+
+class MigrationCenterViewSet(viewsets.ModelViewSet):
+    queryset = MigrationCenter.objects.select_related("region")
+    serializer_class = MigrationCenterSerializer
+    permission_classes = [IsAdminOrReadOnly]
+    filterset_class = MigrationCenterFilter
 
 
 def publish_date(serializer):

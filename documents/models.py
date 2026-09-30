@@ -1,10 +1,18 @@
+import calendar
 from datetime import date
 
 from django.conf import settings
-from django.core.validators import MinValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
-from core.files import document_photo_path, file_validators, private_storage
+from core.files import document_photo_path, file_validators, private_storage, receipt_path
+
+
+def add_months(day, months):
+    """add_months(date(2026, 1, 31), 1) -> date(2026, 2, 28): the same day next month, or the month's last day."""
+    month_index = day.month - 1 + months
+    year, month = day.year + month_index // 12, month_index % 12 + 1
+    return date(year, month, min(day.day, calendar.monthrange(year, month)[1]))
 
 
 class DocumentType(models.Model):
@@ -94,6 +102,44 @@ class UserDocument(models.Model):
 
     def __str__(self):
         return f"{self.document_type} ({self.user}) until {self.expires_at}"
+
+
+class Payment(models.Model):
+    """A payment for a document, e.g. the monthly patent tax, with a photo of the receipt (the receipts archive).
+    Saving a new payment moves the document's end date forward by the months paid; deleting it does not move it back."""
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="payments")
+    document = models.ForeignKey(UserDocument, on_delete=models.CASCADE, related_name="payments")
+    months = models.PositiveSmallIntegerField(default=1, validators=[MinValueValidator(1), MaxValueValidator(12)])
+    amount = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
+    paid_at = models.DateField(default=date.today)
+    receipt = models.FileField(upload_to=receipt_path, storage=private_storage, validators=file_validators, blank=True)
+    note = models.CharField(max_length=255, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-paid_at", "-created_at"]
+
+    def __str__(self):
+        return f"{self.document} — {self.amount} ({self.months} mo.)"
+
+
+class MigrationCenter(models.Model):
+    """A migration center where papers are handed in. Admins add them; the site shows them by region."""
+
+    region = models.ForeignKey(Region, on_delete=models.SET_NULL, blank=True, null=True, related_name="centers")
+    name = models.CharField(max_length=200)
+    address = models.CharField(max_length=255)
+    working_hours = models.CharField(max_length=100, blank=True)  # e.g. "Mon–Sat 08:00–20:00"
+    phone = models.CharField(max_length=30, blank=True)
+    website = models.URLField(blank=True)
+    order = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        ordering = ["order", "name"]
+
+    def __str__(self):
+        return self.name
 
 
 class ReminderLog(models.Model):
