@@ -1,9 +1,15 @@
+"""Login without a password, in two steps:
+1. POST /api/auth/send-code/   {email}        -> we email a 6-digit code
+2. POST /api/auth/verify-code/ {email, code}  -> we check it and give JWT tokens (a new email gets a new account)
+Then: token/refresh/ gives a new access token, logout/ ends the login, profile/ shows and edits the user."""
+from datetime import timedelta
+
 from django.conf import settings
 from django.contrib.auth.hashers import check_password
-from django.db import transaction
+from django.db.models import F
 from django.utils import timezone
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework import mixins, permissions, status, viewsets
+from rest_framework import mixins, permissions, viewsets
 from rest_framework.decorators import action
 from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework.response import Response
@@ -19,20 +25,23 @@ from .serializers import (
     LogoutSerializer, NotificationSerializer, SendCodeSerializer, UserSerializer, VerifyCodeSerializer,
 )
 
-# A new code can be asked for the same email at most once a minute.
-RESEND_PAUSE_SECONDS = 60
+RESEND_PAUSE = timedelta(minutes=1)  # a new code for the same email at most once a minute
 
 
-def tokens_for(user):
+def error(text, status=400):
+    return Response({"detail": text}, status=status)
+
+
+def make_tokens(user):
     refresh = RefreshToken.for_user(user)
     return {"refresh": str(refresh), "access": str(refresh.access_token)}
 
 
 class SendCodeView(APIView):
-    """Step 1 of login and sign-up: sends a 6-digit code to the email address."""
+    """Step 1: send a login code to the email."""
 
     permission_classes = [permissions.AllowAny]
-    throttle_classes = [ScopedRateThrottle]
+    throttle_classes = [ScopedRateThrottle]  # at most 5 codes an hour from one visitor
     throttle_scope = "login_code"
 
     @swagger_auto_schema(request_body=SendCodeSerializer)
@@ -41,25 +50,21 @@ class SendCodeView(APIView):
         serializer.is_valid(raise_exception=True)
         email = serializer.validated_data["email"]
 
-        existing = EmailCode.objects.filter(email=email).first()
-        if existing and (timezone.now() - existing.sent_at).total_seconds() < RESEND_PAUSE_SECONDS:
-            return Response(
-                {"detail": "A code was just sent. Wait a minute before asking for a new one."},
-                status=status.HTTP_429_TOO_MANY_REQUESTS,
-            )
+        old_code = EmailCode.objects.filter(email=email).first()
+        if old_code and timezone.now() - old_code.sent_at < RESEND_PAUSE:
+            return error("A code was just sent. Wait a minute before asking for a new one.", 429)
 
         try:
             send_login_code(email)
-        except OSError:  # SMTP server down or refused the login
-            return Response(
-                {"detail": "The email could not be sent. Try again in a few minutes."},
-                status=status.HTTP_503_SERVICE_UNAVAILABLE,
-            )
-        return Response({"detail": "Code sent.", "is_new_user": not User.objects.filter(email=email).exists()})
+        except OSError:  # the mail server is down or refused us
+            return error("The email could not be sent. Try again in a few minutes.", 503)
+
+        is_new_user = not User.objects.filter(email=email).exists()
+        return Response({"detail": "Code sent.", "is_new_user": is_new_user})
 
 
 class VerifyCodeView(APIView):
-    """Step 2: checks the code and returns JWT tokens. The first successful code creates the account."""
+    """Step 2: check the code and log in. The first login with a new email creates the account."""
 
     permission_classes = [permissions.AllowAny]
 
@@ -70,35 +75,32 @@ class VerifyCodeView(APIView):
         data = serializer.validated_data
         email = data["email"]
 
-        with transaction.atomic():
-            entry = EmailCode.objects.select_for_update().filter(email=email).first()
-            if entry is None or timezone.now() - entry.sent_at > settings.LOGIN_CODE_LIFETIME:
-                return Response({"detail": "The code has expired. Ask for a new one."}, status=status.HTTP_400_BAD_REQUEST)
-            if entry.attempts >= settings.LOGIN_CODE_MAX_ATTEMPTS:
-                return Response({"detail": "Too many wrong tries. Ask for a new code."}, status=status.HTTP_400_BAD_REQUEST)
-            if not check_password(data["code"], entry.code_hash):
-                entry.attempts += 1
-                entry.save(update_fields=["attempts"])
-                return Response({"detail": "Wrong code."}, status=status.HTTP_400_BAD_REQUEST)
-            entry.delete()
+        code = EmailCode.objects.filter(email=email).first()
+        if code is None or timezone.now() - code.sent_at > settings.LOGIN_CODE_LIFETIME:
+            return error("The code has expired. Ask for a new one.")
+        if code.attempts >= settings.LOGIN_CODE_MAX_ATTEMPTS:
+            return error("Too many wrong tries. Ask for a new code.")
+        if not check_password(data["code"], code.code_hash):  # only a hash of the code is stored
+            EmailCode.objects.filter(pk=code.pk).update(attempts=F("attempts") + 1)
+            return error("Wrong code.")
+        code.delete()  # a code works only once
 
-            user, created = User.objects.get_or_create(
-                email=email,
-                defaults={"full_name": data.get("full_name", ""), "role": data["role"]},
-            )
-            if created:
-                user.set_unusable_password()
-                user.save(update_fields=["password"])
-
+        user = User.objects.filter(email=email).first()
+        is_new_user = user is None
+        if is_new_user:
+            user = User.objects.create_user(email, full_name=data.get("full_name", ""), role=data["role"])
         if not user.is_active:
-            return Response({"detail": "This account is blocked."}, status=status.HTTP_403_FORBIDDEN)
+            return error("This account is blocked.", 403)
+
         return Response(
-            {"user": UserSerializer(user).data, "is_new_user": created, **tokens_for(user)},
-            status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
+            {"user": UserSerializer(user).data, "is_new_user": is_new_user, **make_tokens(user)},
+            status=201 if is_new_user else 200,
         )
 
 
 class LogoutView(APIView):
+    """Log out: the refresh token goes on the blacklist, so it can not be used again."""
+
     permission_classes = [permissions.IsAuthenticated]
 
     @swagger_auto_schema(request_body=LogoutSerializer)
@@ -108,11 +110,13 @@ class LogoutView(APIView):
         try:
             RefreshToken(serializer.validated_data["refresh"]).blacklist()
         except TokenError:
-            return Response({"detail": "Invalid or expired token."}, status=status.HTTP_400_BAD_REQUEST)
-        return Response(status=status.HTTP_204_NO_CONTENT)
+            return error("Invalid or expired token.")
+        return Response(status=204)
 
 
 class ProfileView(RetrieveUpdateAPIView):
+    """GET: my profile. PATCH: change name, phone, city, language, email reminders."""
+
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
     http_method_names = ["get", "patch"]
