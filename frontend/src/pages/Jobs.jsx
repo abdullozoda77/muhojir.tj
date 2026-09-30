@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { BadgeCheck, BedDouble, Briefcase, FileCheck2, MapPin, PhoneCall, Search, ShieldAlert, ShieldCheck, Soup } from "lucide-react";
+import { BedDouble, Briefcase, FileCheck2, MapPin, PhoneCall, Search, ShieldAlert, ShieldCheck, Soup } from "lucide-react";
 import { api } from "../api.js";
 import { useApi } from "../hooks.js";
 import { t } from "../i18n.js";
 import { INDUSTRIES } from "../constants.js";
 import ApplyDrawer from "../components/ApplyDrawer.jsx";
 import JobCard from "../components/JobCard.jsx";
-import { Button, EmptyState, ErrorBox, Skeleton } from "../components/ui.jsx";
+import { Button, EmptyState, ErrorBox, PageHeader, Skeleton } from "../components/ui.jsx";
 
 const TOGGLES = [
   ["housing_provided", BedDouble, () => t("Манзил медиҳанд")],
@@ -146,21 +146,12 @@ export default function Jobs() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="card flex flex-col items-start justify-between gap-4 bg-surface-container-low p-4 md:flex-row md:items-center md:p-6">
-        <div className="flex items-start gap-4">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary text-on-primary">
-            <BadgeCheck className="h-7 w-7" aria-hidden />
-          </div>
-          <div>
-            <h1 className="text-headline-sm">{t("Ҷойи кор аз корфармоёни санҷидашуда")}</h1>
-            <p className="mt-1 text-body-md text-on-surface-variant">{t("Пеш аз ариза додан баҳои ширкат ва рӯйхати сиёҳро бинед.")}</p>
-          </div>
-        </div>
-        <a href="#blacklist" className="inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-lg bg-surface-container-highest px-4 text-label-lg text-error hover:bg-error-container sm:w-auto">
+      <PageHeader eyebrow={t("Корфармоёни санҷидашуда")} title={t("Ҷойи кор")} text={t("Пеш аз ариза додан баҳои ширкат ва рӯйхати сиёҳро бинед.")}>
+        <a href="#blacklist" className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-secondary px-5 text-label-lg text-on-secondary shadow-sm hover:bg-secondary-container">
           <ShieldAlert className="h-5 w-5" aria-hidden />
           {t("Рӯйхати сиёҳ")}
         </a>
-      </div>
+      </PageHeader>
 
       <div className="card flex flex-col gap-4 p-4 md:p-6">
         <div className="grid gap-4 md:grid-cols-12">

@@ -2,12 +2,16 @@ import { useEffect } from "react";
 import { AlertTriangle, CheckCircle2, Clock, Loader2, X, XCircle } from "lucide-react";
 import { t } from "../i18n.js";
 import { daysText } from "../format.js";
+import Pattern from "./Pattern.jsx";
 
 const BUTTON = {
   primary: "bg-primary text-on-primary hover:bg-primary-container shadow-sm",
   soft: "bg-surface-container-low text-primary hover:bg-surface-container-high",
   plain: "bg-surface-container-low text-on-surface hover:bg-surface-container",
   danger: "bg-error text-on-error hover:opacity-90",
+  // For the blue patterned banners: red main action, white secondary one.
+  accent: "bg-secondary text-on-secondary hover:bg-secondary-container shadow-sm",
+  light: "bg-white text-primary hover:bg-primary-fixed shadow-sm",
   ghost: "text-on-surface-variant hover:bg-surface-container-low",
 };
 
@@ -140,15 +144,19 @@ export function Drawer({ open, onClose, title, subtitle, icon: Icon, children })
   );
 }
 
+// The page title on a blue banner with the ornament. children: buttons on the right (use "accent" / "light").
 export function PageHeader({ eyebrow, title, text, children }) {
   return (
-    <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
-      <div>
-        {eyebrow && <p className="mb-1 text-label-sm uppercase tracking-wider text-primary">{eyebrow}</p>}
-        <h1 className="font-display text-headline-lg font-bold md:text-headline-xl">{title}</h1>
-        {text && <p className="mt-1 max-w-2xl text-body-md text-on-surface-variant">{text}</p>}
+    <section className="relative overflow-hidden rounded-[28px] bg-primary px-6 py-7 text-on-primary md:px-10 md:py-9">
+      <Pattern />
+      <div className="relative flex flex-col justify-between gap-5 md:flex-row md:items-end">
+        <div className="flex flex-col gap-1.5">
+          {eyebrow && <p className="text-label-md uppercase tracking-wider text-navy-muted">{eyebrow}</p>}
+          <h1 className="font-display text-[30px] font-bold leading-9 md:text-[40px] md:leading-[48px]">{title}</h1>
+          {text && <p className="max-w-2xl text-body-lg text-on-navy">{text}</p>}
+        </div>
+        {children && <div className="flex shrink-0 flex-wrap gap-2">{children}</div>}
       </div>
-      {children && <div className="flex shrink-0 flex-wrap gap-2">{children}</div>}
-    </div>
+    </section>
   );
 }

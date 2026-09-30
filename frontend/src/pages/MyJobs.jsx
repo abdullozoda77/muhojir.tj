@@ -37,7 +37,7 @@ export default function MyJobs() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader eyebrow={company.name} title={t("Эълонҳои ман")}>
-        <Button icon={PlusCircle} onClick={() => setEditing({})} disabled={company.is_blacklisted}>{t("Эълони нав")}</Button>
+        <Button variant="accent" icon={PlusCircle} onClick={() => setEditing({})} disabled={company.is_blacklisted}>{t("Эълони нав")}</Button>
       </PageHeader>
       <div className="flex gap-1 self-start rounded-xl bg-surface-container-lowest p-1 shadow-sm" role="tablist">
         {[

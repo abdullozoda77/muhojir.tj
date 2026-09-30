@@ -34,7 +34,7 @@ export default function Notifications() {
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6">
       <PageHeader title={t("Огоҳиҳо")}>
-        {list.some((n) => !n.is_read) && <Button variant="soft" icon={CheckCheck} onClick={readAll}>{t("Ҳамаро хондам")}</Button>}
+        {list.some((n) => !n.is_read) && <Button variant="light" icon={CheckCheck} onClick={readAll}>{t("Ҳамаро хондам")}</Button>}
       </PageHeader>
       <ErrorBox error={error} />
       {loading ? (

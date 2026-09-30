@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, BadgeCheck, BellRing, Calculator as CalcIcon, Clock, ExternalLink, Info, ListChecks, MapPinned, Phone, Printer, Wallet } from "lucide-react";
+import { ArrowRight, BellRing, Calculator as CalcIcon, Clock, ExternalLink, Info, ListChecks, MapPinned, Phone, Printer, Wallet } from "lucide-react";
 import { apiAll } from "../api.js";
 import { useAuth } from "../auth.jsx";
 import { t } from "../i18n.js";
 import { num, rub } from "../format.js";
 import { Checklist, papersOf } from "../components/GuideSteps.jsx";
 import { useApi } from "../hooks.js";
-import { Button, EmptyState, ErrorBox, Skeleton } from "../components/ui.jsx";
+import { Button, EmptyState, ErrorBox, PageHeader, Skeleton } from "../components/ui.jsx";
 
 export default function Calculator() {
   const { user } = useAuth();
@@ -50,14 +50,11 @@ export default function Calculator() {
 
   return (
     <div className="flex flex-col gap-6">
-      <section className="rounded-2xl bg-gradient-to-r from-primary-container via-primary to-primary-container p-6 text-on-primary shadow-sm md:p-8">
-        <span className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-surface-container-lowest/20 px-3 py-1 text-label-sm backdrop-blur-md">
-          <BadgeCheck className="h-4 w-4" aria-hidden />
-          {region ? t("Нархҳои соли {0}", region.price_year) : t("Нархҳо аз рӯи минтақа")}
-        </span>
-        <h1 className="text-headline-lg">{t("Ҳисобкунаки нархи патент")}</h1>
-        <p className="mt-2 max-w-2xl text-body-md text-on-primary-container">{t("Минтақаи кори худро интихоб кунед ва маблағро пешакӣ донед.")}</p>
-      </section>
+      <PageHeader
+        eyebrow={region ? t("Нархҳои соли {0}", region.price_year) : t("Нархҳо аз рӯи минтақа")}
+        title={t("Ҳисобкунаки нархи патент")}
+        text={t("Минтақаи кори худро интихоб кунед ва маблағро пешакӣ донед.")}
+      />
 
       <ErrorBox error={error} />
       {loading ? (

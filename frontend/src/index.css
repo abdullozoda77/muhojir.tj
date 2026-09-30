@@ -6,6 +6,11 @@
   html {
     -webkit-tap-highlight-color: transparent;
   }
+  /* Design "Нақш": page and section headings in the serif display font. */
+  h1,
+  h2 {
+    @apply font-display;
+  }
   :focus-visible {
     @apply outline-none ring-2 ring-primary ring-offset-2;
   }

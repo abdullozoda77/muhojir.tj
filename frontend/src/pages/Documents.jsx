@@ -138,7 +138,7 @@ export default function Documents() {
       </div>
 
       <PageHeader eyebrow={t("Муҳоҷирати бехатар")} title={t("Ҳуҷҷатҳои ман")} text={t("Ҳуҷҷатҳоро сари вақт нав кунед ва аз ҷарима ва ихроҷ эмин бошед.")}>
-        <Button icon={FilePlus2} onClick={() => setEditing({})}>{t("Ҳуҷҷати нав")}</Button>
+        <Button variant="accent" icon={FilePlus2} onClick={() => setEditing({})}>{t("Ҳуҷҷати нав")}</Button>
       </PageHeader>
 
       <div className="card flex flex-col items-stretch justify-between gap-2 p-1 xl:flex-row xl:items-center">
