@@ -108,7 +108,7 @@ class LawNews(models.Model):
     """News about migration law, written in Tajik."""
 
     title = models.CharField(max_length=255)
-    summary = models.TextField(max_length=500)
+    summary = models.CharField(max_length=500)
     body = models.TextField()
     source_url = models.URLField(blank=True)
     document_types = models.ManyToManyField(DocumentType, blank=True, related_name="news")

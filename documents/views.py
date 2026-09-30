@@ -1,6 +1,7 @@
+from django.utils import timezone
 from rest_framework import permissions, viewsets
 
-from core.permissions import IsAdminOrReadOnly
+from core.permissions import IsAdminOrReadOnly, is_admin
 from .models import DocumentType, GuideStep, LawNews, Region, UserDocument
 from .serializers import (
     DocumentTypeSerializer, GuideStepSerializer, LawNewsSerializer, RegionSerializer, UserDocumentSerializer,
@@ -44,11 +45,27 @@ class UserDocumentViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
 
 
+def publish_date(serializer):
+    """News gets today's date the first time it is published, unless the admin picked a date."""
+    data, news = serializer.validated_data, serializer.instance
+    published = data.get("is_published", getattr(news, "is_published", False))
+    has_date = data.get("published_at", getattr(news, "published_at", None))
+    return {"published_at": timezone.now()} if published and not has_date else {}
+
+
 class LawNewsViewSet(viewsets.ModelViewSet):
-    queryset = LawNews.objects.all()
+    """Drafts (is_published off) are seen only by admins."""
+
     serializer_class = LawNewsSerializer
     permission_classes = [IsAdminOrReadOnly]
     search_fields = ["title", "summary"]
 
+    def get_queryset(self):
+        qs = LawNews.objects.all()
+        return qs if is_admin(self.request.user) else qs.filter(is_published=True)
+
     def perform_create(self, serializer):
-        serializer.save(created_by=self.request.user)
+        serializer.save(created_by=self.request.user, **publish_date(serializer))
+
+    def perform_update(self, serializer):
+        serializer.save(**publish_date(serializer))
