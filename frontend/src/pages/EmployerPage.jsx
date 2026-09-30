@@ -6,7 +6,7 @@ import { useAuth } from "../auth.jsx";
 import { useApi } from "../hooks.js";
 import { t } from "../i18n.js";
 import { date } from "../format.js";
-import JobCard, { VerifiedBadge } from "../components/JobCard.jsx";
+import { JobRow, VerifiedBadge } from "../components/JobCard.jsx";
 import { StarPicker, Stars, average } from "../components/Stars.jsx";
 import { Button, EmptyState, ErrorBox, Skeleton } from "../components/ui.jsx";
 
@@ -179,7 +179,15 @@ export default function EmployerPage() {
         </section>
         <section className="flex flex-col gap-4 lg:col-span-5">
           <h2 className="text-headline-md">{t("Эълонҳои ин ширкат")}</h2>
-          {jobs.data?.results?.length ? jobs.data.results.map((j) => <JobCard key={j.id} job={j} compact />) : <p className="card p-6 text-body-md text-on-surface-variant">{t("Ҳоло эълони фаъол нест.")}</p>}
+          {jobs.data?.results?.length ? (
+            <div className="flex flex-col divide-y divide-surface-container rounded-3xl bg-surface-container-lowest p-2 shadow-sm">
+              {jobs.data.results.map((j) => (
+                <JobRow key={j.id} job={j} />
+              ))}
+            </div>
+          ) : (
+            <p className="card p-6 text-body-md text-on-surface-variant">{t("Ҳоло эълони фаъол нест.")}</p>
+          )}
         </section>
       </div>
     </div>

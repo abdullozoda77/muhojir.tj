@@ -6,7 +6,7 @@ import { useApi } from "../hooks.js";
 import { t } from "../i18n.js";
 import { INDUSTRIES } from "../constants.js";
 import ApplyDrawer from "../components/ApplyDrawer.jsx";
-import JobCard from "../components/JobCard.jsx";
+import { JobRow } from "../components/JobCard.jsx";
 import { Button, EmptyState, ErrorBox, PageHeader, Skeleton } from "../components/ui.jsx";
 
 const TOGGLES = [
@@ -230,9 +230,11 @@ export default function Jobs() {
             <EmptyState icon={Briefcase} title={t("Чунин ҷойи кор ёфт нашуд")} text={t("Филтрҳоро кам кунед ё шаҳри дигарро нависед.")} />
           ) : (
             <>
-              {jobs.map((job) => (
-                <JobCard key={job.id} job={job} onApply={setApplying} />
-              ))}
+              <div className="flex flex-col divide-y divide-surface-container rounded-3xl bg-surface-container-lowest p-2 shadow-sm md:p-3">
+                {jobs.map((job) => (
+                  <JobRow key={job.id} job={job} onApply={setApplying} />
+                ))}
+              </div>
               {page.next && (
                 <Button variant="soft" loading={more} onClick={loadMore} className="self-center">
                   {t("Боз нишон додан")}

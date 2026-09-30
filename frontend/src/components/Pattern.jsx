@@ -26,11 +26,15 @@ export default function Pattern({ opacity = 0.14, size = 56 }) {
   );
 }
 
+// On phones the banner touches the screen edges and the blue header above it, so both read as one blue block;
+// from md on it is a rounded card. (The page container has px-4 py-6 on phones.)
+export const EDGE_TO_EDGE = "-mx-4 -mt-6 rounded-b-[28px] md:mx-0 md:mt-0 md:rounded-[28px]";
+
 // A blue banner with the ornament. Content that should lie over its bottom edge goes right after it,
 // wrapped in <Overlap>.
 export function Hero({ eyebrow, title, text, children, tall = false }) {
   return (
-    <section className={`relative overflow-hidden rounded-[28px] bg-primary px-6 pt-8 text-on-primary md:px-10 md:pt-10 ${tall ? "pb-28 md:pb-32" : "pb-8 md:pb-10"}`}>
+    <section className={`${EDGE_TO_EDGE} relative overflow-hidden bg-primary px-6 pt-8 text-on-primary md:px-10 md:pt-10 ${tall ? "pb-28 md:pb-32" : "pb-8 md:pb-10"}`}>
       <Pattern />
       <div className="relative flex max-w-3xl flex-col gap-2">
         {eyebrow && <span className="text-label-md uppercase tracking-wider text-navy-muted">{eyebrow}</span>}

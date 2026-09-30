@@ -115,6 +115,10 @@ export default function Documents() {
 
   return (
     <div className="flex flex-col gap-6">
+      <PageHeader eyebrow={t("Муҳоҷирати бехатар")} title={t("Ҳуҷҷатҳои ман")} text={t("Ҳуҷҷатҳоро сари вақт нав кунед ва аз ҷарима ва ихроҷ эмин бошед.")}>
+        <Button variant="accent" icon={FilePlus2} onClick={() => setEditing({})}>{t("Ҳуҷҷати нав")}</Button>
+      </PageHeader>
+
       <div className="card flex flex-col items-start justify-between gap-4 bg-surface-container-high p-4 md:flex-row md:items-center md:p-6">
         <div className="flex items-center gap-4">
           <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary text-on-primary">
@@ -137,9 +141,6 @@ export default function Documents() {
         )}
       </div>
 
-      <PageHeader eyebrow={t("Муҳоҷирати бехатар")} title={t("Ҳуҷҷатҳои ман")} text={t("Ҳуҷҷатҳоро сари вақт нав кунед ва аз ҷарима ва ихроҷ эмин бошед.")}>
-        <Button variant="accent" icon={FilePlus2} onClick={() => setEditing({})}>{t("Ҳуҷҷати нав")}</Button>
-      </PageHeader>
 
       <div className="card flex flex-col items-stretch justify-between gap-2 p-1 xl:flex-row xl:items-center">
         <div className="no-scrollbar flex gap-1 overflow-x-auto p-1" role="tablist">

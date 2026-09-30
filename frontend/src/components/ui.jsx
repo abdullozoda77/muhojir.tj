@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { AlertTriangle, CheckCircle2, Clock, Loader2, X, XCircle } from "lucide-react";
 import { t } from "../i18n.js";
 import { daysText } from "../format.js";
-import Pattern from "./Pattern.jsx";
+import Pattern, { EDGE_TO_EDGE } from "./Pattern.jsx";
 
 const BUTTON = {
   primary: "bg-primary text-on-primary hover:bg-primary-container shadow-sm",
@@ -147,7 +147,7 @@ export function Drawer({ open, onClose, title, subtitle, icon: Icon, children })
 // The page title on a blue banner with the ornament. children: buttons on the right (use "accent" / "light").
 export function PageHeader({ eyebrow, title, text, children }) {
   return (
-    <section className="relative overflow-hidden rounded-[28px] bg-primary px-6 py-7 text-on-primary md:px-10 md:py-9">
+    <section className={`${EDGE_TO_EDGE} relative overflow-hidden bg-primary px-6 py-7 text-on-primary md:px-10 md:py-9`}>
       <Pattern />
       <div className="relative flex flex-col justify-between gap-5 md:flex-row md:items-end">
         <div className="flex flex-col gap-1.5">
