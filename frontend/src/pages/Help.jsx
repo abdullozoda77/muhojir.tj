@@ -1,4 +1,5 @@
-import { BookOpen, ExternalLink, Flag, MessageCircleQuestion, Phone, Scale, ShieldCheck } from "lucide-react";
+import { Link } from "react-router-dom";
+import { ArrowRight, BookOpen, ExternalLink, Flag, MessageCircleQuestion, Phone, Scale, SearchCheck } from "lucide-react";
 import { useApi } from "../hooks.js";
 import { t } from "../i18n.js";
 import { PageHeader, Skeleton } from "../components/ui.jsx";
@@ -8,7 +9,6 @@ const KINDS = {
   embassy: { label: () => t("Сафорат ва консулгарӣ"), icon: Flag },
   hotline: { label: () => t("Хатҳои ёрӣ"), icon: Phone },
   lawyer: { label: () => t("Ҳуқуқшиносон"), icon: Scale },
-  mvd_check: { label: () => t("Санҷиши расмӣ"), icon: ShieldCheck },
   other: { label: () => t("Дигар"), icon: MessageCircleQuestion },
 };
 
@@ -58,6 +58,16 @@ export default function Help() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader eyebrow={t("Кӯмак ва бехатарӣ")} title={t("Маркази ёрии ҳуқуқӣ")} text={t("Сайтҳои расмӣ дар бораи патент ва қонунҳои Русия.")} />
+      <Link to="/checks" className="flex min-h-[64px] items-center justify-between gap-3 rounded-2xl bg-banner p-4 text-white shadow-sm md:p-6">
+        <span className="flex items-center gap-3">
+          <SearchCheck className="h-7 w-7 shrink-0" aria-hidden />
+          <span>
+            <span className="block text-headline-sm">{t("Санҷиши ҳуҷҷатҳо")}</span>
+            <span className="text-body-sm text-on-navy">{t("Патент, манъи даромадан ва қарзҳоро дар сайтҳои расмӣ санҷед.")}</span>
+          </span>
+        </span>
+        <ArrowRight className="h-6 w-6 shrink-0" aria-hidden />
+      </Link>
       <Contacts />
     </div>
   );

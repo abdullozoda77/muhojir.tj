@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { ArrowRight, BookOpen, CalendarDays, CheckCircle2, Clock, ExternalLink, FilePlus2, LayoutList, Mail, ReceiptText, ShieldCheck, XCircle } from "lucide-react";
-import { useApi, useDocuments } from "../hooks.js";
+import { ArrowRight, BookOpen, CalendarDays, CheckCircle2, Clock, FilePlus2, LayoutList, Mail, ReceiptText, SearchCheck, ShieldCheck, XCircle } from "lucide-react";
+import { useDocuments } from "../hooks.js";
 import { t } from "../i18n.js";
 import { date, monthTitle } from "../format.js";
 import DocCard from "../components/DocCard.jsx";
@@ -70,8 +70,6 @@ export default function Documents() {
   const [editing, setEditing] = useState(null);
   const [paying, setPaying] = useState(null);
   const [params, setParams] = useSearchParams();
-  // The official MVD check page, if an admin has added it in the help contacts.
-  const mvdCheck = useApi("/help/contacts/?kind=mvd_check&page_size=1").data?.results?.[0];
 
   // /documents?pay=<id> (from the home page or the calculator) opens the payment form for that document.
   useEffect(() => {
@@ -112,12 +110,10 @@ export default function Documents() {
             </p>
           </div>
         </div>
-        {mvdCheck?.website && (
-          <a href={mvdCheck.website} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-surface-container-lowest px-4 text-label-md text-primary shadow-sm hover:bg-surface">
-            {t("Санҷиш дар базаи ВКД")}
-            <ExternalLink className="h-4 w-4" aria-hidden />
-          </a>
-        )}
+        <Link to="/checks" className="inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-surface-container-lowest px-4 text-label-md text-primary shadow-sm hover:bg-surface">
+          <SearchCheck className="h-4 w-4" aria-hidden />
+          {t("Санҷиш дар сайтҳои расмӣ")}
+        </Link>
       </div>
 
 
