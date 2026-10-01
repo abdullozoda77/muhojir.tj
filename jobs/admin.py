@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Employer, EmployerReview, Job
+from .models import Employer, EmployerReview, Job, JobAlert, SavedJob
 
 
 @admin.register(Employer)
@@ -22,3 +22,16 @@ class JobAdmin(admin.ModelAdmin):
 class EmployerReviewAdmin(admin.ModelAdmin):
     list_display = ["employer", "author", "rating", "salary_not_paid", "created_at"]
     list_filter = ["rating", "salary_not_paid"]
+
+
+@admin.register(JobAlert)
+class JobAlertAdmin(admin.ModelAdmin):
+    list_display = ["user", "search", "city", "industry", "min_salary", "is_active", "created_at"]
+    list_filter = ["is_active", "industry"]
+    search_fields = ["user__email", "search", "city"]
+
+
+@admin.register(SavedJob)
+class SavedJobAdmin(admin.ModelAdmin):
+    list_display = ["user", "job", "created_at"]
+    search_fields = ["user__email", "job__title"]

@@ -11,6 +11,7 @@ import NotFound from "./pages/NotFound.jsx";
 const Calculator = lazy(() => import("./pages/Calculator.jsx"));
 const Checks = lazy(() => import("./pages/Checks.jsx"));
 const Exam = lazy(() => import("./pages/Exam.jsx"));
+const SavedJobs = lazy(() => import("./pages/SavedJobs.jsx"));
 const Documents = lazy(() => import("./pages/Documents.jsx"));
 const EmployerPage = lazy(() => import("./pages/EmployerPage.jsx"));
 const Guides = lazy(() => import("./pages/Guides.jsx"));
@@ -55,6 +56,7 @@ export default function App() {
 
         <Route path="documents" element={<Private><Documents /></Private>} />
         <Route path="payments" element={<Private><Payments /></Private>} />
+        <Route path="saved-jobs" element={<Private><SavedJobs /></Private>} />
 
         <Route path="notifications" element={<Private><Notifications /></Private>} />
         <Route path="profile" element={<Private><Profile /></Private>} />

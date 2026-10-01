@@ -23,6 +23,8 @@ class JobFilter(django_filters.FilterSet):
     city = django_filters.CharFilter(lookup_expr="icontains")
     # Jobs that pay at least this much: ?min_salary=90000
     min_salary = django_filters.NumberFilter(method="filter_min_salary")
+    # Only the jobs the viewer saved: ?saved=true
+    saved = django_filters.BooleanFilter(method="filter_saved")
 
     class Meta:
         model = Job
@@ -33,6 +35,14 @@ class JobFilter(django_filters.FilterSet):
 
     def filter_search(self, queryset, name, value):
         return queryset.filter(Q(title__icontains=value) | Q(description__icontains=value) | Q(employer__name__icontains=value))
+
+    def filter_saved(self, queryset, name, value):
+        user = getattr(self.request, "user", None)
+        if not value:
+            return queryset
+        if not user or not user.is_authenticated:
+            return queryset.none()
+        return queryset.filter(saved_by__user=user)
 
     def filter_min_salary(self, queryset, name, value):
         # The top of the range counts; a job with only "from" is compared by that.

@@ -4,7 +4,7 @@ import { useApi } from "../hooks.js";
 import { t } from "../i18n.js";
 import { ago, date, salary } from "../format.js";
 import { industry } from "../constants.js";
-import { OfficialLink, Perks, SOURCE_NAME, SourceBadge, VerifiedBadge, placeOf } from "../components/JobCard.jsx";
+import { OfficialLink, Perks, SOURCE_NAME, SaveButton, SourceBadge, VerifiedBadge, placeOf } from "../components/JobCard.jsx";
 import { Stars, average } from "../components/Stars.jsx";
 import { EmptyState, ErrorBox, Skeleton } from "../components/ui.jsx";
 
@@ -89,7 +89,12 @@ export default function JobDetail() {
               <span className="text-body-sm text-on-surface-variant">({t("{0} шарҳ", reviews.data?.count ?? 0)})</span>
             </div>
           </Link>
-          {!closed && <OfficialLink job={job} className="fixed bottom-[76px] left-4 right-4 z-40 min-h-[52px] shadow-lg lg:static lg:shadow-sm" />}
+          {!closed && (
+            <div className="fixed bottom-[76px] left-4 right-4 z-40 flex gap-2 lg:static">
+              <OfficialLink job={job} className="min-h-[52px] flex-1 shadow-lg lg:shadow-sm" />
+              <SaveButton job={job} className="min-h-[52px] shadow-lg lg:shadow-sm" />
+            </div>
+          )}
           {job.employer.website && (
             <a href={job.employer.website} target="_blank" rel="noopener noreferrer" className="card inline-flex min-h-[52px] items-center justify-center gap-2 px-5 text-label-lg text-primary hover:bg-surface-container-low">
               <Globe className="h-5 w-5" aria-hidden />

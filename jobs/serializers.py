@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Employer, EmployerReview, Job
+from .models import Employer, EmployerReview, Job, JobAlert
 
 
 class EmployerSerializer(serializers.ModelSerializer):
@@ -21,13 +21,16 @@ class EmployerShortSerializer(serializers.ModelSerializer):
 class JobSerializer(serializers.ModelSerializer):
     employer = EmployerShortSerializer(read_only=True)
     industry_label = serializers.CharField(source="get_industry_display", read_only=True)
+    # Saved by the viewer (always false for guests); filled in by the view with one query.
+    is_saved = serializers.BooleanField(read_only=True, default=False)
 
     class Meta:
         model = Job
         fields = [
             "id", "employer", "title", "description", "industry", "industry_label", "city", "address",
             "salary_from", "salary_to", "salary_period", "schedule", "housing_provided", "meals_provided",
-            "helps_with_documents", "is_active", "expires_at", "source", "external_url", "created_at", "updated_at",
+            "helps_with_documents", "is_active", "expires_at", "source", "external_url", "is_saved", "created_at",
+            "updated_at",
         ]
 
 
@@ -57,3 +60,21 @@ class EmployerReviewSerializer(serializers.ModelSerializer):
         if not self.instance and EmployerReview.objects.filter(employer=employer, author=request.user).exists():
             raise serializers.ValidationError("You already reviewed this employer. Edit that review instead.")
         return employer
+
+
+class JobAlertSerializer(serializers.ModelSerializer):
+    industry_label = serializers.CharField(source="get_industry_display", read_only=True)
+
+    class Meta:
+        model = JobAlert
+        fields = [
+            "id", "search", "city", "industry", "industry_label", "min_salary", "housing_provided", "is_active", "created_at",
+        ]
+        read_only_fields = ["id", "created_at"]
+
+    def validate(self, attrs):
+        fields = ("search", "city", "industry", "min_salary", "housing_provided")
+        values = {f: attrs.get(f, getattr(self.instance, f, None)) for f in fields}
+        if not any(values.values()):
+            raise serializers.ValidationError({"detail": "Choose at least one filter for the alert."})
+        return attrs

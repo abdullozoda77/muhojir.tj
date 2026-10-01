@@ -1,5 +1,8 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { BadgeCheck, BedDouble, Clock3, ExternalLink, FileCheck2, Globe, MapPin, Soup } from "lucide-react";
+import { BadgeCheck, BedDouble, Bookmark, Clock3, ExternalLink, FileCheck2, Globe, MapPin, Soup } from "lucide-react";
+import { api } from "../api.js";
+import { useAuth } from "../auth.jsx";
 import { t } from "../i18n.js";
 import { salary } from "../format.js";
 import { Chip } from "./ui.jsx";
@@ -49,10 +52,43 @@ export function OfficialLink({ job, className = "" }) {
 
 export const placeOf = (job) => job.address || job.city;
 
+// Save a job for later (only for logged-in users). onChange tells the page, e.g. to drop it from the saved list.
+export function SaveButton({ job, onChange, className = "" }) {
+  const { user } = useAuth();
+  const [saved, setSaved] = useState(Boolean(job.is_saved));
+  const [busy, setBusy] = useState(false);
+  if (!user) return null;
+  const toggle = async () => {
+    setBusy(true);
+    try {
+      const data = await api(`/jobs/jobs/${job.id}/save/`, { method: saved ? "DELETE" : "POST" });
+      setSaved(data.is_saved);
+      onChange?.(data.is_saved);
+    } catch {
+      // nothing changed; the button stays as it was
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <button
+      type="button"
+      onClick={toggle}
+      disabled={busy}
+      aria-pressed={saved}
+      aria-label={saved ? t("Аз захира баровардан") : t("Захира кардан")}
+      title={saved ? t("Аз захира баровардан") : t("Захира кардан")}
+      className={`inline-flex min-h-[48px] min-w-[48px] items-center justify-center gap-2 rounded-xl px-3 text-label-lg transition-colors disabled:opacity-60 ${saved ? "bg-secondary-fixed text-secondary" : "bg-surface-container-low text-on-surface-variant hover:text-primary"} ${className}`}
+    >
+      <Bookmark className={`h-5 w-5 ${saved ? "fill-current" : ""}`} aria-hidden />
+    </button>
+  );
+}
+
 // The short one-line job: letter, title, company, address and perks, salary on the right.
 // compact (home page): the whole row is a link to the job; otherwise (jobs list) only the title is,
 // and there is a button to the official ad.
-export function JobRow({ job, compact = false }) {
+export function JobRow({ job, compact = false, onSaveChange }) {
   const perks = [
     job.housing_provided && t("манзил"),
     job.meals_provided && t("хӯрок"),
@@ -93,14 +129,17 @@ export function JobRow({ job, compact = false }) {
     );
   }
   return (
-    <div className="grid grid-cols-[44px_1fr] items-center gap-x-4 gap-y-3 rounded-2xl px-3 py-4 transition-colors hover:bg-surface-container-low md:grid-cols-[44px_1fr_auto_auto]">
+    <div className="grid grid-cols-[44px_1fr] items-center gap-x-4 gap-y-3 rounded-2xl px-3 py-4 transition-colors hover:bg-surface-container-low md:grid-cols-[44px_1fr_auto_auto_auto]">
       {avatar}
       <span className="flex min-w-0 flex-col gap-1">
         <Link to={`/jobs/${job.id}`} className="hover:text-primary">{title}</Link>
         {details}
       </span>
       <span className="col-start-2 text-body-lg font-bold text-primary md:col-start-auto md:text-right">{salary(job)}</span>
-      <OfficialLink job={job} className="col-span-2 min-h-[48px] shadow-sm md:col-span-1" />
+      <span className="col-span-2 flex gap-2 md:contents">
+        <OfficialLink job={job} className="min-h-[48px] flex-1 shadow-sm" />
+        <SaveButton job={job} onChange={onSaveChange} />
+      </span>
     </div>
   );
 }

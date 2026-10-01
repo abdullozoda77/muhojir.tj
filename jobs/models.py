@@ -101,3 +101,44 @@ class EmployerReview(models.Model):
 
     def __str__(self):
         return f"{self.employer}: {self.rating}★ by {self.author}"
+
+
+class SavedJob(models.Model):
+    """A job the user saved to look at later."""
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="saved_jobs")
+    job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name="saved_by")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        constraints = [models.UniqueConstraint(fields=["user", "job"], name="one_save_per_job")]
+
+    def __str__(self):
+        return f"{self.user} ♥ {self.job}"
+
+
+class JobAlert(models.Model):
+    """"Tell me about new jobs like these": the filters of the jobs page, kept. After each import the user gets
+    one notification with the new jobs that match (see jobs/alerts.py). Empty fields mean "any"."""
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="job_alerts")
+    search = models.CharField(max_length=100, blank=True)
+    city = models.CharField(max_length=100, blank=True)
+    industry = models.CharField(max_length=20, choices=INDUSTRIES, blank=True)
+    min_salary = models.PositiveIntegerField(blank=True, null=True)
+    housing_provided = models.BooleanField(default=False)  # only jobs with housing
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.user}: {self.search or self.get_industry_display() or '—'} {self.city}"
+
+    def filters(self):
+        """The alert as query parameters of the jobs list (?search=...&city=...)."""
+        data = {"search": self.search, "city": self.city, "industry": self.industry,
+                "min_salary": self.min_salary, "housing_provided": "true" if self.housing_provided else ""}
+        return {key: value for key, value in data.items() if value}

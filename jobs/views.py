@@ -1,11 +1,14 @@
-from django.db.models import Q
+from django.db.models import Exists, OuterRef, Q
 from django.utils import timezone
 from rest_framework import permissions, viewsets
+from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
+from rest_framework.response import Response
 
 from core.permissions import IsAdminOrReadOnly, IsOwnerOrAdminOrReadOnly, is_admin
 from .filters import EmployerFilter, EmployerReviewFilter, JobFilter
-from .models import Employer, EmployerReview, Job
-from .serializers import EmployerReviewSerializer, EmployerSerializer, JobSerializer
+from .models import Employer, EmployerReview, Job, JobAlert, SavedJob
+from .serializers import EmployerReviewSerializer, EmployerSerializer, JobAlertSerializer, JobSerializer
 
 # Jobs and companies come from the import (python manage.py import_jobs), so on the API they are read-only;
 # admins change them (switch off, blacklist) in the admin panel.
@@ -32,7 +35,20 @@ class JobViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         qs = Job.objects.select_related("employer")
-        return qs if is_admin(self.request.user) else qs.filter(open_jobs())
+        user = self.request.user
+        if user.is_authenticated:
+            qs = qs.annotate(is_saved=Exists(SavedJob.objects.filter(user=user, job=OuterRef("pk"))))
+        return qs if is_admin(user) else qs.filter(open_jobs())
+
+    @action(detail=True, methods=["post", "delete"], permission_classes=[permissions.IsAuthenticated])
+    def save(self, request, pk=None):
+        """POST: save the job for later. DELETE: remove it from the saved ones."""
+        job = self.get_object()
+        if request.method == "POST":
+            SavedJob.objects.get_or_create(user=request.user, job=job)
+        else:
+            SavedJob.objects.filter(user=request.user, job=job).delete()
+        return Response({"is_saved": request.method == "POST"})
 
 
 class EmployerReviewViewSet(viewsets.ModelViewSet):
@@ -44,3 +60,21 @@ class EmployerReviewViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+
+
+class JobAlertViewSet(viewsets.ModelViewSet):
+    """The user's own alerts about new jobs."""
+
+    serializer_class = JobAlertSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    pagination_class = None  # a user has only a few
+
+    def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):
+            return JobAlert.objects.none()
+        return JobAlert.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        if JobAlert.objects.filter(user=self.request.user).count() >= 10:
+            raise ValidationError({"detail": "You can have at most 10 job alerts."})
+        serializer.save(user=self.request.user)

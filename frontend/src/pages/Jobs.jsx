@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { BedDouble, BookOpen, Briefcase, FileCheck2, MapPin, Search, ShieldAlert, ShieldCheck, Soup } from "lucide-react";
+import { BedDouble, BellPlus, BookOpen, Briefcase, Check, FileCheck2, MapPin, Search, ShieldAlert, ShieldCheck, Soup } from "lucide-react";
 import { api } from "../api.js";
+import { useAuth } from "../auth.jsx";
 import { useApi } from "../hooks.js";
 import { t } from "../i18n.js";
 import { INDUSTRIES } from "../constants.js";
@@ -71,6 +72,53 @@ function WhereJobsComeFrom() {
         </div>
       ))}
     </div>
+  );
+}
+
+// "Tell me about new jobs like these": keeps the current filters as an alert (see jobs/alerts.py on the server).
+function AlertButton({ params }) {
+  const { user } = useAuth();
+  const [state, setState] = useState("idle");
+  const filters = {
+    search: params.get("search") || "",
+    city: params.get("city") || "",
+    industry: params.get("industry") || "",
+    housing_provided: params.get("housing_provided") === "true",
+  };
+  const query = params.toString();
+  useEffect(() => setState("idle"), [query]);
+  if (!user) return null;
+  const empty = !filters.search && !filters.city && !filters.industry && !filters.housing_provided;
+
+  const save = async () => {
+    setState("busy");
+    try {
+      await api("/jobs/alerts/", { method: "POST", body: filters });
+      setState("done");
+    } catch {
+      setState("error");
+    }
+  };
+
+  if (state === "done") {
+    return (
+      <Link to="/saved-jobs" className="inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-tertiary-fixed px-4 text-label-md text-on-tertiary-fixed">
+        <Check className="h-4 w-4" aria-hidden />
+        {t("Огоҳӣ сабт шуд")}
+      </Link>
+    );
+  }
+  return (
+    <button
+      type="button"
+      onClick={save}
+      disabled={empty || state === "busy"}
+      title={empty ? t("Аввал касб, шаҳр ё соҳаро интихоб кунед") : undefined}
+      className="inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-surface-container-low px-4 text-label-md text-primary hover:bg-surface-container-high disabled:cursor-not-allowed disabled:opacity-50"
+    >
+      <BellPlus className="h-4 w-4" aria-hidden />
+      {state === "error" ? t("Нашуд, боз кӯшиш кунед") : t("Дар бораи кори нав хабар диҳед")}
+    </button>
   );
 }
 
@@ -220,9 +268,12 @@ export default function Jobs() {
 
       <div className="grid items-start gap-6 xl:grid-cols-12">
         <div className="flex flex-col gap-4 xl:col-span-8">
-          <div className="flex items-center gap-2 px-1">
-            <h2 className="text-headline-sm">{t("Ҷойҳои кории фаъол")}</h2>
-            {!loading && <span className="rounded-full bg-surface-container-high px-2 py-0.5 text-label-sm text-primary">{t("{0} ҷой", page.count)}</span>}
+          <div className="flex flex-wrap items-center justify-between gap-2 px-1">
+            <div className="flex items-center gap-2">
+              <h2 className="text-headline-sm">{t("Ҷойҳои кории фаъол")}</h2>
+              {!loading && <span className="rounded-full bg-surface-container-high px-2 py-0.5 text-label-sm text-primary">{t("{0} ҷой", page.count)}</span>}
+            </div>
+            <AlertButton params={params} />
           </div>
           <ErrorBox error={error} />
           {loading ? (

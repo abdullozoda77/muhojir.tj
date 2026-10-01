@@ -1,7 +1,7 @@
 import { Suspense, useEffect, useState } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import {
-  ArrowRight, Bell, BookOpen, Briefcase, Calculator, GraduationCap, Home, LifeBuoy, LogIn, Moon, ReceiptText, Scale, SearchCheck, Settings, ShieldCheck, Sun, WifiOff,
+  ArrowRight, Bell, BookOpen, Bookmark, Briefcase, Calculator, GraduationCap, Home, LifeBuoy, LogIn, Moon, ReceiptText, Scale, SearchCheck, Settings, ShieldCheck, Sun, WifiOff,
 } from "lucide-react";
 import { api, apiAll } from "../api.js";
 import { useAuth } from "../auth.jsx";
@@ -28,6 +28,7 @@ function navFor(user) {
     { to: "/", icon: Home, label: t("Асосӣ"), short: t("Асосӣ"), end: true },
     { to: "/documents", icon: ShieldCheck, label: t("Ҳуҷҷатҳои ман"), short: t("Ҳуҷҷатҳо"), badge: "docs" },
     { to: "/jobs", icon: Briefcase, label: t("Ҷойи кор"), short: t("Кор") },
+    { to: "/saved-jobs", icon: Bookmark, label: t("Захира ва огоҳиҳо"), desktopOnly: true },
     { to: "/calculator", icon: Calculator, label: t("Калкулятори патент"), desktopOnly: true },
     { to: "/guides", icon: BookOpen, label: t("Роҳнамо ва қонунҳо"), short: t("Роҳнамо") },
     { to: "/checks", icon: SearchCheck, label: t("Санҷиши ҳуҷҷатҳо"), desktopOnly: true },
