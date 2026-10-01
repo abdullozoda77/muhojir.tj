@@ -1,27 +1,36 @@
 import { useId } from "react";
 
-// The Tajik geometric ornament (an eight-point star lattice) drawn over the blue banners, in thin white lines.
-export default function Pattern({ opacity = 0.14, size = 56 }) {
+// Papers and books drawn over the blue banners in thin white lines: a document with a folded corner,
+// an open book and a closed book, repeated in a slightly tilted grid. One 120×120 tile:
+const TILE = 120;
+
+export default function Pattern({ opacity = 0.14 }) {
   const id = useId().replace(/:/g, "");
-  const c = size / 2;
-  const star = [
-    [c, size * 0.11], [c + size * 0.09, c - size * 0.09], [size * 0.89, c], [c + size * 0.09, c + size * 0.09],
-    [c, size * 0.89], [c - size * 0.09, c + size * 0.09], [size * 0.11, c], [c - size * 0.09, c - size * 0.09],
-  ];
-  const diamond = [[c, size * 0.29], [size * 0.71, c], [c, size * 0.71], [size * 0.29, c]];
-  const points = (list) => list.map((p) => p.join(",")).join(" ");
   return (
     <svg aria-hidden className="pointer-events-none absolute inset-0 h-full w-full" style={{ opacity }}>
       <defs>
-        <pattern id={`girih-${id}`} width={size} height={size} patternUnits="userSpaceOnUse">
-          <polygon points={points(star)} fill="none" stroke="#fff" strokeWidth="1.2" />
-          <polygon points={points(diamond)} fill="none" stroke="#fff" strokeWidth="1.2" />
-          {[[0, 0], [size, 0], [0, size], [size, size]].map(([x, y]) => (
-            <circle key={`${x}-${y}`} cx={x} cy={y} r="3" fill="#fff" />
-          ))}
+        <pattern id={`papers-${id}`} width={TILE} height={TILE} patternUnits="userSpaceOnUse" patternTransform="rotate(-8)">
+          <g fill="none" stroke="#fff" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+            {/* document: page, folded corner, text lines */}
+            <path d="M12 8h22l9 9v33H12z" />
+            <path d="M34 8v9h9" />
+            <path d="M18 26h18M18 32h18M18 38h12" />
+            {/* open book */}
+            <path d="M64 70c7-4 15-4 22 0v28c-7-4-15-4-22 0z" />
+            <path d="M86 70c7-4 15-4 22 0v28c-7-4-15-4-22 0z" />
+            <path d="M70 78h10M70 84h10M92 78h10M92 84h10" />
+            {/* closed book with its spine */}
+            <path d="M74 12h26v34H74z" />
+            <path d="M80 12v34" />
+            <path d="M85 22h10" />
+            {/* a second small document, for rhythm */}
+            <path d="M16 70h16l6 6v24H16z" />
+            <path d="M32 70v6h6" />
+            <path d="M21 84h12M21 90h8" />
+          </g>
         </pattern>
       </defs>
-      <rect width="100%" height="100%" fill={`url(#girih-${id})`} />
+      <rect width="100%" height="100%" fill={`url(#papers-${id})`} />
     </svg>
   );
 }
