@@ -6,10 +6,12 @@ from accounts.notify import notify
 
 
 class HelpContact(models.Model):
-    """Where a migrant can get help: the embassy, a hotline, a lawyer, or the official MVD check page.
+    """Where a migrant can get help: official sites to read about the patent, the embassy, a hotline, a lawyer,
+    or the official MVD check page.
     Admins add them (with real, checked numbers and links); the site shows them in the help center."""
 
     KINDS = (
+        ("info", "Official site to read"),
         ("embassy", "Embassy / consulate"),
         ("hotline", "Hotline"),
         ("lawyer", "Lawyer"),
