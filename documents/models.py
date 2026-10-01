@@ -43,6 +43,9 @@ class GuideStep(models.Model):
     cost_note = models.CharField(max_length=200, blank=True)
     deadline_note = models.CharField(max_length=200, blank=True)  # e.g. "within 30 days of entry"
     official_url = models.URLField(blank=True)
+    where = models.CharField(max_length=255, blank=True)  # where to go for this step
+    # A filled-in sample of the form for this step, one "Field: value" per line (a made-up person).
+    example = models.TextField(blank=True)
 
     class Meta:
         ordering = ["document_type", "order"]

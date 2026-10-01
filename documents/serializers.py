@@ -8,7 +8,7 @@ class GuideStepSerializer(serializers.ModelSerializer):
         model = GuideStep
         fields = [
             "id", "document_type", "order", "title", "body", "required_papers", "cost_note",
-            "deadline_note", "official_url",
+            "deadline_note", "official_url", "where", "example",
         ]
 
 
