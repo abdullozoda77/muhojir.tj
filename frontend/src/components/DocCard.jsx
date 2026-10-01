@@ -43,7 +43,7 @@ export default function DocCard({ doc, slug, onEdit, onPay }) {
               </div>
               <div>
                 {doc.region_name && <span className="block text-label-sm uppercase tracking-wider text-on-surface-variant">{doc.region_name}</span>}
-                <h3 className="text-headline-sm font-bold">{doc.document_type_title}</h3>
+                <h3 className="text-headline-sm font-bold">{t(doc.document_type_title)}</h3>
               </div>
             </div>
             <StatusBadge doc={doc} />

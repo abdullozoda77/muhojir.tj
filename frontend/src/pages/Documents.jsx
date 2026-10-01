@@ -44,7 +44,7 @@ function Calendar({ docs, onEdit }) {
               <button key={d.id} type="button" onClick={() => onEdit(d)} className={`flex flex-col justify-between gap-3 rounded-xl p-4 text-left ${STATUS[d.status].box}`}>
                 <div>
                   <span className="text-label-sm uppercase">{date(d.expires_at)}</span>
-                  <p className="mt-1 text-headline-sm">{d.document_type_title}</p>
+                  <p className="mt-1 text-headline-sm">{t(d.document_type_title)}</p>
                   {d.region_name && <p className="text-body-sm opacity-80">{d.region_name}</p>}
                 </div>
                 <StatusBadge doc={d} className="self-start bg-surface-container-lowest/60" />

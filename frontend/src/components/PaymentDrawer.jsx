@@ -73,7 +73,7 @@ export default function PaymentDrawer({ doc, monthlyPrice, onClose, onSaved }) {
   };
 
   return (
-    <Drawer open={Boolean(doc)} onClose={close} icon={Wallet} title={t("Пардохтро сабт кардан")} subtitle={doc?.document_type_title}>
+    <Drawer open={Boolean(doc)} onClose={close} icon={Wallet} title={t("Пардохтро сабт кардан")} subtitle={doc && t(doc.document_type_title)}>
       {done ? (
         <div className="flex flex-col items-center gap-3 py-8 text-center">
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-tertiary-container text-on-tertiary">

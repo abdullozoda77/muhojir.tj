@@ -95,7 +95,7 @@ export default function Guides() {
               return (
                 <button key={x.id} type="button" role="tab" aria-selected={active} onClick={() => setParams({ type: x.id }, { replace: true })} className={`flex min-h-[96px] w-40 shrink-0 flex-col items-start justify-between gap-2 rounded-2xl p-4 text-left transition-all md:w-auto ${active ? "bg-primary text-on-primary shadow-md" : "card hover:bg-surface-container-low"}`}>
                   <Icon className="h-6 w-6" aria-hidden />
-                  <span className="text-label-lg">{x.title}</span>
+                  <span className="text-label-lg">{t(x.title)}</span>
                 </button>
               );
             })}
@@ -104,7 +104,7 @@ export default function Guides() {
           {current && (
             <section className="flex flex-col gap-4">
               <div>
-                <h2 className="text-headline-lg">{current.title}</h2>
+                <h2 className="text-headline-lg">{t(current.title)}</h2>
                 {current.description && <p className="mt-1 max-w-3xl whitespace-pre-line text-body-lg text-on-surface-variant">{current.description}</p>}
               </div>
               {steps === null ? <Skeleton className="h-64" /> : steps.length ? <GuideSteps steps={steps} /> : <p className="card p-6 text-body-md text-on-surface-variant">{t("Қадамҳо ба наздикӣ илова мешаванд.")}</p>}

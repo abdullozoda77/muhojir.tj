@@ -108,7 +108,7 @@ export default function DocForm({ doc, types, regions, onClose, onSaved }) {
           <select className="input" required value={form.document_type} onChange={set("document_type")}>
             <option value="">{t("— интихоб кунед —")}</option>
             {types.map((x) => (
-              <option key={x.id} value={x.id}>{x.title}</option>
+              <option key={x.id} value={x.id}>{t(x.title)}</option>
             ))}
           </select>
         </Field>

@@ -39,7 +39,7 @@ function DocTile({ doc }) {
   return (
     <Link to="/documents" className={`flex w-full flex-col gap-2 rounded-[20px] border-t-[5px] bg-surface-container-lowest p-5 shadow-sm transition-shadow hover:shadow-md ${TILE_BAR[doc.status]}`}>
       <span className={`text-label-md ${STATUS[doc.status].accent}`}>{statusText(doc)}</span>
-      <span className="text-body-lg font-semibold">{doc.document_type_title}</span>
+      <span className="text-body-lg font-semibold">{t(doc.document_type_title)}</span>
       <span className="text-body-sm text-on-surface-variant">{t("то {0}", date(doc.expires_at))}</span>
     </Link>
   );
@@ -136,7 +136,7 @@ function JobsAndSide({ city }) {
 function GuestHome() {
   return (
     <div className="flex flex-col gap-7">
-      <Hero eyebrow={t("Барои муҳоҷирони тоҷик дар Русия")} title={t("Ҳуҷҷатҳо сари вақт. Кори боэътимод.")} text={t("Мӯҳлати патент ва бақайдгириро фаромӯш накунед, нархи патентро ҳисоб кунед ва корро аз корфармоёни санҷидашуда ёбед. Ҳамааш бепул ва бо забони тоҷикӣ.")} tall>
+      <Hero eyebrow={t("Барои муҳоҷирони тоҷик дар Русия")} title={t("Ҳуҷҷатҳо сари вақт. Кори боэътимод.")} text={t("Мӯҳлати патент ва бақайдгириро фаромӯш накунед, нархи патентро ҳисоб кунед ва ҷойҳои кори воқеиро аз сайти давлатӣ ёбед. Ҳамааш бепул ва бо забони тоҷикӣ.")} tall>
         <div className="mt-4 flex flex-col gap-3 sm:flex-row">
           <Link to="/login" className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl bg-secondary px-6 text-label-lg text-on-secondary shadow-sm hover:bg-secondary-container">
             {t("Оғоз кардан — бепул")}
@@ -204,7 +204,7 @@ function MigrantHome({ user }) {
                   <Clock className="h-4 w-4" aria-hidden />
                   {next.status === "expired" ? t("Мӯҳлат гузашт") : t("Мӯҳлати наздиктарин")}
                 </span>
-                <h2 className="font-display text-[26px] font-bold leading-8 md:text-[34px] md:leading-10">{next.document_type_title}</h2>
+                <h2 className="font-display text-[26px] font-bold leading-8 md:text-[34px] md:leading-10">{t(next.document_type_title)}</h2>
                 <p className="text-body-md text-on-surface-variant">
                   {[next.region_name, next.number && `№ ${next.number}`, t("то {0}", date(next.expires_at))].filter(Boolean).join(" · ")}
                 </p>

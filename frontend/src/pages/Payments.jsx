@@ -47,7 +47,7 @@ export default function Payments() {
                   <ReceiptText className="h-6 w-6" aria-hidden />
                 </div>
                 <div>
-                  <h3 className="text-headline-sm">{p.document_title}</h3>
+                  <h3 className="text-headline-sm">{t(p.document_title)}</h3>
                   <p className="text-body-md">
                     <strong>{rub(p.amount)}</strong> · {t("{0} моҳ", p.months)} · {date(p.paid_at)}
                   </p>

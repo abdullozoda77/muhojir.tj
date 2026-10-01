@@ -58,7 +58,7 @@ export default function Profile() {
           <input className="input" value={form.full_name} onChange={(e) => set("full_name", e.target.value)} autoComplete="name" />
         </Field>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label={t("Телефон (ихтиёрӣ)")} error={errors.phone} hint={t("Корфармоён барои тамос мебинанд")}>
+          <Field label={t("Телефон (ихтиёрӣ)")} error={errors.phone} hint={t("Ба касе нишон дода намешавад")}>
             <input className="input" type="tel" value={form.phone} onChange={(e) => set("phone", e.target.value)} placeholder="+7 999 123-45-67" autoComplete="tel" />
           </Field>
           <Field label={t("Шаҳр дар Русия")} error={errors.city}>
