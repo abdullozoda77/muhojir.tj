@@ -44,7 +44,7 @@ export default function Calculator() {
 
   const region = regions.find((r) => String(r.id) === regionId);
   const price = Number(region?.patent_monthly_price || 0);
-  const papers = useMemo(() => [...new Set(steps.flatMap(papersOf))], [steps]);
+  const papers = useMemo(() => (steps.length ? papersOf(steps[0]) : []), [steps]); // what to bring when applying (step 1)
   const centers = useApi(regionId ? `/documents/centers/?region=${regionId}&page_size=50` : null);
   const payLink = myPatent ? `/documents?pay=${myPatent.id}` : user ? "/documents" : "/login";
 
