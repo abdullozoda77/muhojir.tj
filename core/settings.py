@@ -46,8 +46,6 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
     ),
-    # Filters and ?search= are written in each app's filters.py (a FilterSet per list), so DRF's own
-    # SearchFilter is not used; OrderingFilter gives ?ordering=.
     'DEFAULT_FILTER_BACKENDS': (
         'django_filters.rest_framework.DjangoFilterBackend',
         'rest_framework.filters.OrderingFilter',
@@ -61,14 +59,12 @@ REST_FRAMEWORK = {
     'DEFAULT_THROTTLE_RATES': {
         'anon': '1000/hour',
         'user': '5000/hour',
-        # Asking for login codes sends emails, so it is limited much harder than the rest of the API.
         'login_code': '5/hour',
     },
 }
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
-    # Migrants often have bad internet and change phones rarely, so they stay logged in for a month.
     'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
@@ -120,7 +116,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'core.wsgi.application'
 
 
-# Database: PostgreSQL when DB_NAME is set in .env, otherwise a local SQLite file for development.
 if os.getenv('DB_NAME'):
     DATABASES = {
         'default': {
@@ -162,7 +157,6 @@ STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'static'
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
-# Document photos and receipts: never served by the web server, only through the API to their owner.
 PRIVATE_MEDIA_ROOT = BASE_DIR / 'private_media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

@@ -1,7 +1,7 @@
 import django_filters
 from django.db.models import Q
 
-from .models import Employer, EmployerReview, Job, JobApplication, Resume
+from .models import Employer, EmployerReview, Job
 
 # Every filter has ?search=... that looks for the words in the main text fields (case does not matter).
 
@@ -12,7 +12,7 @@ class EmployerFilter(django_filters.FilterSet):
 
     class Meta:
         model = Employer
-        fields = ["owner", "city", "is_verified", "is_blacklisted"]
+        fields = ["city", "is_verified", "is_blacklisted"]
 
     def filter_search(self, queryset, name, value):
         return queryset.filter(Q(name__icontains=value) | Q(description__icontains=value) | Q(inn__icontains=value))
@@ -28,7 +28,7 @@ class JobFilter(django_filters.FilterSet):
         model = Job
         fields = [
             "city", "industry", "employer", "salary_period", "housing_provided", "meals_provided",
-            "helps_with_documents", "is_active", "source",
+            "helps_with_documents", "is_active",
         ]
 
     def filter_search(self, queryset, name, value):
@@ -46,29 +46,3 @@ class EmployerReviewFilter(django_filters.FilterSet):
     class Meta:
         model = EmployerReview
         fields = ["employer", "rating", "salary_not_paid"]
-
-
-class ResumeFilter(django_filters.FilterSet):
-    search = django_filters.CharFilter(method="filter_search")
-    city = django_filters.CharFilter(lookup_expr="icontains")
-    min_experience = django_filters.NumberFilter(field_name="experience_years", lookup_expr="gte")
-
-    class Meta:
-        model = Resume
-        fields = ["city", "industry", "russian_level", "has_patent"]
-
-    def filter_search(self, queryset, name, value):
-        return queryset.filter(Q(full_name__icontains=value) | Q(profession__icontains=value) | Q(about__icontains=value))
-
-
-class JobApplicationFilter(django_filters.FilterSet):
-    search = django_filters.CharFilter(method="filter_search")
-
-    class Meta:
-        model = JobApplication
-        fields = ["job", "status"]
-
-    def filter_search(self, queryset, name, value):
-        return queryset.filter(
-            Q(job__title__icontains=value) | Q(message__icontains=value) | Q(applicant__full_name__icontains=value)
-        )

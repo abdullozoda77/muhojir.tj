@@ -88,7 +88,7 @@ class VerifyCodeView(APIView):
         user = User.objects.filter(email=email).first()
         is_new_user = user is None
         if is_new_user:
-            user = User.objects.create_user(email, full_name=data.get("full_name", ""), role=data["role"])
+            user = User.objects.create_user(email, full_name=data.get("full_name", ""))
         if not user.is_active:
             return error("This account is blocked.", 403)
 

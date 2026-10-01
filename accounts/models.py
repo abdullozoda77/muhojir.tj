@@ -37,14 +37,13 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-    # migrant: documents, reminders, resume, job applications, reviews of employers.
-    # employer: also a company profile and job ads.
-    # admin: everything, including verifying employers, the blacklist and news.
-    ROLES = (("migrant", "Migrant"), ("employer", "Employer"), ("admin", "Admin"))
+    # migrant: documents, reminders, payments, reviews of companies.
+    # admin: everything, including the blacklist of companies and news.
+    ROLES = (("migrant", "Migrant"), ("admin", "Admin"))
     LANGUAGES = (("tg", "Тоҷикӣ"), ("ru", "Русский"))
 
     email = models.EmailField(unique=True)
-    # Contact number shown to employers on the resume; not used for login.
+    # Optional contact number; not used for login.
     phone = models.CharField(max_length=16, unique=True, blank=True, null=True)
     full_name = models.CharField(max_length=150, blank=True)
     role = models.CharField(max_length=20, choices=ROLES, default="migrant")

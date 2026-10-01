@@ -5,7 +5,6 @@ from .models import Notification
 
 
 class NotificationFilter(django_filters.FilterSet):
-    # ?search=... looks in the title and the text (case does not matter).
     search = django_filters.CharFilter(method="filter_search")
 
     class Meta:

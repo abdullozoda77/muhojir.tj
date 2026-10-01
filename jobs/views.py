@@ -1,64 +1,38 @@
 from django.db.models import Q
 from django.utils import timezone
 from rest_framework import permissions, viewsets
-from rest_framework.exceptions import PermissionDenied, ValidationError
 
-from core.permissions import IsEmployer, IsOwnerOrAdminOrReadOnly, is_admin
-from .filters import EmployerFilter, EmployerReviewFilter, JobApplicationFilter, JobFilter, ResumeFilter
-from .models import Employer, EmployerReview, Job, JobApplication, Resume
-from .serializers import (
-    EmployerReviewSerializer, EmployerSerializer, JobApplicationSerializer, JobSerializer, ResumeSerializer,
-)
+from core.permissions import IsAdminOrReadOnly, IsOwnerOrAdminOrReadOnly, is_admin
+from .filters import EmployerFilter, EmployerReviewFilter, JobFilter
+from .models import Employer, EmployerReview, Job
+from .serializers import EmployerReviewSerializer, EmployerSerializer, JobSerializer
+
+# Jobs and companies come from the import (python manage.py import_jobs), so on the API they are read-only;
+# admins change them (switch off, blacklist) in the admin panel.
 
 
 def open_jobs():
-    """Q for jobs workers may see and apply to: switched on, not expired, and not from a blacklisted company."""
+    """Q for the jobs workers see: switched on, not expired, and not from a blacklisted company."""
     return Q(is_active=True, expires_at__gt=timezone.now(), employer__is_blacklisted=False)
 
 
-class EmployerViewSet(viewsets.ModelViewSet):
+class EmployerViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Employer.objects.all()
     serializer_class = EmployerSerializer
-    owner_field = "owner_id"
     filterset_class = EmployerFilter
 
-    def get_permissions(self):
-        if self.action == "create":
-            return [permissions.IsAuthenticated(), IsEmployer()]
-        return [permissions.IsAuthenticatedOrReadOnly(), IsOwnerOrAdminOrReadOnly()]
 
-    def perform_create(self, serializer):
-        if Employer.objects.filter(owner=self.request.user).exists():
-            raise ValidationError({"detail": "You already have a company profile."})
-        serializer.save(owner=self.request.user)
-
-
-class JobViewSet(viewsets.ModelViewSet):
-    """Workers see only open jobs. A company also sees its own closed ones, admins see everything."""
+class JobViewSet(viewsets.ReadOnlyModelViewSet):
+    """Workers see only open jobs; admins see everything."""
 
     serializer_class = JobSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrAdminOrReadOnly]
-    owner_field = "employer.owner_id"
+    permission_classes = [IsAdminOrReadOnly]
     filterset_class = JobFilter
     ordering_fields = ["created_at", "salary_from", "salary_to"]
 
     def get_queryset(self):
         qs = Job.objects.select_related("employer")
-        user = self.request.user
-        if is_admin(user):
-            return qs
-        visible = open_jobs()
-        if user.is_authenticated:
-            visible |= Q(employer__owner=user)
-        return qs.filter(visible)
-
-    def perform_create(self, serializer):
-        employer = Employer.objects.filter(owner=self.request.user).first()
-        if employer is None:
-            raise ValidationError({"detail": "Create a company profile before posting jobs."})
-        if employer.is_blacklisted:
-            raise PermissionDenied("Your company is on the blacklist and cannot post jobs.")
-        serializer.save(employer=employer)
+        return qs if is_admin(self.request.user) else qs.filter(open_jobs())
 
 
 class EmployerReviewViewSet(viewsets.ModelViewSet):
@@ -70,71 +44,3 @@ class EmployerReviewViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
-
-
-class ResumeViewSet(viewsets.ModelViewSet):
-    """Resumes hold names and phone numbers, so only employers see them, and only the visible ones.
-    A worker always sees their own resume, admins see all."""
-
-    serializer_class = ResumeSerializer
-    permission_classes = [permissions.IsAuthenticated, IsOwnerOrAdminOrReadOnly]
-    owner_field = "user_id"
-    filterset_class = ResumeFilter
-
-    def get_queryset(self):
-        if getattr(self, "swagger_fake_view", False):
-            return Resume.objects.none()
-        qs = Resume.objects.select_related("user")
-        user = self.request.user
-        if is_admin(user):
-            return qs
-        if user.role == "employer":
-            return qs.filter(Q(is_visible=True) | Q(user=user))
-        return qs.filter(user=user)
-
-    def perform_create(self, serializer):
-        if Resume.objects.filter(user=self.request.user).exists():
-            raise ValidationError({"detail": "You already have a resume. Edit it instead."})
-        serializer.save(user=self.request.user)
-
-
-class JobApplicationViewSet(viewsets.ModelViewSet):
-    """A user sees the applications they sent and the ones sent to their company's jobs.
-    The worker may change only the message and withdraw it; the employer changes only the status."""
-
-    serializer_class = JobApplicationSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    filterset_class = JobApplicationFilter
-
-    def get_queryset(self):
-        if getattr(self, "swagger_fake_view", False):
-            return JobApplication.objects.none()
-        user = self.request.user
-        return JobApplication.objects.filter(Q(applicant=user) | Q(job__employer__owner=user)).select_related("job__employer")
-
-    def perform_create(self, serializer):
-        job, user = serializer.validated_data["job"], self.request.user
-        if job.source != "site":
-            raise ValidationError({"job": "Apply for this job on the source site."})
-        if job.employer.owner_id == user.id:
-            raise ValidationError({"job": "You cannot apply to your own company's job."})
-        if not Job.objects.filter(open_jobs(), pk=job.pk).exists():
-            raise ValidationError({"job": "This job is closed."})
-        if JobApplication.objects.filter(job=job, applicant=user).exists():
-            raise ValidationError({"detail": "You already applied for this job."})
-        serializer.save(applicant=user, status="sent")
-
-    def perform_update(self, serializer):
-        application = serializer.instance
-        allowed = {"status"} if application.job.employer.owner_id == self.request.user.id else {"message"}
-        # A PUT sends every field, so only the ones whose value really changes count.
-        changed = {f for f, v in serializer.validated_data.items() if getattr(application, f) != v} - allowed
-        if changed:
-            raise PermissionDenied(f"You cannot change: {', '.join(sorted(changed))}.")
-        serializer.save()
-
-    def perform_destroy(self, application):
-        # Employers answer with the "rejected" status instead, so the worker still sees what happened.
-        if application.applicant_id != self.request.user.id:
-            raise PermissionDenied("Only the worker who applied can withdraw the application.")
-        application.delete()

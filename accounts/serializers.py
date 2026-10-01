@@ -26,7 +26,6 @@ class VerifyCodeSerializer(serializers.Serializer):
     code = serializers.RegexField(r"^\d{6}$", error_messages={"invalid": "The code is 6 digits."})
     # Only used when this code creates the account.
     full_name = serializers.CharField(max_length=150, required=False, allow_blank=True)
-    role = serializers.ChoiceField(choices=["migrant", "employer"], required=False, default="migrant")
 
 
 class UserSerializer(serializers.ModelSerializer):
