@@ -1,9 +1,9 @@
-// The service worker: lets the site open without internet and shows phone notifications.
+// The service worker: lets the site open without internet.
 //
 // Offline: pages and their files are kept after the first visit; the user's own data (documents, payments,
 // profile) and the guides are taken from the network when there is one and from the copy when there is not.
 // On logout the page asks to forget the user's data (message "clear-user-data").
-const VERSION = "muhojir-v1";
+const VERSION = "muhojir-v2";
 const SHELL = ["/", "/manifest.webmanifest", "/logo.svg", "/icon-192.png"];
 
 // API lists kept for offline reading (GET only). Photos and receipts are not kept.
@@ -81,39 +81,6 @@ self.addEventListener("message", (event) => {
       for (const request of await cache.keys()) {
         if (USER_API.some((path) => new URL(request.url).pathname.startsWith(path))) await cache.delete(request);
       }
-    }),
-  );
-});
-
-// Phone notifications sent by the server (accounts/push.py): {title, body, url}.
-self.addEventListener("push", (event) => {
-  let data = {};
-  try {
-    data = event.data ? event.data.json() : {};
-  } catch {
-    data = { body: event.data?.text() };
-  }
-  event.waitUntil(
-    self.registration.showNotification(data.title || "Muhojir.tj", {
-      body: data.body || "",
-      icon: "/icon-192.png",
-      badge: "/icon-192.png",
-      data: { url: data.url || "/notifications" },
-    }),
-  );
-});
-
-self.addEventListener("notificationclick", (event) => {
-  event.notification.close();
-  const url = event.notification.data?.url || "/";
-  event.waitUntil(
-    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((windows) => {
-      const open = windows.find((w) => new URL(w.url).origin === self.location.origin);
-      if (open) {
-        open.navigate(url);
-        return open.focus();
-      }
-      return self.clients.openWindow(url);
     }),
   );
 });

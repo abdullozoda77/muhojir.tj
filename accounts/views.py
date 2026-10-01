@@ -20,11 +20,9 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from .emails import send_login_code
 from .filters import NotificationFilter
-from .models import EmailCode, Notification, PushSubscription, User
-from .push import push_enabled
+from .models import EmailCode, Notification, User
 from .serializers import (
-    LogoutSerializer, NotificationSerializer, PushSubscribeSerializer, SendCodeSerializer, UserSerializer,
-    VerifyCodeSerializer,
+    LogoutSerializer, NotificationSerializer, SendCodeSerializer, UserSerializer, VerifyCodeSerializer,
 )
 
 RESEND_PAUSE = timedelta(minutes=1)  # a new code for the same email at most once a minute
@@ -148,36 +146,3 @@ class NotificationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixi
     def read_all(self, request):
         updated = self.get_queryset().filter(is_read=False).update(is_read=True)
         return Response({"updated": updated})
-
-
-class PushKeyView(APIView):
-    """The public key the browser needs to turn on phone notifications. Empty when they are not set up."""
-
-    permission_classes = [permissions.AllowAny]
-
-    def get(self, request):
-        return Response({"public_key": settings.VAPID_PUBLIC_KEY if push_enabled() else ""})
-
-
-class PushSubscribeView(APIView):
-    """POST: this phone/browser gets notifications. DELETE (with the same endpoint): it stops getting them."""
-
-    permission_classes = [permissions.IsAuthenticated]
-
-    @swagger_auto_schema(request_body=PushSubscribeSerializer)
-    def post(self, request):
-        serializer = PushSubscribeSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        data = serializer.validated_data
-        if "keys" not in data:
-            return error("The subscription has no keys.")
-        # The same phone may have belonged to another account before: it now belongs to this one.
-        PushSubscription.objects.update_or_create(
-            endpoint=data["endpoint"], defaults={"user": request.user, **data["keys"]}
-        )
-        return Response(status=201)
-
-    @swagger_auto_schema(request_body=PushSubscribeSerializer)
-    def delete(self, request):
-        PushSubscription.objects.filter(user=request.user, endpoint=request.data.get("endpoint", "")).delete()
-        return Response(status=204)

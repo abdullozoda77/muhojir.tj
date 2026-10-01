@@ -6,7 +6,7 @@ from django.contrib import admin
 from django.db.models import Count, Max, Sum
 from django.utils import timezone
 
-from accounts.models import PushSubscription, User
+from accounts.models import User
 from documents.models import ExamQuestion, LawNews, Payment, ReminderLog, UserDocument
 from jobs.models import Employer, EmployerReview, Job, JobAlert, SavedJob
 
@@ -39,7 +39,6 @@ def stats():
         "last_import": last_import,
         "import_late": not last_import or now - last_import > timedelta(hours=36),
         "small": [
-            ("Огоҳиҳо дар телефон", PushSubscription.objects.values("user").distinct().count(), "accounts/pushsubscription/"),
             ("Ёдраскунӣ ба почта фаъол", User.objects.filter(is_active=True, email_reminders=True).count(), "accounts/user/"),
             ("Огоҳиҳои кори нав", JobAlert.objects.filter(is_active=True).count(), "jobs/jobalert/"),
             ("Ҷойҳои захирашуда", SavedJob.objects.count(), "jobs/savedjob/"),

@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
-import { api } from "./api.js";
 
-// The site as a phone app: the service worker (public/sw.js), "install on the phone" and phone notifications.
+// The site as a phone app: the service worker (public/sw.js) and "install on the phone".
 
 // Only in the built site: in development the service worker would keep old files while the code changes.
 export function registerServiceWorker() {
@@ -66,45 +65,4 @@ export function useOnline() {
     };
   }, []);
   return online;
-}
-
-// --- phone notifications (Web Push)
-
-export const pushSupported = () => "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
-
-function keyBytes(base64) {
-  const padded = (base64 + "=".repeat((4 - (base64.length % 4)) % 4)).replace(/-/g, "+").replace(/_/g, "/");
-  return Uint8Array.from(atob(padded), (c) => c.charCodeAt(0));
-}
-
-async function currentSubscription() {
-  const registration = await navigator.serviceWorker.getRegistration();
-  return registration ? registration.pushManager.getSubscription() : null;
-}
-
-// "unsupported" (old browser or development build), "off" (server has no keys), "blocked", "on" or "can".
-export async function pushState() {
-  if (!pushSupported() || !(await navigator.serviceWorker.getRegistration())) return "unsupported";
-  const { public_key } = await api("/auth/push/key/");
-  if (!public_key) return "off";
-  if (Notification.permission === "denied") return "blocked";
-  return (await currentSubscription()) ? "on" : "can";
-}
-
-export async function turnPushOn() {
-  const { public_key } = await api("/auth/push/key/");
-  if ((await Notification.requestPermission()) !== "granted") return false;
-  const registration = await navigator.serviceWorker.ready;
-  const subscription =
-    (await registration.pushManager.getSubscription()) ||
-    (await registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyBytes(public_key) }));
-  await api("/auth/push/subscribe/", { method: "POST", body: subscription.toJSON() });
-  return true;
-}
-
-export async function turnPushOff() {
-  const subscription = await currentSubscription();
-  if (!subscription) return;
-  await api("/auth/push/subscribe/", { method: "DELETE", body: { endpoint: subscription.endpoint } }).catch(() => {});
-  await subscription.unsubscribe();
 }

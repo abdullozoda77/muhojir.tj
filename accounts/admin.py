@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import BaseUserCreationForm, UserChangeForm as BaseUserChangeForm
 
-from .models import EmailCode, Notification, PushSubscription, User
+from .models import EmailCode, Notification, User
 
 
 class UserCreationForm(BaseUserCreationForm):
@@ -45,10 +45,3 @@ class NotificationAdmin(admin.ModelAdmin):
 class EmailCodeAdmin(admin.ModelAdmin):
     list_display = ["email", "sent_at", "attempts"]
     readonly_fields = ["email", "code_hash", "sent_at", "attempts"]
-
-
-@admin.register(PushSubscription)
-class PushSubscriptionAdmin(admin.ModelAdmin):
-    list_display = ["user", "created_at"]
-    search_fields = ["user__email"]
-    readonly_fields = ["user", "endpoint", "p256dh", "auth", "created_at"]

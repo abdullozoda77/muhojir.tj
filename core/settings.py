@@ -194,12 +194,6 @@ DEFAULT_FROM_EMAIL = os.getenv(
     'DEFAULT_FROM_EMAIL', f'"Muhojir.tj" <{os.getenv("EMAIL_HOST_USER") or "noreply@muhojir.tj"}>'
 )
 
-# Phone notifications (Web Push). The keys come from `python manage.py make_vapid_keys >> .env`;
-# without them the site works as before, only without phone notifications.
-VAPID_PUBLIC_KEY = os.getenv('VAPID_PUBLIC_KEY', '')
-VAPID_PRIVATE_KEY = os.getenv('VAPID_PRIVATE_KEY', '')
-VAPID_CONTACT = os.getenv('VAPID_CONTACT', 'mailto:' + (os.getenv('EMAIL_HOST_USER') or 'admin@muhojir.tj'))
-
 LOGIN_CODE_LIFETIME = timedelta(minutes=10)
 LOGIN_CODE_MAX_ATTEMPTS = 5
 

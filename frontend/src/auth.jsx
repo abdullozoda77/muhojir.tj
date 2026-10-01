@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { api, setLogoutHandler, tokens } from "./api.js";
-import { clearUserData, turnPushOff } from "./pwa.js";
+import { clearUserData } from "./pwa.js";
 
 const AuthContext = createContext(null);
 
@@ -9,9 +9,7 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(Boolean(tokens.access));
 
   const logout = useCallback(async () => {
-    // This phone stops getting the user's notifications, and their saved data is forgotten.
-    await turnPushOff().catch(() => {});
-    clearUserData();
+    clearUserData(); // the copies of the user's data saved for offline use are forgotten
     const refresh = tokens.refresh;
     tokens.clear();
     setUser(null);
