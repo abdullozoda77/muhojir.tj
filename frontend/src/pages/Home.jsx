@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 import {
-  ArrowRight, BadgeCheck, BookOpen, Briefcase, CheckCircle2, ClipboardList, Clock, FilePlus2, Inbox, Newspaper, Plus,
-  PlusCircle, ShieldAlert, Users, Wallet,
+  ArrowRight, BookOpen, Briefcase, Clock, FilePlus2, Newspaper, Plus, PlusCircle, ShieldAlert, Wallet,
 } from "lucide-react";
 import { useAuth } from "../auth.jsx";
 import { useApi, useDocuments } from "../hooks.js";
@@ -74,7 +73,7 @@ function JobsPanel({ city }) {
         <Stagger className="flex flex-col divide-y divide-surface-container">
           {jobs.results.map((job) => (
             <StaggerItem key={job.id}>
-              <JobRow job={job} />
+              <JobRow job={job} compact />
             </StaggerItem>
           ))}
         </Stagger>
@@ -154,7 +153,7 @@ function GuestHome() {
           {[
             [ShieldAlert, t("Ёдраскунии мӯҳлатҳо"), t("Пеш аз тамом шудани патент, бақайдгирӣ ва суғурта ба почтаи шумо хабар меояд."), "border-t-secondary", "text-secondary"],
             [BookOpen, t("Роҳнамои қадам ба қадам"), t("Чӣ бояд кард, чӣ бурдан лозим ва чанд пул аст — бо забони содда."), "border-t-primary-container", "text-primary"],
-            [BadgeCheck, t("Корфармоёни тасдиқшуда"), t("Шарҳи коргарон ва рӯйхати сиёҳи ширкатҳое, ки маош намедиҳанд."), "border-t-tertiary-container", "text-tertiary"],
+            [Briefcase, t("Ҷойҳои кори воқеӣ"), t("Вакансияҳо аз сайти давлатии «Работа России» — бо суроға ва пайванд ба эълони аслӣ."), "border-t-tertiary-container", "text-tertiary"],
           ].map(([Icon, title, text, bar, tone]) => (
             <div key={title} className={`flex flex-col gap-3 rounded-[20px] border-t-[5px] bg-surface-container-lowest p-6 ${LIFTED} ${bar}`}>
               <Icon className={`h-7 w-7 ${tone}`} aria-hidden />
@@ -267,72 +266,9 @@ function MigrantHome({ user }) {
   );
 }
 
-function EmployerHome({ user }) {
-  const company = useApi(`/jobs/employers/?owner=${user.id}`);
-  const employer = company.data?.results?.[0];
-  const jobs = useApi(employer ? `/jobs/jobs/?employer=${employer.id}&is_active=true&page_size=1` : null);
-  const fresh = useApi("/jobs/applications/?status=sent&page_size=1");
-
-  const status = !employer
-    ? null
-    : employer.is_blacklisted
-      ? { text: t("Ширкати шумо дар рӯйхати сиёҳ аст"), box: "bg-error-container text-on-error-container", icon: ShieldAlert }
-      : employer.is_verified
-        ? { text: t("Ширкат тасдиқ шудааст"), box: "bg-tertiary-fixed text-on-tertiary-fixed", icon: CheckCircle2 }
-        : { text: t("Дар санҷиши админ"), box: "bg-warning-fixed text-on-warning-fixed", icon: Clock };
-
-  return (
-    <div className="flex flex-col gap-7">
-      <Hero eyebrow={todayTitle()} title={employer?.name || t("Салом!")} text={employer ? employer.city : t("Профили ширкатро созед, то эълон гузоред.")} tall>
-        {status && (
-          <span className={`mt-3 inline-flex w-fit items-center gap-2 rounded-full px-4 py-2 text-label-md ${status.box}`}>
-            <status.icon className="h-4 w-4" aria-hidden />
-            {status.text}
-          </span>
-        )}
-        {!employer && !company.loading && (
-          <Link to="/company" className="mt-4 inline-flex min-h-[52px] w-fit items-center gap-2 rounded-2xl bg-secondary px-6 text-label-lg text-on-secondary">
-            <PlusCircle className="h-5 w-5" aria-hidden />
-            {t("Ширкат сохтан")}
-          </Link>
-        )}
-      </Hero>
-      <Overlap>
-        <section className="grid grid-cols-2 gap-4">
-          <div className={`rounded-3xl bg-surface-container-lowest p-6 ${LIFTED}`}>
-            <p className="text-body-md text-on-surface-variant">{t("Эълонҳои фаъол")}</p>
-            <p className="font-display text-[44px] font-bold text-primary">{jobs.data?.count ?? (employer ? "…" : 0)}</p>
-          </div>
-          <div className={`rounded-3xl bg-surface-container-lowest p-6 ${LIFTED}`}>
-            <p className="text-body-md text-on-surface-variant">{t("Аризаҳои нав")}</p>
-            <p className="font-display text-[44px] font-bold text-secondary">{fresh.data?.count ?? "…"}</p>
-          </div>
-        </section>
-        <section className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-          {[
-            ["/my-jobs", PlusCircle, t("Эълони нав"), t("Коргар ёбед"), "border-t-primary-container", "text-primary"],
-            ["/inbox", Inbox, t("Аризаҳо"), t("Ҷавоб диҳед"), "border-t-secondary", "text-secondary"],
-            ["/resumes", Users, t("Резюмеҳо"), t("Коргарони омода"), "border-t-tertiary-container", "text-tertiary"],
-            ["/company", ClipboardList, t("Ширкати ман"), t("Маълумот ва тасдиқ"), "border-t-navy", "text-navy"],
-          ].map(([to, Icon, title, text, bar, tone]) => (
-            <Link key={to} to={to} className={`flex min-h-[140px] flex-col justify-between gap-3 rounded-[20px] border-t-[5px] bg-surface-container-lowest p-5 shadow-sm transition-shadow hover:shadow-md ${bar}`}>
-              <Icon className={`h-7 w-7 ${tone}`} aria-hidden />
-              <span>
-                <span className="block text-label-lg font-bold">{title}</span>
-                <span className="text-body-sm text-on-surface-variant">{text}</span>
-              </span>
-            </Link>
-          ))}
-        </section>
-      </Overlap>
-    </div>
-  );
-}
-
 export default function Home() {
   const { user, loading } = useAuth();
   if (loading) return <Skeleton className="h-64" />;
   if (!user) return <GuestHome />;
-  if (user.role === "employer") return <EmployerHome user={user} />;
   return <MigrantHome user={user} />;
 }

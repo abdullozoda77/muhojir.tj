@@ -8,26 +8,20 @@ import Login from "./pages/Login.jsx";
 import NotFound from "./pages/NotFound.jsx";
 
 // Every other page is downloaded only when it is opened, so the first visit on a slow phone is lighter.
-const Applications = lazy(() => import("./pages/Applications.jsx"));
 const Calculator = lazy(() => import("./pages/Calculator.jsx"));
-const Company = lazy(() => import("./pages/Company.jsx"));
 const Documents = lazy(() => import("./pages/Documents.jsx"));
 const EmployerPage = lazy(() => import("./pages/EmployerPage.jsx"));
 const Guides = lazy(() => import("./pages/Guides.jsx"));
 const Help = lazy(() => import("./pages/Help.jsx"));
-const Inbox = lazy(() => import("./pages/Inbox.jsx"));
 const JobDetail = lazy(() => import("./pages/JobDetail.jsx"));
 const Jobs = lazy(() => import("./pages/Jobs.jsx"));
-const MyJobs = lazy(() => import("./pages/MyJobs.jsx"));
 const NewsDetail = lazy(() => import("./pages/NewsDetail.jsx"));
 const Notifications = lazy(() => import("./pages/Notifications.jsx"));
 const Payments = lazy(() => import("./pages/Payments.jsx"));
 const Profile = lazy(() => import("./pages/Profile.jsx"));
-const Resume = lazy(() => import("./pages/Resume.jsx"));
-const Resumes = lazy(() => import("./pages/Resumes.jsx"));
 
-// Pages that need a login; role limits them to migrants or employers.
-function Private({ role, children }) {
+// Pages that need a login.
+function Private({ children }) {
   const { user, loading } = useAuth();
   const location = useLocation();
   if (loading) {
@@ -38,7 +32,6 @@ function Private({ role, children }) {
     );
   }
   if (!user) return <Navigate to="/login" replace state={{ from: location.pathname }} />;
-  if (role && user.role !== role && user.role !== "admin") return <Navigate to="/" replace />;
   return children;
 }
 
@@ -56,15 +49,8 @@ export default function App() {
         <Route path="news/:id" element={<NewsDetail />} />
         <Route path="help" element={<Help />} />
 
-        <Route path="documents" element={<Private role="migrant"><Documents /></Private>} />
-        <Route path="resume" element={<Private role="migrant"><Resume /></Private>} />
-        <Route path="applications" element={<Private role="migrant"><Applications /></Private>} />
-        <Route path="payments" element={<Private role="migrant"><Payments /></Private>} />
-
-        <Route path="company" element={<Private role="employer"><Company /></Private>} />
-        <Route path="my-jobs" element={<Private role="employer"><MyJobs /></Private>} />
-        <Route path="inbox" element={<Private role="employer"><Inbox /></Private>} />
-        <Route path="resumes" element={<Private role="employer"><Resumes /></Private>} />
+        <Route path="documents" element={<Private><Documents /></Private>} />
+        <Route path="payments" element={<Private><Payments /></Private>} />
 
         <Route path="notifications" element={<Private><Notifications /></Private>} />
         <Route path="profile" element={<Private><Profile /></Private>} />

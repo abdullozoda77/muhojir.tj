@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
-import { ArrowLeft, Briefcase, CheckCircle2, HardHat, Mail, ShieldCheck } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Mail, ShieldCheck } from "lucide-react";
 import { api } from "../api.js";
 import { useAuth } from "../auth.jsx";
 import { t } from "../i18n.js";
@@ -59,21 +59,6 @@ function CodeBoxes({ value, onChange, disabled }) {
   );
 }
 
-function RoleCard({ active, icon: Icon, title, text, onClick }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={active}
-      className={`flex flex-1 flex-col items-start gap-2 rounded-2xl p-4 text-left transition-all ${active ? "bg-primary-container text-white shadow-md" : "bg-surface-container-low hover:bg-surface-container"}`}
-    >
-      <Icon className="h-7 w-7" aria-hidden />
-      <span className="text-label-lg">{title}</span>
-      <span className={`text-body-sm ${active ? "text-white/85" : "text-on-surface-variant"}`}>{text}</span>
-    </button>
-  );
-}
-
 export default function Login() {
   const { user, login } = useAuth();
   const navigate = useNavigate();
@@ -83,7 +68,6 @@ export default function Login() {
   const [code, setCode] = useState("");
   const [isNew, setIsNew] = useState(false);
   const [fullName, setFullName] = useState("");
-  const [role, setRole] = useState("migrant");
   const [wait, setWait] = useState(0);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
@@ -119,10 +103,10 @@ export default function Login() {
     setBusy(true);
     setError(null);
     try {
-      const body = { email, code: code.replace(/\s/g, ""), ...(isNew ? { full_name: fullName.trim(), role } : {}) };
+      const body = { email, code: code.replace(/\s/g, ""), ...(isNew ? { full_name: fullName.trim() } : {}) };
       const data = await api("/auth/verify-code/", { method: "POST", body });
       login(data);
-      navigate(location.state?.from || (data.is_new_user && data.user.role === "employer" ? "/company" : "/"), { replace: true });
+      navigate(location.state?.from || "/", { replace: true });
     } catch (err) {
       setError(err);
     } finally {
@@ -193,10 +177,6 @@ export default function Login() {
                     <span className="label">{t("Ному насаб")}</span>
                     <input className="input" autoComplete="name" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder={t("Масалан: Алӣ Каримов")} />
                   </label>
-                  <div className="flex flex-col gap-3 sm:flex-row">
-                    <RoleCard active={role === "migrant"} icon={HardHat} title={t("Ман кор меҷӯям")} text={t("Ҳуҷҷатҳо, ёдраскунӣ, ҷойи кор")} onClick={() => setRole("migrant")} />
-                    <RoleCard active={role === "employer"} icon={Briefcase} title={t("Ман корфармоям")} text={t("Эълони кор ва ҷустуҷӯи коргар")} onClick={() => setRole("employer")} />
-                  </div>
                 </div>
               )}
 

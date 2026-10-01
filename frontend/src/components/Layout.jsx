@@ -1,8 +1,7 @@
 import { Suspense, useEffect, useState } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import {
-  ArrowRight, Bell, BookOpen, Briefcase, Building2, Calculator, ClipboardList, FileUser, Home, Inbox, LifeBuoy, LogIn,
-  Moon, ReceiptText, Scale, Send, Settings, ShieldCheck, Sun, Users,
+  ArrowRight, Bell, BookOpen, Briefcase, Calculator, Home, LifeBuoy, LogIn, Moon, ReceiptText, Scale, Settings, ShieldCheck, Sun,
 } from "lucide-react";
 import { api, apiAll } from "../api.js";
 import { useAuth } from "../auth.jsx";
@@ -22,25 +21,12 @@ function navFor(user) {
       { to: "/login", icon: LogIn, label: t("Ворид шудан"), short: t("Ворид"), mobileOnly: true },
     ];
   }
-  if (user.role === "employer") {
-    return [
-      { to: "/", icon: Home, label: t("Асосӣ"), short: t("Асосӣ"), end: true },
-      { to: "/company", icon: Building2, label: t("Ширкати ман"), short: t("Ширкат"), desktopOnly: true },
-      { to: "/my-jobs", icon: ClipboardList, label: t("Эълонҳои ман"), short: t("Эълонҳо") },
-      { to: "/inbox", icon: Inbox, label: t("Аризаҳо"), short: t("Аризаҳо") },
-      { to: "/resumes", icon: Users, label: t("Резюмеҳо"), short: t("Резюмеҳо") },
-      { to: "/notifications", icon: Bell, label: t("Огоҳиҳо"), badge: "unread", desktopOnly: true },
-      { to: "/profile", icon: Settings, label: t("Профил ва танзимот"), short: t("Профил") },
-    ];
-  }
   return [
     { to: "/", icon: Home, label: t("Асосӣ"), short: t("Асосӣ"), end: true },
     { to: "/documents", icon: ShieldCheck, label: t("Ҳуҷҷатҳои ман"), short: t("Ҳуҷҷатҳо"), badge: "docs" },
     { to: "/jobs", icon: Briefcase, label: t("Ҷойи кор"), short: t("Кор") },
     { to: "/calculator", icon: Calculator, label: t("Калкулятори патент"), desktopOnly: true },
     { to: "/guides", icon: BookOpen, label: t("Роҳнамо ва қонунҳо"), short: t("Роҳнамо") },
-    { to: "/resume", icon: FileUser, label: t("Резюмеи ман"), desktopOnly: true },
-    { to: "/applications", icon: Send, label: t("Аризаҳои ман"), desktopOnly: true },
     { to: "/payments", icon: ReceiptText, label: t("Архиви чекҳо"), desktopOnly: true },
     { to: "/notifications", icon: Bell, label: t("Огоҳиҳо"), badge: "unread", desktopOnly: true },
     { to: "/profile", icon: Settings, label: t("Профил ва танзимот"), short: t("Профил") },
@@ -58,7 +44,7 @@ function useCounters(user) {
     }
     let alive = true;
     const unread = api("/auth/notifications/unread-count/").then((r) => r.count).catch(() => 0);
-    const docs = user.role === "employer" ? Promise.resolve(0) : apiAll("/documents/my-documents/").then((list) => list.filter((d) => d.status !== "valid").length).catch(() => 0);
+    const docs = apiAll("/documents/my-documents/").then((list) => list.filter((d) => d.status !== "valid").length).catch(() => 0);
     Promise.all([unread, docs]).then(([u, d]) => alive && setCounts({ unread: u, docs: d }));
     return () => {
       alive = false;

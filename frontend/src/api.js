@@ -68,19 +68,7 @@ const SERVER_MESSAGES = {
   "This account is blocked.": t("Ин ҳисоб баста шудааст."),
   "This phone number is already used by another account.": t("Ин рақами телефон аллакай дар ҳисоби дигар ҳаст."),
   "The end date must be after the issue date.": t("Санаи анҷом бояд баъд аз санаи додан бошад."),
-  "You already have a company profile.": t("Шумо аллакай профили ширкат доред."),
-  "Create a company profile before posting jobs.": t("Аввал профили ширкатро созед."),
-  "Your company is on the blacklist and cannot post jobs.": t("Ширкати шумо дар рӯйхати сиёҳ аст ва эълон гузошта наметавонад."),
-  "The top of the salary range is below the bottom.": t("Маоши «то» аз маоши «аз» кам аст."),
-  "You cannot review your own company.": t("Ба ширкати худ баҳо додан мумкин нест."),
   "You already reviewed this employer. Edit that review instead.": t("Шумо аллакай ба ин корфармо баҳо додаед."),
-  "You already have a resume. Edit it instead.": t("Шумо аллакай резюме доред."),
-  "You cannot apply to your own company's job.": t("Ба кори ширкати худ ариза додан мумкин нест."),
-  "This job is closed.": t("Ин ҷойи кор пӯшида аст."),
-  "Apply for this job on the source site.": t("Ба ин эълон дар сайти манбаъ ариза диҳед."),
-  "You already applied for this job.": t("Шумо ба ин кор аллакай ариза додаед."),
-  "Only employer accounts can do this.": t("Инро танҳо корфармоён карда метавонанд."),
-  "Only the worker who applied can withdraw the application.": t("Аризаро танҳо худи коргар бозпас гирифта метавонад."),
 };
 
 export function errorText(data) {

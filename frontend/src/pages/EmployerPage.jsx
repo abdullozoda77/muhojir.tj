@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, Ban, Building2, ExternalLink, MessageSquarePlus, Pencil, Phone, ShieldAlert, Trash2 } from "lucide-react";
+import { ArrowLeft, Ban, Building2, ExternalLink, MessageSquarePlus, Pencil, ShieldAlert, Trash2 } from "lucide-react";
 import { api } from "../api.js";
 import { useAuth } from "../auth.jsx";
 import { useApi } from "../hooks.js";
@@ -74,8 +74,7 @@ export default function EmployerPage() {
   const list = reviews.data?.results || [];
   const rating = average(list);
   const complaints = list.filter((r) => r.salary_not_paid).length;
-  const isOwner = user?.id === e.owner;
-  const canReview = user?.role === "migrant";
+  const canReview = Boolean(user);
 
   const refresh = () => {
     setEditing(null);
@@ -131,12 +130,6 @@ export default function EmployerPage() {
             {t("Сайт")}
           </a>
         )}
-        {e.phone && user && (
-          <a href={`tel:${e.phone}`} className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-surface-container-low px-5 text-label-lg text-primary hover:bg-surface-container">
-            <Phone className="h-5 w-5" aria-hidden />
-            {e.phone}
-          </a>
-        )}
       </section>
       {e.description && <p className="card whitespace-pre-line p-4 text-body-lg md:p-6">{e.description}</p>}
 
@@ -144,7 +137,7 @@ export default function EmployerPage() {
         <section className="flex flex-col gap-4 lg:col-span-7">
           <div className="flex items-center justify-between gap-2">
             <h2 className="text-headline-md">{t("Шарҳҳои коргарон")}</h2>
-            {canReview && !isOwner && !writing && !list.some((r) => r.is_mine) && (
+            {canReview && !writing && !list.some((r) => r.is_mine) && (
               <Button variant="soft" icon={MessageSquarePlus} onClick={() => setWriting(true)}>{t("Шарҳ навиштан")}</Button>
             )}
           </div>
@@ -189,7 +182,7 @@ export default function EmployerPage() {
           {jobs.data?.results?.length ? (
             <div className="flex flex-col divide-y divide-surface-container rounded-3xl bg-surface-container-lowest p-2 shadow-sm">
               {jobs.data.results.map((j) => (
-                <JobRow key={j.id} job={j} />
+                <JobRow key={j.id} job={j} compact />
               ))}
             </div>
           ) : (

@@ -30,7 +30,7 @@ export default function Calculator() {
         const type = types.find((x) => /patent/.test(x.slug));
         setPatent(type || null);
         if (type) setSteps(await apiAll(`/documents/guide-steps/?document_type=${type.id}`));
-        if (type && user?.role === "migrant") {
+        if (type && user) {
           const mine = await apiAll(`/documents/my-documents/?document_type=${type.id}`);
           setMyPatent(mine[0] || null);
         }

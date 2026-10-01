@@ -5,7 +5,6 @@ import { api } from "../api.js";
 import { useApi } from "../hooks.js";
 import { t } from "../i18n.js";
 import { INDUSTRIES } from "../constants.js";
-import ApplyDrawer from "../components/ApplyDrawer.jsx";
 import { JobRow } from "../components/JobCard.jsx";
 import { Stagger, StaggerItem } from "../components/motion.jsx";
 import { Button, EmptyState, ErrorBox, PageHeader, Skeleton } from "../components/ui.jsx";
@@ -54,14 +53,18 @@ function Blacklist() {
   );
 }
 
-function HowWeVerify() {
+function WhereJobsComeFrom() {
   return (
     <div className="card flex flex-col gap-3 p-4 md:p-6">
       <h2 className="flex items-center gap-2 text-headline-sm">
         <ShieldCheck className="h-6 w-6 text-primary" aria-hidden />
-        {t("Мо чӣ тавр месанҷем")}
+        {t("Ин ҷойҳои кор аз куҷоянд")}
       </h2>
-      {[t("Админ ИНН ва маълумоти ширкатро месанҷад ва баъд нишони «Тасдиқшуда» медиҳад."), t("Коргарон ба корфармо баҳо ва шарҳ медиҳанд."), t("Ширкатҳое, ки маош намедиҳанд, ба рӯйхати сиёҳ мераванд ва эълонашон пинҳон мешавад.")].map((text, i) => (
+      {[
+        t("Ҳамаи эълонҳо аз сайти давлатии «Работа России» (trudvsem.ru) гирифта мешаванд ва ҳар рӯз нав мешаванд."),
+        t("Эълонҳои агентиҳои миёнарав нишон дода намешаванд."),
+        t("Тамос ва ариза — дар эълони расмӣ. Пеш аз оғози кор ба касе пул надиҳед."),
+      ].map((text, i) => (
         <div key={text} className="flex items-start gap-3">
           <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary-fixed text-label-sm text-on-primary-fixed">{i + 1}</span>
           <p className="text-body-sm text-on-surface-variant">{text}</p>
@@ -79,7 +82,6 @@ export default function Jobs() {
   const [loading, setLoading] = useState(true);
   const [more, setMore] = useState(false);
   const [error, setError] = useState(null);
-  const [applying, setApplying] = useState(null);
 
   const query = params.toString();
   const update = (key, value) => {
@@ -141,13 +143,11 @@ export default function Jobs() {
 
   const activeIndustry = params.get("industry");
   const ordering = params.get("ordering") || "-created_at";
-  // Promoted (paid) jobs first, keeping the chosen order inside each group.
-  const promoted = (j) => (j.promoted_until && new Date(j.promoted_until) > new Date() ? 0 : 1);
-  const jobs = [...page.results].sort((a, b) => promoted(a) - promoted(b));
+  const jobs = page.results;
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader eyebrow={t("Корфармоёни санҷидашуда")} title={t("Ҷойи кор")} text={t("Пеш аз ариза додан баҳои ширкат ва рӯйхати сиёҳро бинед.")}>
+      <PageHeader eyebrow={t("Аз сайти давлатии «Работа России»")} title={t("Ҷойи кор")} text={t("Ҷойҳои кори воқеӣ бо суроға. Ариза дар эълони расмӣ дода мешавад.")}>
         <a href="#blacklist" className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-secondary px-5 text-label-lg text-on-secondary shadow-sm hover:bg-secondary-container">
           <ShieldAlert className="h-5 w-5" aria-hidden />
           {t("Рӯйхати сиёҳ")}
@@ -234,7 +234,7 @@ export default function Jobs() {
               <Stagger key={query} className="flex flex-col divide-y divide-surface-container rounded-3xl bg-surface-container-lowest p-2 shadow-sm md:p-3">
                 {jobs.map((job) => (
                   <StaggerItem key={job.id}>
-                    <JobRow job={job} onApply={setApplying} />
+                    <JobRow job={job} />
                   </StaggerItem>
                 ))}
               </Stagger>
@@ -248,7 +248,7 @@ export default function Jobs() {
         </div>
         <aside className="grid gap-4 md:grid-cols-2 xl:col-span-4 xl:flex xl:flex-col">
           <Blacklist />
-          <HowWeVerify />
+          <WhereJobsComeFrom />
           <Link to="/help" className="flex flex-col gap-2 rounded-2xl bg-banner p-4 text-white shadow-sm transition-shadow hover:shadow-md md:p-6">
             <span className="flex items-center gap-2">
               <BookOpen className="h-6 w-6" aria-hidden />
@@ -259,8 +259,6 @@ export default function Jobs() {
           </Link>
         </aside>
       </div>
-
-      <ApplyDrawer job={applying} onClose={() => setApplying(null)} />
     </div>
   );
 }

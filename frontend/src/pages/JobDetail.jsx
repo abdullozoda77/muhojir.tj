@@ -1,29 +1,23 @@
-import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, Building2, CalendarClock, ChevronRight, MapPin, ShieldAlert } from "lucide-react";
-import { useAuth } from "../auth.jsx";
+import { ArrowLeft, Building2, CalendarClock, ChevronRight, ExternalLink, Globe, Map as MapIcon, MapPin, ShieldAlert } from "lucide-react";
 import { useApi } from "../hooks.js";
 import { t } from "../i18n.js";
 import { ago, date, salary } from "../format.js";
 import { industry } from "../constants.js";
-import ApplyDrawer from "../components/ApplyDrawer.jsx";
-import { ApplyButton, Perks, SOURCE_NAME, SourceBadge, VerifiedBadge, isImported, isPromoted } from "../components/JobCard.jsx";
+import { OfficialLink, Perks, SOURCE_NAME, SourceBadge, VerifiedBadge, placeOf } from "../components/JobCard.jsx";
 import { Stars, average } from "../components/Stars.jsx";
 import { EmptyState, ErrorBox, Skeleton } from "../components/ui.jsx";
 
 export default function JobDetail() {
   const { id } = useParams();
-  const { user } = useAuth();
   const { data: job, error, loading } = useApi(`/jobs/jobs/${id}/`);
   const reviews = useApi(job ? `/jobs/reviews/?employer=${job.employer.id}&page_size=100` : null);
-  const [applying, setApplying] = useState(null);
 
   if (loading) return <Skeleton className="h-96" />;
   if (error) return error.status === 404 ? <EmptyState title={t("Ин ҷойи кор ёфт нашуд ё пӯшида шудааст")} /> : <ErrorBox error={error} />;
 
   const rating = average(reviews.data?.results);
   const Industry = industry(job.industry).icon;
-  const own = user && user.role === "employer";
   const closed = !job.is_active || new Date(job.expires_at) <= new Date();
 
   return (
@@ -43,19 +37,29 @@ export default function JobDetail() {
       <div className="grid items-start gap-6 lg:grid-cols-12">
         <article className="card flex flex-col gap-5 p-4 md:p-8 lg:col-span-8">
           <div className="flex flex-wrap items-center gap-2">
-            {isPromoted(job) && <span className="rounded-full bg-secondary px-2.5 py-1 text-label-sm text-on-secondary">TOP</span>}
             {job.employer.is_verified && <VerifiedBadge />}
-            {isImported(job) && <SourceBadge />}
+            <SourceBadge />
             <span className="text-body-sm text-on-surface-variant">{ago(job.created_at)}</span>
           </div>
           <div>
             <h1 className="text-headline-lg">{job.title}</h1>
             <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-body-md text-on-surface-variant">
-              <span className="inline-flex items-center gap-1"><MapPin className="h-4 w-4" aria-hidden />{[job.city, job.address].filter(Boolean).join(", ")}</span>
               <span className="inline-flex items-center gap-1"><Industry className="h-4 w-4" aria-hidden />{industry(job.industry).label}</span>
             </div>
           </div>
           <p className="text-headline-md font-bold text-primary">{salary(job)}</p>
+          {placeOf(job) && (
+            <div className="flex flex-col gap-2 rounded-xl bg-surface-container-low p-4 sm:flex-row sm:items-center sm:justify-between">
+              <p className="flex items-start gap-2 text-body-lg">
+                <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-secondary" aria-hidden />
+                <span><span className="block text-label-md text-on-surface-variant">{t("Суроғаи кор")}</span>{placeOf(job)}</span>
+              </p>
+              <a href={`https://yandex.ru/maps/?text=${encodeURIComponent(placeOf(job))}`} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-[44px] shrink-0 items-center gap-2 self-start rounded-xl bg-surface-container-lowest px-4 text-label-md text-primary shadow-sm hover:bg-surface sm:self-auto">
+                <MapIcon className="h-4 w-4" aria-hidden />
+                {t("Дар харита")}
+              </a>
+            </div>
+          )}
           <Perks job={job} />
           <div className="border-t border-surface-container pt-5">
             <h2 className="mb-2 text-headline-sm">{t("Тавсифи кор")}</h2>
@@ -85,18 +89,20 @@ export default function JobDetail() {
               <span className="text-body-sm text-on-surface-variant">({t("{0} шарҳ", reviews.data?.count ?? 0)})</span>
             </div>
           </Link>
-          {!own && !closed && (
-            <ApplyButton job={job} onApply={setApplying} className="fixed bottom-[76px] left-4 right-4 z-40 min-h-[52px] shadow-lg lg:static lg:shadow-sm" />
+          {!closed && <OfficialLink job={job} className="fixed bottom-[76px] left-4 right-4 z-40 min-h-[52px] shadow-lg lg:static lg:shadow-sm" />}
+          {job.employer.website && (
+            <a href={job.employer.website} target="_blank" rel="noopener noreferrer" className="card inline-flex min-h-[52px] items-center justify-center gap-2 px-5 text-label-lg text-primary hover:bg-surface-container-low">
+              <Globe className="h-5 w-5" aria-hidden />
+              {t("Ширкат дар сайти расмӣ")}
+              <ExternalLink className="h-4 w-4" aria-hidden />
+            </a>
           )}
-          {isImported(job) && (
-            <p className="card p-4 text-body-sm text-on-surface-variant">
-              {t("Ин эълон аз сайти давлатии «{0}» гирифта шудааст. Ариза ва тамос бо корфармо — дар он сайт. Пеш аз сафар шартҳоро бо корфармо санҷед.", SOURCE_NAME)}
-            </p>
-          )}
+          <p className="card p-4 text-body-sm text-on-surface-variant">
+            {t("Ин эълон аз сайти давлатии «{0}» гирифта шудааст. Ариза ва тамос бо корфармо — дар он сайт. Пеш аз сафар шартҳоро бо корфармо санҷед.", SOURCE_NAME)}
+          </p>
           {closed && <p className="card p-4 text-body-md text-on-surface-variant">{t("Ин эълон пӯшида аст.")}</p>}
         </aside>
       </div>
-      <ApplyDrawer job={applying} onClose={() => setApplying(null)} />
     </div>
   );
 }
