@@ -80,7 +80,7 @@ export default function Guides() {
 
   return (
     <div className="flex flex-col gap-8">
-      <PageHeader eyebrow={t("Роҳнамои расмӣ")} title={t("Роҳнамо ва қонунҳо")} text={t("Барои ҳар ҳуҷҷат: чӣ бояд кард, чӣ бурдан лозим ва чанд пул аст.")} />
+      <PageHeader eyebrow={t("Роҳнамои расмӣ")} title={t("Роҳнамо ва қонунҳо")} text={t("Барои ҳар ҳуҷҷат: куҷо рафтан, чӣ бурдан ва чӣ тавр пур кардан.")} />
       <ErrorBox error={error} />
       {loading ? (
         <Skeleton className="h-32" />
