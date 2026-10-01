@@ -2,7 +2,7 @@ from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 from .views import (
-    DocumentTypeViewSet, GuideStepViewSet, LawNewsViewSet, MigrationCenterViewSet, PaymentViewSet, RegionViewSet,
+    DocumentTypeViewSet, ExamQuestionViewSet, GuideStepViewSet, LawNewsViewSet, MigrationCenterViewSet, PaymentViewSet, RegionViewSet,
     UserDocumentViewSet,
 )
 
@@ -14,6 +14,7 @@ router.register("my-documents", UserDocumentViewSet, basename="my-documents")
 router.register("news", LawNewsViewSet, basename="news")
 router.register("payments", PaymentViewSet, basename="payments")
 router.register("centers", MigrationCenterViewSet, basename="centers")
+router.register("exam-questions", ExamQuestionViewSet, basename="exam-questions")
 
 urlpatterns = [
     path("", include(router.urls)),

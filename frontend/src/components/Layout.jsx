@@ -1,7 +1,7 @@
 import { Suspense, useEffect, useState } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import {
-  ArrowRight, Bell, BookOpen, Briefcase, Calculator, Home, LifeBuoy, LogIn, Moon, ReceiptText, Scale, SearchCheck, Settings, ShieldCheck, Sun, WifiOff,
+  ArrowRight, Bell, BookOpen, Briefcase, Calculator, GraduationCap, Home, LifeBuoy, LogIn, Moon, ReceiptText, Scale, SearchCheck, Settings, ShieldCheck, Sun, WifiOff,
 } from "lucide-react";
 import { api, apiAll } from "../api.js";
 import { useAuth } from "../auth.jsx";
@@ -20,6 +20,7 @@ function navFor(user) {
       { to: "/calculator", icon: Calculator, label: t("Калкулятори патент"), short: t("Патент") },
       { to: "/guides", icon: BookOpen, label: t("Роҳнамо ва қонунҳо"), short: t("Роҳнамо") },
       { to: "/checks", icon: SearchCheck, label: t("Санҷиши ҳуҷҷатҳо"), desktopOnly: true },
+      { to: "/exam", icon: GraduationCap, label: t("Машқ барои имтиҳон"), desktopOnly: true },
       { to: "/login", icon: LogIn, label: t("Ворид шудан"), short: t("Ворид"), mobileOnly: true },
     ];
   }
@@ -30,6 +31,7 @@ function navFor(user) {
     { to: "/calculator", icon: Calculator, label: t("Калкулятори патент"), desktopOnly: true },
     { to: "/guides", icon: BookOpen, label: t("Роҳнамо ва қонунҳо"), short: t("Роҳнамо") },
     { to: "/checks", icon: SearchCheck, label: t("Санҷиши ҳуҷҷатҳо"), desktopOnly: true },
+    { to: "/exam", icon: GraduationCap, label: t("Машқ барои имтиҳон"), desktopOnly: true },
     { to: "/payments", icon: ReceiptText, label: t("Архиви чекҳо"), desktopOnly: true },
     { to: "/notifications", icon: Bell, label: t("Огоҳиҳо"), badge: "unread", desktopOnly: true },
     { to: "/profile", icon: Settings, label: t("Профил ва танзимот"), short: t("Профил") },

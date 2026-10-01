@@ -1,6 +1,8 @@
 from rest_framework import serializers
 
-from .models import DocumentType, GuideStep, LawNews, MigrationCenter, Payment, Region, UserDocument
+from .models import (
+    DocumentType, ExamQuestion, GuideStep, LawNews, MigrationCenter, Payment, Region, UserDocument,
+)
 
 
 class GuideStepSerializer(serializers.ModelSerializer):
@@ -98,3 +100,18 @@ class MigrationCenterSerializer(serializers.ModelSerializer):
     class Meta:
         model = MigrationCenter
         fields = ["id", "region", "region_name", "name", "address", "working_hours", "phone", "website", "order"]
+
+
+class ExamQuestionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ExamQuestion
+        fields = ["id", "section", "question", "listen_text", "options", "answer", "explanation", "is_active", "order"]
+
+    def validate(self, attrs):
+        options = attrs.get("options", getattr(self.instance, "options", None))
+        answer = attrs.get("answer", getattr(self.instance, "answer", None))
+        if not isinstance(options, list) or len(options) < 2 or not all(isinstance(o, str) and o for o in options):
+            raise serializers.ValidationError({"options": "Give at least two answers."})
+        if answer is not None and answer >= len(options):
+            raise serializers.ValidationError({"answer": "The right answer must be one of the options."})
+        return attrs

@@ -1,6 +1,8 @@
 from django.contrib import admin
 
-from .models import DocumentType, GuideStep, LawNews, MigrationCenter, Payment, Region, ReminderLog, UserDocument
+from .models import (
+    DocumentType, ExamQuestion, GuideStep, LawNews, MigrationCenter, Payment, Region, ReminderLog, UserDocument,
+)
 
 
 class GuideStepInline(admin.StackedInline):
@@ -58,3 +60,11 @@ class MigrationCenterAdmin(admin.ModelAdmin):
     list_filter = ["region"]
     list_editable = ["order"]
     search_fields = ["name", "address"]
+
+
+@admin.register(ExamQuestion)
+class ExamQuestionAdmin(admin.ModelAdmin):
+    list_display = ["question", "section", "answer", "is_active", "order"]
+    list_filter = ["section", "is_active"]
+    list_editable = ["is_active", "order"]
+    search_fields = ["question"]

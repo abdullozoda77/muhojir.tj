@@ -2,6 +2,7 @@ import calendar
 from datetime import date
 
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
@@ -179,3 +180,32 @@ class LawNews(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class ExamQuestion(models.Model):
+    """A practice question for the exam in Russian language, history and law that is needed for the patent.
+    options is a list of answers; answer is the number (from 0) of the right one. A listening question has
+    listen_text: the site reads it aloud in Russian before the question."""
+
+    SECTIONS = (("language", "Russian language"), ("history", "History of Russia"), ("law", "Basics of law"))
+
+    section = models.CharField(max_length=20, choices=SECTIONS)
+    question = models.CharField(max_length=500)
+    listen_text = models.TextField(blank=True)
+    options = models.JSONField()
+    answer = models.PositiveSmallIntegerField()
+    explanation = models.TextField(blank=True)  # in Tajik: why this answer is right
+    is_active = models.BooleanField(default=True)
+    order = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        ordering = ["section", "order", "id"]
+
+    def __str__(self):
+        return self.question[:60]
+
+    def clean(self):
+        if not isinstance(self.options, list) or len(self.options) < 2:
+            raise ValidationError({"options": "Give at least two answers."})
+        if self.answer >= len(self.options):
+            raise ValidationError({"answer": "The right answer must be one of the options."})

@@ -1,7 +1,9 @@
 import django_filters
 from django.db.models import Q
 
-from .models import DocumentType, GuideStep, LawNews, MigrationCenter, Payment, Region, UserDocument
+from .models import (
+    DocumentType, ExamQuestion, GuideStep, LawNews, MigrationCenter, Payment, Region, UserDocument,
+)
 
 # Every filter has ?search=... that looks for the words in the main text fields (case does not matter).
 
@@ -83,3 +85,11 @@ class MigrationCenterFilter(django_filters.FilterSet):
 
     def filter_search(self, queryset, name, value):
         return queryset.filter(Q(name__icontains=value) | Q(address__icontains=value))
+
+
+class ExamQuestionFilter(django_filters.FilterSet):
+    search = django_filters.CharFilter(field_name="question", lookup_expr="icontains")
+
+    class Meta:
+        model = ExamQuestion
+        fields = ["section"]

@@ -7,12 +7,15 @@ from rest_framework.response import Response
 
 from core.permissions import IsAdminOrReadOnly, is_admin
 from .filters import (
-    DocumentTypeFilter, GuideStepFilter, LawNewsFilter, MigrationCenterFilter, PaymentFilter, RegionFilter, UserDocumentFilter,
+    DocumentTypeFilter, ExamQuestionFilter, GuideStepFilter, LawNewsFilter, MigrationCenterFilter, PaymentFilter,
+    RegionFilter, UserDocumentFilter,
 )
-from .models import DocumentType, GuideStep, LawNews, MigrationCenter, Payment, Region, UserDocument, add_months
+from .models import (
+    DocumentType, ExamQuestion, GuideStep, LawNews, MigrationCenter, Payment, Region, UserDocument, add_months,
+)
 from .serializers import (
-    DocumentPhotoSerializer, DocumentTypeSerializer, GuideStepSerializer, LawNewsSerializer, MigrationCenterSerializer,
-    PaymentSerializer, RegionSerializer, UserDocumentSerializer,
+    DocumentPhotoSerializer, DocumentTypeSerializer, ExamQuestionSerializer, GuideStepSerializer, LawNewsSerializer,
+    MigrationCenterSerializer, PaymentSerializer, RegionSerializer, UserDocumentSerializer,
 )
 
 
@@ -140,3 +143,15 @@ class LawNewsViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         serializer.save(**publish_date(serializer))
+
+
+class ExamQuestionViewSet(viewsets.ModelViewSet):
+    """Practice questions for the patent exam. Everyone reads the active ones; admins manage them."""
+
+    serializer_class = ExamQuestionSerializer
+    permission_classes = [IsAdminOrReadOnly]
+    filterset_class = ExamQuestionFilter
+
+    def get_queryset(self):
+        qs = ExamQuestion.objects.all()
+        return qs if is_admin(self.request.user) else qs.filter(is_active=True)

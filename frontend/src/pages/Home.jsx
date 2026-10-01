@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import {
-  ArrowRight, BookOpen, Briefcase, Clock, FilePlus2, Newspaper, Plus, PlusCircle, ShieldAlert, Wallet,
+  ArrowRight, BookOpen, Briefcase, Clock, FilePlus2, GraduationCap, Newspaper, Plus, PlusCircle, ShieldAlert, Wallet,
 } from "lucide-react";
 import { useAuth } from "../auth.jsx";
 import { useApi, useDocuments } from "../hooks.js";
@@ -98,6 +98,21 @@ function CalculatorPromo() {
   );
 }
 
+function ExamPromo() {
+  return (
+    <Link to="/exam" className="flex items-center gap-4 rounded-3xl bg-surface-container-lowest p-6 shadow-sm transition-shadow hover:shadow-md">
+      <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-secondary-fixed text-secondary">
+        <GraduationCap className="h-6 w-6" aria-hidden />
+      </span>
+      <span className="flex flex-col gap-0.5">
+        <span className="text-headline-sm font-bold">{t("Машқ барои имтиҳон")}</span>
+        <span className="text-body-sm text-on-surface-variant">{t("Забони русӣ, таърих ва қонун — бо шарҳ")}</span>
+      </span>
+      <ArrowRight className="ml-auto h-5 w-5 shrink-0 text-primary" aria-hidden />
+    </Link>
+  );
+}
+
 function NewsPanel() {
   const news = useApi("/documents/news/?page_size=3");
   if (!news.data?.results?.length) return null;
@@ -127,6 +142,7 @@ function JobsAndSide({ city }) {
       <JobsPanel city={city} />
       <div className="flex flex-col gap-6">
         <CalculatorPromo />
+        <ExamPromo />
         <NewsPanel />
       </div>
     </div>
