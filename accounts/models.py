@@ -103,3 +103,16 @@ class Notification(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class PushSubscription(models.Model):
+    """A phone or browser that agreed to get notifications from the site (Web Push). One user can have several."""
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="push_subscriptions")
+    endpoint = models.URLField(max_length=1000, unique=True)  # the browser's push service address
+    p256dh = models.CharField(max_length=200)  # the browser's keys that encrypt the message
+    auth = models.CharField(max_length=100)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user} — {self.endpoint[:40]}"

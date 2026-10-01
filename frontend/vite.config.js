@@ -11,4 +11,12 @@ export default defineConfig({
       "/media": "http://127.0.0.1:8001",
     },
   },
+  // `npm run preview` serves the built site (with the service worker, which is off in development).
+  preview: {
+    port: 4174,
+    proxy: {
+      "/api": "http://127.0.0.1:8001",
+      "/media": "http://127.0.0.1:8001",
+    },
+  },
 });

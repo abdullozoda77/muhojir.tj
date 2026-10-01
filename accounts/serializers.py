@@ -44,6 +44,17 @@ class UserSerializer(serializers.ModelSerializer):
         return phone
 
 
+class PushKeysSerializer(serializers.Serializer):
+    p256dh = serializers.CharField(max_length=200)
+    auth = serializers.CharField(max_length=100)
+
+
+class PushSubscribeSerializer(serializers.Serializer):
+    # The object the browser gives from pushManager.subscribe(), as it is.
+    endpoint = serializers.URLField(max_length=1000)
+    keys = PushKeysSerializer(required=False)
+
+
 class LogoutSerializer(serializers.Serializer):
     refresh = serializers.CharField()
 

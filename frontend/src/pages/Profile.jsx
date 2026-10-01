@@ -4,6 +4,7 @@ import { LogOut, Mail, Save } from "lucide-react";
 import { api } from "../api.js";
 import { useAuth } from "../auth.jsx";
 import { lang, setLang, t } from "../i18n.js";
+import PhoneApp from "../components/PhoneApp.jsx";
 import { Button, ErrorBox, Field, PageHeader } from "../components/ui.jsx";
 
 export default function Profile() {
@@ -82,6 +83,7 @@ export default function Profile() {
         {saved && <p role="status" className="rounded-xl bg-tertiary-fixed p-3 text-label-md text-on-tertiary-fixed">{t("Сабт шуд")}</p>}
         <Button type="submit" icon={Save} loading={busy}>{t("Сабт кардан")}</Button>
       </form>
+      <PhoneApp />
       <Button
         variant="plain"
         icon={LogOut}

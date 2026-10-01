@@ -1,7 +1,7 @@
 import { Suspense, useEffect, useState } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import {
-  ArrowRight, Bell, BookOpen, Briefcase, Calculator, Home, LifeBuoy, LogIn, Moon, ReceiptText, Scale, SearchCheck, Settings, ShieldCheck, Sun,
+  ArrowRight, Bell, BookOpen, Briefcase, Calculator, Home, LifeBuoy, LogIn, Moon, ReceiptText, Scale, SearchCheck, Settings, ShieldCheck, Sun, WifiOff,
 } from "lucide-react";
 import { api, apiAll } from "../api.js";
 import { useAuth } from "../auth.jsx";
@@ -9,6 +9,7 @@ import { lang, setLang, t } from "../i18n.js";
 import { useTheme } from "../theme.js";
 import { AnimatePresence, m } from "motion/react";
 import { PageTransition } from "./motion.jsx";
+import { useOnline } from "../pwa.js";
 import { Skeleton } from "./ui.jsx";
 
 function navFor(user) {
@@ -133,6 +134,7 @@ export default function Layout() {
   const items = navFor(user);
   const counts = useCounters(user);
   const { pathname } = useLocation();
+  const online = useOnline();
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -231,6 +233,12 @@ export default function Layout() {
 
         <main className="min-h-screen pb-24 pt-16 lg:pb-0 lg:pt-[72px]">
           <div className="mx-auto max-w-6xl px-4 py-6 md:px-8 md:py-8">
+            {!online && (
+              <p role="status" className="mb-4 flex items-center gap-2 rounded-xl bg-warning-fixed px-4 py-3 text-label-md text-on-warning-fixed">
+                <WifiOff className="h-4 w-4 shrink-0" aria-hidden />
+                {t("Интернет нест. Маълумоти охирини захирашуда нишон дода мешавад.")}
+              </p>
+            )}
             {/* A page that is still downloading shows a placeholder; the menu and header stay. */}
             <Suspense fallback={<Skeleton className="h-64" />}>
               <PageTransition pageKey={pathname}>
