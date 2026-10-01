@@ -7,16 +7,18 @@ class EmployerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Employer
         fields = [
-            "id", "owner", "name", "inn", "city", "phone", "description", "is_verified", "verified_at", "is_blacklisted",
-            "blacklist_reason", "created_at",
+            "id", "owner", "name", "inn", "city", "phone", "description", "website", "source", "is_verified", "verified_at",
+            "is_blacklisted", "blacklist_reason", "created_at",
         ]
-        read_only_fields = ["id", "owner", "is_verified", "verified_at", "is_blacklisted", "blacklist_reason", "created_at"]
+        read_only_fields = [
+            "id", "owner", "website", "source", "is_verified", "verified_at", "is_blacklisted", "blacklist_reason", "created_at",
+        ]
 
 
 class EmployerShortSerializer(serializers.ModelSerializer):
     class Meta:
         model = Employer
-        fields = ["id", "name", "city", "is_verified", "is_blacklisted"]
+        fields = ["id", "name", "city", "is_verified", "is_blacklisted", "source"]
 
 
 class JobSerializer(serializers.ModelSerializer):
@@ -28,11 +30,11 @@ class JobSerializer(serializers.ModelSerializer):
         fields = [
             "id", "employer", "title", "description", "industry", "industry_label", "city", "address",
             "salary_from", "salary_to", "salary_period", "schedule", "housing_provided", "meals_provided",
-            "helps_with_documents", "is_active", "promoted_until", "expires_at", "created_at",
+            "helps_with_documents", "is_active", "promoted_until", "expires_at", "source", "external_url", "created_at",
             "updated_at",
         ]
-        # Promotion is paid, so only admins set it (through the admin panel).
-        read_only_fields = ["id", "promoted_until", "created_at", "updated_at"]
+        # Promotion is paid, so only admins set it (through the admin panel). Source fields belong to the import.
+        read_only_fields = ["id", "promoted_until", "source", "external_url", "created_at", "updated_at"]
 
     def validate(self, attrs):
         low = attrs.get("salary_from", getattr(self.instance, "salary_from", None))

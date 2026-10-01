@@ -19,18 +19,27 @@ INDUSTRIES = (
 )
 
 
+# Where a job ad comes from: written on this site by an employer, or imported from «Работа России»
+# (trudvsem.ru, the state job portal whose ads are open data). Imported ads are applied for on the source site.
+SOURCES = (("site", "Muhojir.tj"), ("trudvsem", "Работа России"))
+
+
 def default_job_expiry():
     return timezone.now() + timedelta(days=30)
 
 
 class Employer(models.Model):
-    """A company profile. Admins verify real companies and put the ones that don't pay wages on the blacklist."""
+    """A company profile. Admins verify real companies and put the ones that don't pay wages on the blacklist.
+    Companies of imported ads have no owner on this site; they are found again by their OGRN (external_id)."""
 
-    owner = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="employer")
+    owner = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="employer", blank=True, null=True)
+    source = models.CharField(max_length=20, choices=SOURCES, default="site")
+    external_id = models.CharField(max_length=40, blank=True, null=True, unique=True)
+    website = models.URLField(blank=True)
     name = models.CharField(max_length=200)
     inn = models.CharField("INN", max_length=12, blank=True)  # Russian tax number, checked by admins when verifying
     city = models.CharField(max_length=100)
-    phone = models.CharField(max_length=16)
+    phone = models.CharField(max_length=16, blank=True)
     description = models.TextField(blank=True)
     is_verified = models.BooleanField(default=False)
     verified_at = models.DateTimeField(blank=True, null=True)
@@ -65,12 +74,16 @@ class Job(models.Model):
     # Paid ads: shown above the others until promoted_until.
     promoted_until = models.DateTimeField(blank=True, null=True)
     expires_at = models.DateTimeField(default=default_job_expiry)
+    # Imported ads: where they came from, their id there, and the page where people apply.
+    source = models.CharField(max_length=20, choices=SOURCES, default="site")
+    external_id = models.CharField(max_length=60, blank=True, null=True, unique=True)
+    external_url = models.URLField(max_length=500, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ["-created_at"]
-        indexes = [models.Index(fields=["city", "industry"])]
+        indexes = [models.Index(fields=["city", "industry"]), models.Index(fields=["source"])]
 
     def __str__(self):
         return f"{self.title} — {self.employer}"

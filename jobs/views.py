@@ -114,6 +114,8 @@ class JobApplicationViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         job, user = serializer.validated_data["job"], self.request.user
+        if job.source != "site":
+            raise ValidationError({"job": "Apply for this job on the source site."})
         if job.employer.owner_id == user.id:
             raise ValidationError({"job": "You cannot apply to your own company's job."})
         if not Job.objects.filter(open_jobs(), pk=job.pk).exists():

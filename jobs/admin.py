@@ -5,16 +5,16 @@ from .models import Employer, EmployerReview, Job, JobApplication, Resume
 
 @admin.register(Employer)
 class EmployerAdmin(admin.ModelAdmin):
-    list_display = ["name", "city", "owner", "is_verified", "is_blacklisted", "created_at"]
-    list_filter = ["is_verified", "is_blacklisted", "city"]
+    list_display = ["name", "city", "owner", "source", "is_verified", "is_blacklisted", "created_at"]
+    list_filter = ["source", "is_verified", "is_blacklisted", "city"]
     list_editable = ["is_verified", "is_blacklisted"]
     search_fields = ["name", "inn", "owner__email"]
 
 
 @admin.register(Job)
 class JobAdmin(admin.ModelAdmin):
-    list_display = ["title", "employer", "city", "industry", "salary_from", "salary_to", "is_active", "promoted_until"]
-    list_filter = ["industry", "is_active", "housing_provided"]
+    list_display = ["title", "employer", "city", "industry", "salary_from", "salary_to", "source", "is_active", "promoted_until"]
+    list_filter = ["source", "industry", "is_active", "housing_provided"]
     search_fields = ["title", "employer__name", "city"]
 
 

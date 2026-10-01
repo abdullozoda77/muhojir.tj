@@ -28,7 +28,7 @@ class JobFilter(django_filters.FilterSet):
         model = Job
         fields = [
             "city", "industry", "employer", "salary_period", "housing_provided", "meals_provided",
-            "helps_with_documents", "is_active",
+            "helps_with_documents", "is_active", "source",
         ]
 
     def filter_search(self, queryset, name, value):
