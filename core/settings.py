@@ -200,11 +200,6 @@ DEFAULT_FROM_EMAIL = os.getenv(
     'DEFAULT_FROM_EMAIL', f'"Muhojir.tj" <{os.getenv("EMAIL_HOST_USER") or "noreply@muhojir.tj"}>'
 )
 
-# Telegram reminders (free). Create a bot with @BotFather in Telegram and put its token and name in .env.
-# Without a token the Telegram option is hidden. The bot listens with: python manage.py telegram_bot
-TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN', '')
-TELEGRAM_BOT_USERNAME = os.getenv('TELEGRAM_BOT_USERNAME', '')
-
 LOGIN_CODE_LIFETIME = timedelta(minutes=10)
 LOGIN_CODE_MAX_ATTEMPTS = 5
 

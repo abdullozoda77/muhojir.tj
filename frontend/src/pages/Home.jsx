@@ -152,7 +152,7 @@ function GuestHome() {
       <Overlap>
         <section className="grid gap-4 md:grid-cols-3">
           {[
-            [ShieldAlert, t("Ёдраскунии мӯҳлатҳо"), t("Пеш аз тамом шудани патент, бақайдгирӣ ва суғурта ба почта ва Telegram хабар меояд."), "border-t-secondary", "text-secondary"],
+            [ShieldAlert, t("Ёдраскунии мӯҳлатҳо"), t("Пеш аз тамом шудани патент, бақайдгирӣ ва суғурта ба почтаи шумо хабар меояд."), "border-t-secondary", "text-secondary"],
             [BookOpen, t("Роҳнамои қадам ба қадам"), t("Чӣ бояд кард, чӣ бурдан лозим ва чанд пул аст — бо забони содда."), "border-t-primary-container", "text-primary"],
             [BadgeCheck, t("Корфармоёни тасдиқшуда"), t("Шарҳи коргарон ва рӯйхати сиёҳи ширкатҳое, ки маош намедиҳанд."), "border-t-tertiary-container", "text-tertiary"],
           ].map(([Icon, title, text, bar, tone]) => (
@@ -234,7 +234,7 @@ function MigrantHome({ user }) {
             </div>
             <div className="flex-1">
               <h2 className="font-display text-headline-md font-bold">{t("Ҳуҷҷати аввалини худро илова кунед")}</h2>
-              <p className="text-body-md text-on-surface-variant">{t("Мо пеш аз тамом шудани мӯҳлат ба почта ва Telegram ёдрас мекунем.")}</p>
+              <p className="text-body-md text-on-surface-variant">{t("Мо пеш аз тамом шудани мӯҳлат ба почтаи шумо ёдрас мекунем.")}</p>
             </div>
             <Link to="/documents" className="inline-flex min-h-[52px] items-center gap-2 rounded-2xl bg-primary px-6 text-label-lg text-on-primary">
               <PlusCircle className="h-5 w-5" aria-hidden />

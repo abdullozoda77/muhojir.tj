@@ -134,7 +134,7 @@ export default function Calculator() {
               <div className="flex-1">
                 <p className="text-label-lg">{t("Пардохти навбатиро фаромӯш накунед")}</p>
                 <p className="text-body-sm text-on-surface-variant">
-                  {t("Патентро дар «Ҳуҷҷатҳои ман» илова кунед — пеш аз анҷоми мӯҳлат ба почта ва Telegram ёдраскунӣ меояд.")}
+                  {t("Патентро дар «Ҳуҷҷатҳои ман» илова кунед — пеш аз анҷоми мӯҳлат ба почтаи шумо ёдраскунӣ меояд.")}
                 </p>
               </div>
               <Link to={user ? "/documents" : "/login"} className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-primary px-5 text-label-lg text-on-primary">

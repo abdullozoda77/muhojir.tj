@@ -97,7 +97,7 @@ function AskLawyer() {
       </h2>
       {!user ? (
         <p className="card p-6 text-body-md">
-          <Link to="/login" className="text-primary underline">{t("Ворид шавед")}</Link>, {t("то савол диҳед. Ҷавоб ба почта ва Telegram меояд.")}
+          <Link to="/login" className="text-primary underline">{t("Ворид шавед")}</Link>, {t("то савол диҳед. Ҷавоб ба почтаи шумо меояд.")}
         </p>
       ) : (
         <>

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { ArrowRight, CalendarDays, CheckCircle2, Clock, ExternalLink, FilePlus2, Gavel, LayoutList, ReceiptText, Send, ShieldCheck, XCircle } from "lucide-react";
+import { ArrowRight, CalendarDays, CheckCircle2, Clock, ExternalLink, FilePlus2, Gavel, LayoutList, Mail, ReceiptText, ShieldCheck, XCircle } from "lucide-react";
 import { useApi, useDocuments } from "../hooks.js";
 import { t } from "../i18n.js";
 import { date, monthTitle } from "../format.js";
@@ -58,7 +58,7 @@ function Calendar({ docs, onEdit }) {
 }
 
 const SERVICES = [
-  { to: "/profile", icon: Send, title: () => t("Ёдраскунӣ дар Telegram"), text: () => t("Бепул. Дар профил Telegram-ро пайваст кунед — ёдраскуниҳо ба он ҷо ҳам меоянд.") },
+  { to: "/profile", icon: Mail, title: () => t("Ёдраскунӣ ба почта"), text: () => t("Пеш аз анҷоми мӯҳлат мактуб меояд. Дар профил фаъол ё хомӯш кунед.") },
   { to: "/help", icon: Gavel, title: () => t("Ёрии ҳуқуқшинос"), text: () => t("Агар патент бекор шуда бошад ё мушкили дигар дошта бошед, савол диҳед.") },
   { to: "/payments", icon: ReceiptText, title: () => t("Архиви чекҳо"), text: () => t("Ҳамаи чекҳои пардохт дар як ҷо нигоҳ дошта мешаванд.") },
 ];

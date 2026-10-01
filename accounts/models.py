@@ -52,9 +52,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     # City in Russia where the person lives now; jobs and news are shown for it first.
     city = models.CharField(max_length=100, blank=True)
     email_reminders = models.BooleanField(default=True)
-    # Telegram reminders: chat id saved when the user presses Start in our bot; the link code is used once for that.
-    telegram_chat_id = models.CharField(max_length=32, blank=True)
-    telegram_link_code = models.CharField(max_length=32, blank=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     date_joined = models.DateTimeField(default=timezone.now)

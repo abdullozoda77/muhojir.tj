@@ -2,7 +2,6 @@
 1. POST /api/auth/send-code/   {email}        -> we email a 6-digit code
 2. POST /api/auth/verify-code/ {email, code}  -> we check it and give JWT tokens (a new email gets a new account)
 Then: token/refresh/ gives a new access token, logout/ ends the login, profile/ shows and edits the user."""
-import secrets
 from datetime import timedelta
 
 from django.conf import settings
@@ -124,27 +123,6 @@ class ProfileView(RetrieveUpdateAPIView):
 
     def get_object(self):
         return self.request.user
-
-
-class TelegramView(APIView):
-    """Telegram reminders. GET: is it on? POST: get a link to our bot (open it and press Start). DELETE: turn off."""
-
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get(self, request):
-        return Response({"available": bool(settings.TELEGRAM_BOT_TOKEN), "connected": bool(request.user.telegram_chat_id)})
-
-    def post(self, request):
-        if not settings.TELEGRAM_BOT_TOKEN:
-            return error("Telegram is not set up on the server yet.", 503)
-        request.user.telegram_link_code = secrets.token_urlsafe(16)
-        request.user.save(update_fields=["telegram_link_code"])
-        return Response({"url": f"https://t.me/{settings.TELEGRAM_BOT_USERNAME}?start={request.user.telegram_link_code}"})
-
-    def delete(self, request):
-        request.user.telegram_chat_id = ""
-        request.user.save(update_fields=["telegram_chat_id"])
-        return Response(status=204)
 
 
 class NotificationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
