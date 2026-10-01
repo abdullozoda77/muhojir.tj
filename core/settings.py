@@ -101,7 +101,7 @@ ROOT_URLCONF = 'core.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'core' / 'templates'],  # the admin start page with the site's numbers
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

@@ -1,0 +1,76 @@
+{% extends "admin/index.html" %}
+{% comment %}The admin start page with the site's numbers on top (core/dashboard.py), then the usual list of models.{% endcomment %}
+
+{% block extrastyle %}{{ block.super }}
+<style>
+  .mj-dash { margin: 0 0 24px; }
+  .mj-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; margin-bottom: 16px; }
+  .mj-card { display: block; padding: 14px 16px; border-radius: 10px; border: 1px solid var(--hairline-color); background: var(--darkened-bg); color: var(--body-fg); text-decoration: none; }
+  .mj-card:hover { border-color: var(--link-fg); text-decoration: none; }
+  .mj-card b { display: block; font-size: 30px; line-height: 1.2; color: var(--link-fg); }
+  .mj-card.warn b { color: #c1121f; }
+  .mj-card small { color: var(--body-quiet-color); }
+  .mj-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+  .mj-box { border: 1px solid var(--hairline-color); border-radius: 10px; padding: 12px 16px; }
+  .mj-box h3 { margin: 0 0 8px; font-size: 14px; }
+  .mj-box table { width: 100%; }
+  .mj-box td { padding: 4px 0; border-bottom: 1px solid var(--hairline-color); }
+  .mj-box td.n { text-align: right; font-weight: 600; }
+  .mj-alert { padding: 10px 14px; border-radius: 8px; margin-bottom: 14px; background: #fff3cd; color: #664d03; }
+  .mj-ok { color: var(--body-quiet-color); margin: 0 0 14px; }
+</style>
+{% endblock %}
+
+{% block content %}
+{% if stats %}
+<div class="mj-dash">
+  {% if stats.import_late %}
+    <p class="mj-alert">Ҷойҳои кор зиёда аз 36 соат нав нашудаанд. Санҷед, ки cron фармони <code>python manage.py import_jobs</code>-ро ҳар рӯз иҷро мекунад.</p>
+  {% else %}
+    <p class="mj-ok">Охирин навсозии ҷойҳои кор: {{ stats.last_import|date:"d.m.Y H:i" }}</p>
+  {% endif %}
+
+  <div class="mj-cards">
+    {% for card in stats.cards %}
+      <a class="mj-card{% if card.warn and card.value %} warn{% endif %}" href="{% url 'admin:index' %}{{ card.url }}">
+        <span>{{ card.title }}</span>
+        <b>{{ card.value }}</b>
+        <small>{{ card.note }}</small>
+      </a>
+    {% endfor %}
+  </div>
+
+  <div class="mj-row">
+    <div class="mj-box">
+      <h3>Ҳуҷҷатҳо аз рӯи намуд</h3>
+      <table>
+        {% for row in stats.documents_by_type %}<tr><td>{{ row.document_type__title }}</td><td class="n">{{ row.n }}</td></tr>
+        {% empty %}<tr><td>Ҳоло ҳуҷҷат нест</td><td></td></tr>{% endfor %}
+      </table>
+    </div>
+    <div class="mj-box">
+      <h3>Ҷойҳои кор аз рӯи шаҳр</h3>
+      <table>
+        {% for row in stats.jobs_by_city %}<tr><td>{{ row.city }}</td><td class="n">{{ row.n }}</td></tr>
+        {% empty %}<tr><td>Ҳоло ҷойи кор нест</td><td></td></tr>{% endfor %}
+      </table>
+    </div>
+    <div class="mj-box">
+      <h3>Боз</h3>
+      <table>
+        {% for title, value, url in stats.small %}<tr><td><a href="{% url 'admin:index' %}{{ url }}">{{ title }}</a></td><td class="n">{{ value }}</td></tr>{% endfor %}
+      </table>
+    </div>
+    <div class="mj-box">
+      <h3>Шикоятҳои охирин аз маош</h3>
+      <table>
+        {% for review in stats.complaints %}
+          <tr><td><a href="{% url 'admin:jobs_employer_change' review.employer_id %}">{{ review.employer.name }}</a><br><small>{{ review.text|truncatechars:60 }}</small></td><td class="n">{{ review.created_at|date:"d.m" }}</td></tr>
+        {% empty %}<tr><td>Шикоят нест</td><td></td></tr>{% endfor %}
+      </table>
+    </div>
+  </div>
+</div>
+{% endif %}
+{{ block.super }}
+{% endblock %}
