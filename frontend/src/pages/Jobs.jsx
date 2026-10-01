@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { BedDouble, Briefcase, FileCheck2, MapPin, PhoneCall, Search, ShieldAlert, ShieldCheck, Soup } from "lucide-react";
+import { BedDouble, BookOpen, Briefcase, FileCheck2, MapPin, Search, ShieldAlert, ShieldCheck, Soup } from "lucide-react";
 import { api } from "../api.js";
 import { useApi } from "../hooks.js";
 import { t } from "../i18n.js";
@@ -251,11 +251,11 @@ export default function Jobs() {
           <HowWeVerify />
           <Link to="/help" className="flex flex-col gap-2 rounded-2xl bg-banner p-4 text-white shadow-sm transition-shadow hover:shadow-md md:p-6">
             <span className="flex items-center gap-2">
-              <PhoneCall className="h-6 w-6" aria-hidden />
-              <span className="text-headline-sm font-bold">{t("Хати ёрӣ барои муҳоҷирон")}</span>
+              <BookOpen className="h-6 w-6" aria-hidden />
+              <span className="text-headline-sm font-bold">{t("Ҳуқуқҳои худро донед")}</span>
             </span>
-            <span className="text-body-sm text-on-navy">{t("Агар дар ҷойи кор мушкил пеш ояд, бо ҳуқуқшинос маслиҳат кунед.")}</span>
-            <span className="inline-flex min-h-[44px] items-center justify-center self-start rounded-xl bg-surface-container-lowest px-4 text-label-md text-primary">{t("Рақамҳо ва савол ба ҳуқуқшинос")}</span>
+            <span className="text-body-sm text-on-navy">{t("Қонунҳои Русия дар бораи кори муҳоҷирон — дар сайтҳои расмӣ.")}</span>
+            <span className="inline-flex min-h-[44px] items-center justify-center self-start rounded-xl bg-surface-container-lowest px-4 text-label-md text-primary">{t("Сайтҳои расмӣ")}</span>
           </Link>
         </aside>
       </div>

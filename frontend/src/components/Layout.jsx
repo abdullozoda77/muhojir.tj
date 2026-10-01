@@ -189,7 +189,7 @@ export default function Layout() {
               <Scale className="h-5 w-5" aria-hidden />
               {t("Маркази ёрии ҳуқуқӣ")}
             </span>
-            <span className="text-body-sm text-secondary-fixed">{t("Сайтҳои расмӣ ва саволи ройгон ба ҳуқуқшинос")}</span>
+            <span className="text-body-sm text-secondary-fixed">{t("Сайтҳои расмӣ дар бораи патент ва қонунҳо")}</span>
             <span className="mt-1 inline-flex items-center gap-1 text-label-md">
               {t("Кушодан")}
               <ArrowRight className="h-4 w-4" aria-hidden />
