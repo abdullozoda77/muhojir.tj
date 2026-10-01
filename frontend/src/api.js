@@ -77,6 +77,7 @@ const SERVER_MESSAGES = {
   "You already have a resume. Edit it instead.": t("Шумо аллакай резюме доред."),
   "You cannot apply to your own company's job.": t("Ба кори ширкати худ ариза додан мумкин нест."),
   "This job is closed.": t("Ин ҷойи кор пӯшида аст."),
+  "Apply for this job on the source site.": t("Ба ин эълон дар сайти манбаъ ариза диҳед."),
   "You already applied for this job.": t("Шумо ба ин кор аллакай ариза додаед."),
   "Only employer accounts can do this.": t("Инро танҳо корфармоён карда метавонанд."),
   "Only the worker who applied can withdraw the application.": t("Аризаро танҳо худи коргар бозпас гирифта метавонад."),

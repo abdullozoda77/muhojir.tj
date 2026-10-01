@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, Ban, Building2, MessageSquarePlus, Pencil, Phone, ShieldAlert, Trash2 } from "lucide-react";
+import { ArrowLeft, Ban, Building2, ExternalLink, MessageSquarePlus, Pencil, Phone, ShieldAlert, Trash2 } from "lucide-react";
 import { api } from "../api.js";
 import { useAuth } from "../auth.jsx";
 import { useApi } from "../hooks.js";
 import { t } from "../i18n.js";
 import { date } from "../format.js";
-import { JobRow, VerifiedBadge } from "../components/JobCard.jsx";
+import { JobRow, SourceBadge, VerifiedBadge } from "../components/JobCard.jsx";
 import { StarPicker, Stars, average } from "../components/Stars.jsx";
 import { Button, EmptyState, ErrorBox, Skeleton } from "../components/ui.jsx";
 
@@ -115,6 +115,7 @@ export default function EmployerPage() {
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="text-headline-lg">{e.name}</h1>
             {e.is_verified && <VerifiedBadge />}
+            {e.source === "trudvsem" && <SourceBadge />}
           </div>
           <p className="text-body-md text-on-surface-variant">{[e.city, e.inn && `ИНН: ${e.inn}`].filter(Boolean).join(" • ")}</p>
           <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -124,6 +125,12 @@ export default function EmployerPage() {
             {complaints > 0 && <span className="rounded-full bg-error-container px-2.5 py-1 text-label-sm text-on-error-container">{t("{0} шикоят аз маош", complaints)}</span>}
           </div>
         </div>
+        {e.website && (
+          <a href={e.website} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-surface-container-low px-5 text-label-lg text-primary hover:bg-surface-container">
+            <ExternalLink className="h-5 w-5" aria-hidden />
+            {t("Сайт")}
+          </a>
+        )}
         {e.phone && user && (
           <a href={`tel:${e.phone}`} className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-surface-container-low px-5 text-label-lg text-primary hover:bg-surface-container">
             <Phone className="h-5 w-5" aria-hidden />

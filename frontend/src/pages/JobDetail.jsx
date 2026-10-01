@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, Building2, CalendarClock, ChevronRight, MapPin, Send, ShieldAlert } from "lucide-react";
+import { ArrowLeft, Building2, CalendarClock, ChevronRight, MapPin, ShieldAlert } from "lucide-react";
 import { useAuth } from "../auth.jsx";
 import { useApi } from "../hooks.js";
 import { t } from "../i18n.js";
 import { ago, date, salary } from "../format.js";
 import { industry } from "../constants.js";
 import ApplyDrawer from "../components/ApplyDrawer.jsx";
-import { Perks, VerifiedBadge, isPromoted } from "../components/JobCard.jsx";
+import { ApplyButton, Perks, SOURCE_NAME, SourceBadge, VerifiedBadge, isImported, isPromoted } from "../components/JobCard.jsx";
 import { Stars, average } from "../components/Stars.jsx";
 import { EmptyState, ErrorBox, Skeleton } from "../components/ui.jsx";
 
@@ -45,6 +45,7 @@ export default function JobDetail() {
           <div className="flex flex-wrap items-center gap-2">
             {isPromoted(job) && <span className="rounded-full bg-secondary px-2.5 py-1 text-label-sm text-on-secondary">TOP</span>}
             {job.employer.is_verified && <VerifiedBadge />}
+            {isImported(job) && <SourceBadge />}
             <span className="text-body-sm text-on-surface-variant">{ago(job.created_at)}</span>
           </div>
           <div>
@@ -85,10 +86,12 @@ export default function JobDetail() {
             </div>
           </Link>
           {!own && !closed && (
-            <button type="button" onClick={() => setApplying(job)} className="fixed bottom-[76px] left-4 right-4 z-40 inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl bg-primary text-label-lg text-on-primary shadow-lg hover:brightness-110 lg:static lg:shadow-sm">
-              <Send className="h-5 w-5" aria-hidden />
-              {t("Ариза додан")}
-            </button>
+            <ApplyButton job={job} onApply={setApplying} className="fixed bottom-[76px] left-4 right-4 z-40 min-h-[52px] shadow-lg lg:static lg:shadow-sm" />
+          )}
+          {isImported(job) && (
+            <p className="card p-4 text-body-sm text-on-surface-variant">
+              {t("Ин эълон аз сайти давлатии «{0}» гирифта шудааст. Ариза ва тамос бо корфармо — дар он сайт. Пеш аз сафар шартҳоро бо корфармо санҷед.", SOURCE_NAME)}
+            </p>
           )}
           {closed && <p className="card p-4 text-body-md text-on-surface-variant">{t("Ин эълон пӯшида аст.")}</p>}
         </aside>
