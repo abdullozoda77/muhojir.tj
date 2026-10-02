@@ -12,6 +12,8 @@ export default defineConfig({
       "/static": "http://127.0.0.1:8001",
       "/api": "http://127.0.0.1:8001",
       "/media": "http://127.0.0.1:8001",
+      // Live notifications (WebSocket).
+      "/ws": { target: "ws://127.0.0.1:8001", ws: true },
     },
   },
   // `npm run preview` serves the built site (with the service worker, which is off in development).
@@ -23,6 +25,8 @@ export default defineConfig({
       "/static": "http://127.0.0.1:8001",
       "/api": "http://127.0.0.1:8001",
       "/media": "http://127.0.0.1:8001",
+      // Live notifications (WebSocket).
+      "/ws": { target: "ws://127.0.0.1:8001", ws: true },
     },
   },
 });

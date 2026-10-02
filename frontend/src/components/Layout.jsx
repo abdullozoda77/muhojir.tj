@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import {
   ArrowRight, Bell, BookOpen, Bookmark, Briefcase, Calculator, GraduationCap, Home, LifeBuoy, LogIn, Moon, PenSquare, ReceiptText, Scale, SearchCheck, Settings, ShieldCheck, Sun, WifiOff,
@@ -9,8 +9,10 @@ import { lang, setLang, t } from "../i18n.js";
 import { useTheme } from "../theme.js";
 import { AnimatePresence, m } from "motion/react";
 import Footer from "./Footer.jsx";
+import LiveToast from "./LiveToast.jsx";
 import { PageTransition } from "./motion.jsx";
 import { useOnline } from "../pwa.js";
+import { useLiveNotifications } from "../live.js";
 import { Skeleton } from "./ui.jsx";
 
 function navFor(user) {
@@ -43,9 +45,14 @@ function navFor(user) {
 export const canEdit = (user) => user && (user.role === "editor" || user.role === "admin");
 
 // Counters for the menu: unread notifications and documents that need attention (ending soon or expired).
-function useCounters(user) {
+function useCounters(user, onNew) {
   const [counts, setCounts] = useState({ unread: 0, docs: 0 });
   const { pathname } = useLocation();
+  // New notifications and read ones in other tabs arrive over the WebSocket, so the bell is always current.
+  useLiveNotifications(user, (msg) => {
+    if (typeof msg.unread === "number") setCounts((c) => ({ ...c, unread: msg.unread }));
+    if (msg.type === "notification") onNew?.(msg.notification);
+  });
   useEffect(() => {
     if (!user) {
       setCounts({ unread: 0, docs: 0 });
@@ -139,7 +146,9 @@ function Badge({ kind, counts }) {
 export default function Layout() {
   const { user } = useAuth();
   const items = navFor(user);
-  const counts = useCounters(user);
+  const [toast, setToast] = useState(null);
+  const closeToast = useCallback(() => setToast(null), []);
+  const counts = useCounters(user, setToast);
   const { pathname } = useLocation();
   const online = useOnline();
 
@@ -288,6 +297,7 @@ export default function Layout() {
             </NavLink>
           ))}
       </nav>
+      <LiveToast notification={toast} onClose={closeToast} />
     </div>
   );
 }

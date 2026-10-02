@@ -1,6 +1,8 @@
+import { useEffect } from "react";
 import { Bell, BellRing, Briefcase, CheckCheck, Newspaper, Trash2 } from "lucide-react";
 import { api } from "../api.js";
 import { useApi } from "../hooks.js";
+import { LIVE_EVENT } from "../live.js";
 import { t } from "../i18n.js";
 import { ago } from "../format.js";
 import { Button, EmptyState, ErrorBox, PageHeader, Skeleton } from "../components/ui.jsx";
@@ -9,6 +11,11 @@ const KIND_ICON = { reminder: BellRing, job: Briefcase, news: Newspaper, system:
 
 export default function Notifications() {
   const { data, loading, error, reload } = useApi("/auth/notifications/?page_size=100");
+  // A new notification or one read in another tab: the list updates by itself.
+  useEffect(() => {
+    window.addEventListener(LIVE_EVENT, reload);
+    return () => window.removeEventListener(LIVE_EVENT, reload);
+  }, [reload]);
   const list = data?.results || [];
   const today = new Date().toDateString();
   const groups = [
