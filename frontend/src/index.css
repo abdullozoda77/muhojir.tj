@@ -146,6 +146,25 @@ html.dark {
   }
 }
 
+/* Footer: a bright copy of the papers pattern, seen only through a narrow slanted window that slides across,
+   so each document and book lights up as the light passes over it, then goes dim again. */
+.paper-shine {
+  -webkit-mask-image: linear-gradient(105deg, transparent 42%, #000 50%, transparent 58%);
+  mask-image: linear-gradient(105deg, transparent 42%, #000 50%, transparent 58%);
+  -webkit-mask-size: 300% 100%;
+  mask-size: 300% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  animation: paper-shine 9s ease-in-out infinite;
+}
+@keyframes paper-shine {
+  0% { -webkit-mask-position: 100% 0; mask-position: 100% 0; }
+  50%, 100% { -webkit-mask-position: 0% 0; mask-position: 0% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .paper-shine { display: none; }
+}
+
 /* "Print or PDF" on the calculator prints only the checklist (#print-area). */
 @media print {
   body * {
