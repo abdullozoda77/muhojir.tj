@@ -10,7 +10,7 @@ from .dashboard import install as install_dashboard
 
 schema_view = get_schema_view(
     openapi.Info(
-        title="Muhojir.tj API",
+        title="Muhojir API",
         default_version="v1",
         description="API for Tajik migrants in Russia: documents and deadlines, patent prices, guides and real jobs",
     ),
@@ -30,5 +30,5 @@ urlpatterns = [
     re_path(r"^redoc/$", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
-admin.site.site_header = "Muhojir.tj"
-admin.site.site_title = "Muhojir.tj"
+admin.site.site_header = "Muhojir"
+admin.site.site_title = "Muhojir"

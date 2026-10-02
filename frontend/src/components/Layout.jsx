@@ -62,12 +62,12 @@ function useCounters(user) {
 // light: white text for the dark sidebar.
 function Logo({ light = false }) {
   return (
-    <Link to="/" className="flex items-center gap-2.5" aria-label="Muhojir.tj">
+    <Link to="/" className="flex items-center gap-2.5" aria-label="Muhojir">
       <span className={`flex h-9 w-9 items-center justify-center rounded-[10px] ${light ? "bg-white" : "bg-banner"}`}>
         <ShieldCheck className={`h-5 w-5 ${light ? "text-secondary" : "text-white"}`} strokeWidth={2.4} aria-hidden />
       </span>
       <span className={`font-display text-[22px] font-bold ${light ? "text-white" : "text-navy"}`}>
-        Muhojir<span className={light ? "text-[#ff8a8f]" : "text-secondary"}>.tj</span>
+        Muhojir
       </span>
     </Link>
   );

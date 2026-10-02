@@ -17,16 +17,16 @@ def send_login_code(email):
     )
     minutes = int(settings.LOGIN_CODE_LIFETIME.total_seconds() // 60)
     send_mail(
-        subject=f"Muhojir.tj — рамзи воридшавӣ {code}",
+        subject=f"Muhojir — рамзи воридшавӣ {code}",
         message=(
             f"Салом!\n\n"
-            f"Рамзи воридшавӣ ба Muhojir.tj: {code}\n\n"
+            f"Рамзи воридшавӣ ба Muhojir: {code}\n\n"
             f"Рамз {minutes} дақиқа амал мекунад.\n"
             "Агар шумо ворид шудан нахостед, ин мактубро нодида гиред."
         ),
         html_message=(
             f'<div style="font-family:Arial,sans-serif;max-width:480px;margin:auto;padding:24px;color:#0f172a">'
-            f'<h2 style="color:#0369a1;margin:0 0 12px">Muhojir.tj</h2>'
+            f'<h2 style="color:#0369a1;margin:0 0 12px">Muhojir</h2>'
             f"<p>Салом!</p>"
             f"<p>Рамзи воридшавӣ:</p>"
             f'<p style="font-size:32px;font-weight:bold;letter-spacing:8px;background:#f0f9ff;border-radius:12px;'

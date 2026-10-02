@@ -51,7 +51,7 @@ KEEP_DAYS = 3
 
 def fetch(region, text, limit):
     query = urllib.parse.urlencode({"text": text, "offset": 0, "limit": limit})
-    request = urllib.request.Request(API.format(region=region, query=query), headers={"User-Agent": "Muhojir.tj job import"})
+    request = urllib.request.Request(API.format(region=region, query=query), headers={"User-Agent": "Muhojir job import"})
     with urllib.request.urlopen(request, timeout=30) as response:
         data = json.loads(response.read())
     return [item["vacancy"] for item in (data.get("results") or {}).get("vacancies", [])]

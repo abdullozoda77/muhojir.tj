@@ -1,6 +1,6 @@
 import forms from "@tailwindcss/forms";
 
-// Colors, sizes and type scale from the Muhojir.tj design (Material 3 style token names).
+// Colors, sizes and type scale from the Muhojir design (Material 3 style token names).
 // Blue is the main color and red the accent; "warning" (amber) is only for deadlines that end soon,
 // so they never look like "expired" (error red). "banner" is the blue of the patterned banners, deep in both themes.
 /** @type {import('tailwindcss').Config} */

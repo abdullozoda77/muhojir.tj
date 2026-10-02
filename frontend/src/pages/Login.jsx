@@ -119,7 +119,7 @@ export default function Login() {
       <div className="relative hidden flex-col justify-between overflow-hidden bg-banner p-12 text-white lg:flex">
         <Link to="/" className="flex items-center gap-2">
           <img src="/logo.svg" alt="" className="h-10 w-10 rounded-xl ring-2 ring-white/30" />
-          <span className="text-headline-md font-bold">Muhojir.tj</span>
+          <span className="text-headline-md font-bold">Muhojir</span>
         </Link>
         <div>
           <h1 className="text-headline-xl">{t("Ҳуҷҷатҳо сари вақт. Кори боэътимод.")}</h1>

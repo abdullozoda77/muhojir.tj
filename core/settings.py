@@ -1,5 +1,5 @@
 """
-Django settings for Muhojir.tj (a platform for Tajik migrants in Russia).
+Django settings for Muhojir (a platform for Tajik migrants in Russia).
 """
 
 import os
@@ -191,7 +191,7 @@ else:
 
 # Gmail and most SMTP servers only send "from" the account itself, so it is used by default.
 DEFAULT_FROM_EMAIL = os.getenv(
-    'DEFAULT_FROM_EMAIL', f'"Muhojir.tj" <{os.getenv("EMAIL_HOST_USER") or "noreply@muhojir.tj"}>'
+    'DEFAULT_FROM_EMAIL', f'"Muhojir" <{os.getenv("EMAIL_HOST_USER") or "noreply@muhojir.tj"}>'
 )
 
 LOGIN_CODE_LIFETIME = timedelta(minutes=10)
