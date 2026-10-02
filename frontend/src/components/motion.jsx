@@ -42,6 +42,18 @@ export function Stagger({ as = "div", className = "", children, ...props }) {
   );
 }
 
+// Like Stagger, but it starts when the group scrolls into view (once), e.g. the footer columns.
+const revealVariants = { hidden: {}, shown: { transition: { staggerChildren: 0.12 } } };
+
+export function RevealGroup({ as = "div", className = "", children, ...props }) {
+  const Tag = m[as];
+  return (
+    <Tag className={className} variants={revealVariants} initial={startShown() ? false : "hidden"} whileInView="shown" viewport={{ once: true, amount: 0.2 }} {...props}>
+      {children}
+    </Tag>
+  );
+}
+
 export function StaggerItem({ as = "div", className = "", children, ...props }) {
   const Tag = m[as];
   return (
