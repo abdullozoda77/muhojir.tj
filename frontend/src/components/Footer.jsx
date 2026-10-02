@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ExternalLink, Phone } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import { t } from "../i18n.js";
 import Pattern from "./Pattern.jsx";
 
@@ -50,10 +50,6 @@ export default function Footer() {
               <span className="font-display text-[24px] font-bold">Muhojir</span>
             </Link>
             <p className="max-w-xs text-body-md text-on-navy">{t("Ҳуҷҷатҳо сари вақт, кори боэътимод — барои муҳоҷирони тоҷик дар Русия. Ройгон ва бо забони тоҷикӣ.")}</p>
-            <a href="tel:112" className="inline-flex min-h-[44px] items-center gap-2 self-start rounded-xl bg-white/10 px-4 text-label-md hover:bg-white/15">
-              <Phone className="h-4 w-4" aria-hidden />
-              {t("Ёрии таъҷилӣ: 112")}
-            </a>
           </div>
 
           {COLUMNS.map((col) => (
