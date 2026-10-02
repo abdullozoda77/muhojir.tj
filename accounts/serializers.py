@@ -1,3 +1,4 @@
+from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers
 
@@ -17,15 +18,50 @@ class LowerEmailField(serializers.EmailField):
         return super().to_internal_value(data).strip().lower()
 
 
-class SendCodeSerializer(serializers.Serializer):
+class EmailSerializer(serializers.Serializer):
     email = LowerEmailField()
 
 
-class VerifyCodeSerializer(serializers.Serializer):
+class PasswordField(serializers.CharField):
+    """A new password, checked by Django's password rules (length, too common, only digits, like the email)."""
+
+    def __init__(self, **kwargs):
+        super().__init__(write_only=True, max_length=128, trim_whitespace=False, **kwargs)
+
+
+def check_password_rules(password, email=""):
+    try:
+        validate_password(password, user=User(email=email))
+    except DjangoValidationError as e:
+        raise serializers.ValidationError({"password": e.messages})
+
+
+class RegisterSerializer(serializers.Serializer):
+    email = LowerEmailField()
+    password = PasswordField()
+    full_name = serializers.CharField(max_length=150, required=False, allow_blank=True)
+
+    def validate(self, attrs):
+        check_password_rules(attrs["password"], attrs["email"])
+        return attrs
+
+
+class LoginSerializer(serializers.Serializer):
+    email = LowerEmailField()
+    password = serializers.CharField(write_only=True, trim_whitespace=False)
+
+
+class CodeSerializer(serializers.Serializer):
     email = LowerEmailField()
     code = serializers.RegexField(r"^\d{6}$", error_messages={"invalid": "The code is 6 digits."})
-    # Only used when this code creates the account.
-    full_name = serializers.CharField(max_length=150, required=False, allow_blank=True)
+
+
+class ResetPasswordSerializer(CodeSerializer):
+    password = PasswordField()
+
+    def validate(self, attrs):
+        check_password_rules(attrs["password"], attrs["email"])
+        return attrs
 
 
 class UserSerializer(serializers.ModelSerializer):

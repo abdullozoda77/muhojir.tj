@@ -32,7 +32,7 @@ class UserManager(BaseUserManager):
         return user
 
     def create_superuser(self, email, password=None, **extra):
-        extra.update(is_staff=True, is_superuser=True, role="admin")
+        extra.update(is_staff=True, is_superuser=True, role="admin", email_verified=True)
         return self.create_user(email, password, **extra)
 
 
@@ -53,6 +53,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     # City in Russia where the person lives now; jobs and news are shown for it first.
     city = models.CharField(max_length=100, blank=True)
     email_reminders = models.BooleanField(default=True)
+    # Sign-up is finished only when the code sent to the email is entered; until then login is refused.
+    email_verified = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     date_joined = models.DateTimeField(default=timezone.now)
@@ -83,10 +85,13 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 
 class EmailCode(models.Model):
-    """The 6-digit login code sent by email. Only a hash is stored, like a password; asking for a new code
-    replaces the old one. It is keyed by email, not user, because the first code creates the account."""
+    """A 6-digit code sent by email: to confirm the email after sign-up ("verify") or to set a new password
+    ("reset"). Only a hash is stored, like a password; asking for a new code replaces the old one."""
+
+    PURPOSES = (("verify", "Confirm email"), ("reset", "Reset password"))
 
     email = models.EmailField(unique=True)
+    purpose = models.CharField(max_length=10, choices=PURPOSES, default="verify")
     code_hash = models.CharField(max_length=128)
     sent_at = models.DateTimeField()
     attempts = models.PositiveSmallIntegerField(default=0)  # wrong tries with this code

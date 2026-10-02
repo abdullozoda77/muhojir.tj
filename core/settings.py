@@ -60,6 +60,8 @@ REST_FRAMEWORK = {
         'anon': '1000/hour',
         'user': '5000/hour',
         'login_code': '5/hour',
+        # Password tries: enough for typos, too few for guessing.
+        'login': '20/hour',
     },
 }
 
