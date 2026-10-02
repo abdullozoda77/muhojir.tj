@@ -1,16 +1,19 @@
-"""
-ASGI config for core project.
-
-It exposes the ASGI callable as a module-level variable named ``application``.
-
-For more information on this file, see
-https://docs.djangoproject.com/en/6.1/howto/deployment/asgi/
-"""
-
+"""ASGI entry point: normal HTTP requests go to Django, WebSockets (ws/...) to Channels.
+Run it with `python manage.py runserver` (Daphne) in development, or `daphne core.asgi:application` on a server."""
 import os
 
 from django.core.asgi import get_asgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.settings")
+django_app = get_asgi_application()  # set up Django before importing anything that uses models
 
-application = get_asgi_application()
+from channels.routing import ProtocolTypeRouter, URLRouter  # noqa: E402
+from channels.security.websocket import AllowedHostsOriginValidator  # noqa: E402
+
+from accounts.routing import websocket_urlpatterns  # noqa: E402
+from accounts.ws_auth import JWTAuthMiddleware  # noqa: E402
+
+application = ProtocolTypeRouter({
+    "http": django_app,
+    "websocket": AllowedHostsOriginValidator(JWTAuthMiddleware(URLRouter(websocket_urlpatterns))),
+})

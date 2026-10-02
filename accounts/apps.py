@@ -7,3 +7,5 @@ class AccountsConfig(AppConfig):
     def ready(self):
         # Makes ?search= ignore upper/lower case for Cyrillic on SQLite too (see core/sqlite.py).
         from core import sqlite  # noqa: F401
+
+        from . import signals  # noqa: F401  (live notifications)

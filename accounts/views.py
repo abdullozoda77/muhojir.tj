@@ -22,6 +22,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from .emails import send_code
 from .filters import NotificationFilter
+from .live import push_count
 from .models import EmailCode, Notification, User
 from .serializers import (
     CodeSerializer, EmailSerializer, LoginSerializer, LogoutSerializer, NotificationSerializer, RegisterSerializer,
@@ -247,4 +248,13 @@ class NotificationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixi
     @action(detail=False, methods=["post"], url_path="read-all")
     def read_all(self, request):
         updated = self.get_queryset().filter(is_read=False).update(is_read=True)
+        push_count(request.user.pk)  # other open tabs update their bell too
         return Response({"updated": updated})
+
+    def perform_update(self, serializer):
+        serializer.save()
+        push_count(self.request.user.pk)
+
+    def perform_destroy(self, notification):
+        notification.delete()
+        push_count(self.request.user.pk)

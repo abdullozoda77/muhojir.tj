@@ -20,6 +20,7 @@ ALLOWED_HOSTS = [h.strip() for h in os.getenv('ALLOWED_HOSTS', '127.0.0.1,localh
 
 
 INSTALLED_APPS = [
+    'daphne',  # first: `runserver` then also serves WebSockets (live notifications)
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -31,6 +32,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     'django_filters',
     'drf_yasg',
+    'channels',
     'accounts',
     'documents',
     'jobs',
@@ -116,6 +118,16 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'core.wsgi.application'
+ASGI_APPLICATION = 'core.asgi.application'
+
+# Live notifications go through a "channel layer". On one server process the in-memory one is enough
+# (development); with several processes (production) set REDIS_URL in .env, e.g. redis://127.0.0.1:6379/0.
+if os.getenv('REDIS_URL'):
+    CHANNEL_LAYERS = {
+        'default': {'BACKEND': 'channels_redis.core.RedisChannelLayer', 'CONFIG': {'hosts': [os.getenv('REDIS_URL')]}},
+    }
+else:
+    CHANNEL_LAYERS = {'default': {'BACKEND': 'channels.layers.InMemoryChannelLayer'}}
 
 
 if os.getenv('DB_NAME'):
