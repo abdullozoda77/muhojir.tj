@@ -69,6 +69,15 @@ const SERVER_MESSAGES = {
   "This phone number is already used by another account.": t("Ин рақами телефон аллакай дар ҳисоби дигар ҳаст."),
   "The end date must be after the issue date.": t("Санаи анҷом бояд баъд аз санаи додан бошад."),
   "You already reviewed this employer. Edit that review instead.": t("Шумо аллакай ба ин корфармо баҳо додаед."),
+  "Wrong email or password.": t("Почта ё парол нодуруст аст."),
+  "This email is already registered. Log in or reset the password.": t("Ин почта аллакай сабти ном шудааст. Ворид шавед ё паролро барқарор кунед."),
+  "Confirm your email first. We sent you a code.": t("Аввал почтаро тасдиқ кунед. Мо рамз фиристодем."),
+  "This email is already confirmed or not registered.": t("Ин почта аллакай тасдиқ шудааст ё сабти ном нашудааст."),
+  // Password rules: Django writes these in Russian.
+  "Введённый пароль слишком короткий. Он должен состоять из как минимум 8 символов.": t("Парол кӯтоҳ аст: ҳадди ақал 8 аломат лозим."),
+  "Введённый пароль слишком широко распространён.": t("Ин парол хеле оддӣ аст. Пароли дигар созед."),
+  "Введённый пароль состоит только из цифр.": t("Парол набояд танҳо аз рақамҳо иборат бошад."),
+  "Введённый пароль слишком похож на email.": t("Парол ба почтаи электронӣ хеле монанд аст."),
 };
 
 export function errorText(data) {

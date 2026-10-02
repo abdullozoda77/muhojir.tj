@@ -1,12 +1,37 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
-import { ArrowLeft, CheckCircle2, Mail, ShieldCheck } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Eye, EyeOff, KeyRound, LogIn, ShieldCheck, UserPlus } from "lucide-react";
 import { api } from "../api.js";
 import { useAuth } from "../auth.jsx";
 import { t } from "../i18n.js";
 import { Button, ErrorBox } from "../components/ui.jsx";
 
 const RESEND_SECONDS = 60;
+
+// A password box with a button to show what was typed (on a phone it is easy to mistype).
+function PasswordInput({ value, onChange, autoComplete, label, hint }) {
+  const [shown, setShown] = useState(false);
+  return (
+    <label className="block">
+      <span className="label">{label}</span>
+      <span className="relative block">
+        <input className="input pr-12" type={shown ? "text" : "password"} required minLength={8} autoComplete={autoComplete} value={value} onChange={(e) => onChange(e.target.value)} />
+        <button
+          type="button"
+          onClick={() => setShown((v) => !v)}
+          aria-label={shown ? t("Паролро пинҳон кардан") : t("Паролро нишон додан")}
+          className="absolute inset-y-0 right-0 flex w-12 items-center justify-center text-on-surface-variant hover:text-primary"
+        >
+          {shown ? <EyeOff className="h-5 w-5" aria-hidden /> : <Eye className="h-5 w-5" aria-hidden />}
+        </button>
+      </span>
+      {hint && <span className="mt-1 block text-body-sm text-on-surface-variant">{hint}</span>}
+    </label>
+  );
+}
+
+// The screens of this page. "verify" and "reset" come after a code was emailed.
+const ICONS = { login: LogIn, register: UserPlus, verify: ShieldCheck, forgot: KeyRound, reset: KeyRound };
 
 function CodeBoxes({ value, onChange, disabled }) {
   const refs = useRef([]);
@@ -63,14 +88,15 @@ export default function Login() {
   const { user, login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [step, setStep] = useState("email");
+  const [mode, setMode] = useState("login");
   const [email, setEmail] = useState("");
-  const [code, setCode] = useState("");
-  const [isNew, setIsNew] = useState(false);
+  const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
+  const [code, setCode] = useState("");
   const [wait, setWait] = useState(0);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
+  const [note, setNote] = useState("");
 
   useEffect(() => {
     if (wait <= 0) return;
@@ -80,16 +106,20 @@ export default function Login() {
 
   if (user) return <Navigate to={location.state?.from || "/"} replace />;
 
-  const sendCode = async (e) => {
+  const go = (next) => {
+    setMode(next);
+    setError(null);
+    setNote("");
+    setCode("");
+  };
+
+  // Every form: busy while waiting, errors shown under the fields.
+  const run = (action) => async (e) => {
     e?.preventDefault();
     setBusy(true);
     setError(null);
     try {
-      const res = await api("/auth/send-code/", { method: "POST", body: { email } });
-      setIsNew(res.is_new_user);
-      setStep("code");
-      setCode("");
-      setWait(RESEND_SECONDS);
+      await action();
     } catch (err) {
       setError(err);
       if (err.status === 429) setWait(RESEND_SECONDS);
@@ -98,21 +128,61 @@ export default function Login() {
     }
   };
 
-  const verify = async (e) => {
-    e.preventDefault();
-    setBusy(true);
-    setError(null);
-    try {
-      const body = { email, code: code.replace(/\s/g, ""), ...(isNew ? { full_name: fullName.trim() } : {}) };
-      const data = await api("/auth/verify-code/", { method: "POST", body });
-      login(data);
-      navigate(location.state?.from || "/", { replace: true });
-    } catch (err) {
-      setError(err);
-    } finally {
-      setBusy(false);
-    }
+  const enter = (data) => {
+    login(data);
+    navigate(location.state?.from || "/", { replace: true });
   };
+
+  const codeSent = (next) => {
+    setCode("");
+    setWait(RESEND_SECONDS);
+    go(next);
+  };
+
+  const signIn = run(async () => {
+    try {
+      enter(await api("/auth/login/", { method: "POST", body: { email, password } }));
+    } catch (err) {
+      // Signed up but never confirmed the email: the server has just sent a new code.
+      if (err.status === 403 && err.data?.code === "not_verified") return codeSent("verify");
+      throw err;
+    }
+  });
+
+  const register = run(async () => {
+    await api("/auth/register/", { method: "POST", body: { email, password, full_name: fullName.trim() } });
+    codeSent("verify");
+  });
+
+  const verify = run(async () => {
+    enter(await api("/auth/verify-email/", { method: "POST", body: { email, code: code.replace(/\s/g, "") } }));
+  });
+
+  const resend = run(async () => {
+    await api("/auth/resend-code/", { method: "POST", body: { email } });
+    setWait(RESEND_SECONDS);
+    setNote(t("Рамзи нав фиристода шуд."));
+  });
+
+  const forgot = run(async () => {
+    await api("/auth/password/forgot/", { method: "POST", body: { email } });
+    setPassword("");
+    codeSent("reset");
+  });
+
+  const reset = run(async () => {
+    enter(await api("/auth/password/reset/", { method: "POST", body: { email, code: code.replace(/\s/g, ""), password } }));
+  });
+
+  const Icon = ICONS[mode];
+  const codeReady = code.replace(/\s/g, "").length === 6;
+  const emailInput = (
+    <label className="block">
+      <span className="label">{t("Почтаи электронӣ (email)")}</span>
+      <input className="input" type="email" required autoFocus autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="ali@gmail.com" />
+    </label>
+  );
+  const linkButton = "min-h-[44px] text-label-md text-primary hover:underline disabled:text-outline disabled:no-underline";
 
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
@@ -132,7 +202,7 @@ export default function Login() {
             ))}
           </ul>
         </div>
-        <p className="text-body-sm text-on-navy/80">{t("Бепул. Бе парол — рамз ба почтаи электронӣ меояд.")}</p>
+        <p className="text-body-sm text-on-navy/80">{t("Бепул. Почтаи шумо бо рамз тасдиқ карда мешавад.")}</p>
       </div>
 
       <div className="flex flex-col justify-center px-4 py-10 sm:px-10">
@@ -142,56 +212,84 @@ export default function Login() {
             {t("Ба саҳифаи асосӣ")}
           </Link>
           <div className="mb-8 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-fixed text-primary">
-            {step === "email" ? <Mail className="h-7 w-7" aria-hidden /> : <ShieldCheck className="h-7 w-7" aria-hidden />}
+            <Icon className="h-7 w-7" aria-hidden />
           </div>
 
-          {step === "email" ? (
-            <form onSubmit={sendCode} className="space-y-5">
+          {mode === "login" && (
+            <form onSubmit={signIn} className="space-y-5">
               <div>
                 <h2 className="text-headline-lg">{t("Ворид шудан")}</h2>
-                <p className="mt-1 text-body-md text-on-surface-variant">{t("Почтаи электронии худро нависед. Мо ба он рамзи 6-рақама мефиристем.")}</p>
+                <p className="mt-1 text-body-md text-on-surface-variant">{t("Почтаи электронӣ ва пароли худро нависед.")}</p>
+              </div>
+              {emailInput}
+              <PasswordInput label={t("Парол")} value={password} onChange={setPassword} autoComplete="current-password" />
+              <ErrorBox error={error} />
+              <Button type="submit" loading={busy} className="w-full">{t("Ворид шудан")}</Button>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <button type="button" onClick={() => go("forgot")} className={linkButton}>{t("Паролро фаромӯш кардед?")}</button>
+                <button type="button" onClick={() => go("register")} className={linkButton}>{t("Ҳисоб надоред? Сабти ном")}</button>
+              </div>
+            </form>
+          )}
+
+          {mode === "register" && (
+            <form onSubmit={register} className="space-y-5">
+              <div>
+                <h2 className="text-headline-lg">{t("Сабти ном")}</h2>
+                <p className="mt-1 text-body-md text-on-surface-variant">{t("Парол созед. Баъд ба почтаи шумо рамзи 6-рақама меояд, то онро тасдиқ кунед.")}</p>
               </div>
               <label className="block">
-                <span className="label">{t("Почтаи электронӣ (email)")}</span>
-                <input className="input" type="email" required autoFocus autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="ali@gmail.com" />
+                <span className="label">{t("Ному насаб")}</span>
+                <input className="input" autoComplete="name" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder={t("Масалан: Алӣ Каримов")} />
               </label>
+              {emailInput}
+              <PasswordInput label={t("Парол созед")} value={password} onChange={setPassword} autoComplete="new-password" hint={t("Ҳадди ақал 8 аломат: ҳарфҳо ва рақамҳо. Танҳо рақам ё пароли осон қабул намешавад.")} />
               <ErrorBox error={error} />
-              <Button type="submit" loading={busy} disabled={wait > 0} className="w-full">
-                {wait > 0 ? t("Баъд аз {0} сония", wait) : t("Рамз гирифтан")}
-              </Button>
+              <Button type="submit" loading={busy} className="w-full">{t("Сабти ном ва гирифтани рамз")}</Button>
+              <button type="button" onClick={() => go("login")} className={linkButton}>{t("Ҳисоб доред? Ворид шавед")}</button>
             </form>
-          ) : (
-            <form onSubmit={verify} className="space-y-5">
+          )}
+
+          {(mode === "verify" || mode === "reset") && (
+            <form onSubmit={mode === "verify" ? verify : reset} className="space-y-5">
               <div>
-                <h2 className="text-headline-lg">{t("Рамзро ворид кунед")}</h2>
+                <h2 className="text-headline-lg">{mode === "verify" ? t("Почтаро тасдиқ кунед") : t("Пароли нав")}</h2>
                 <p className="mt-1 text-body-md text-on-surface-variant">
                   {t("Рамзро ба {0} фиристодем. Агар набошад, папкаи «Спам»-ро бинед.", email)}
                 </p>
               </div>
               <CodeBoxes value={code} onChange={setCode} disabled={busy} />
-
-              {isNew && (
-                <div className="space-y-4 rounded-2xl bg-surface-container-lowest p-4 shadow-sm">
-                  <p className="text-label-lg">{t("Шумо бори аввал ҳастед. Хуш омадед!")}</p>
-                  <label className="block">
-                    <span className="label">{t("Ному насаб")}</span>
-                    <input className="input" autoComplete="name" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder={t("Масалан: Алӣ Каримов")} />
-                  </label>
-                </div>
+              {mode === "reset" && (
+                <PasswordInput label={t("Пароли нав")} value={password} onChange={setPassword} autoComplete="new-password" hint={t("Ҳадди ақал 8 аломат: ҳарфҳо ва рақамҳо. Танҳо рақам ё пароли осон қабул намешавад.")} />
               )}
-
               <ErrorBox error={error} />
-              <Button type="submit" loading={busy} disabled={code.replace(/\s/g, "").length !== 6} className="w-full">
-                {t("Тасдиқ кардан")}
+              {note && <p role="status" className="rounded-xl bg-tertiary-fixed p-3 text-label-md text-on-tertiary-fixed">{note}</p>}
+              <Button type="submit" loading={busy} disabled={!codeReady || (mode === "reset" && password.length < 8)} className="w-full">
+                {mode === "verify" ? t("Тасдиқ кардан") : t("Паролро иваз кардан")}
               </Button>
-              <div className="flex flex-wrap items-center justify-between gap-2 text-label-md">
-                <button type="button" onClick={() => { setStep("email"); setError(null); }} className="min-h-[44px] text-on-surface-variant hover:text-primary">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <button type="button" onClick={() => go(mode === "verify" ? "register" : "forgot")} className="min-h-[44px] text-label-md text-on-surface-variant hover:text-primary">
                   {t("Email-ро иваз кардан")}
                 </button>
-                <button type="button" onClick={sendCode} disabled={wait > 0 || busy} className="min-h-[44px] text-primary disabled:text-outline">
+                <button type="button" onClick={mode === "verify" ? resend : forgot} disabled={wait > 0 || busy} className={linkButton}>
                   {wait > 0 ? t("Рамзи нав баъд аз {0} сония", wait) : t("Рамзи нав фиристед")}
                 </button>
               </div>
+            </form>
+          )}
+
+          {mode === "forgot" && (
+            <form onSubmit={forgot} className="space-y-5">
+              <div>
+                <h2 className="text-headline-lg">{t("Барқарор кардани парол")}</h2>
+                <p className="mt-1 text-body-md text-on-surface-variant">{t("Почтаи худро нависед. Мо рамз мефиристем ва шумо пароли нав мегузоред.")}</p>
+              </div>
+              {emailInput}
+              <ErrorBox error={error} />
+              <Button type="submit" loading={busy} disabled={wait > 0} className="w-full">
+                {wait > 0 ? t("Баъд аз {0} сония", wait) : t("Рамз гирифтан")}
+              </Button>
+              <button type="button" onClick={() => go("login")} className={linkButton}>{t("Бозгашт ба воридшавӣ")}</button>
             </form>
           )}
         </div>
