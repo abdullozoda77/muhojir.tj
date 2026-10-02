@@ -9,6 +9,14 @@ export default {
   content: ["./index.html", "./src/**/*.{js,jsx}"],
   theme: {
     extend: {
+      // The footer's light: a soft band that sweeps across, then rests before the next pass.
+      keyframes: {
+        shine: {
+          "0%": { transform: "translateX(-120%) skewX(-20deg)" },
+          "45%, 100%": { transform: "translateX(320%) skewX(-20deg)" },
+        },
+      },
+      animation: { shine: "shine 9s ease-in-out infinite" },
       // Every color is a CSS variable from index.css, so dark mode (html.dark) only swaps the variables.
       colors: {
         banner: "rgb(var(--c-banner) / <alpha-value>)",

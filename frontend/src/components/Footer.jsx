@@ -39,7 +39,9 @@ const linkStyle = "inline-flex min-h-[36px] items-center gap-1.5 text-body-md te
 export default function Footer() {
   return (
     <footer className="relative mt-10 overflow-hidden bg-banner text-white">
-      <Pattern opacity={0.08} motion="float" />
+      <Pattern opacity={0.07} motion="none" />
+      {/* A soft light sweeps over the papers now and then (not for people who turned animations off). */}
+      <div aria-hidden className="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-white/[0.1] to-transparent opacity-0 motion-safe:animate-shine motion-safe:opacity-100" />
       <div className="relative mx-auto flex max-w-6xl flex-col gap-8 px-4 pb-28 pt-10 md:px-8 lg:pb-8">
         <div className="grid grid-cols-2 gap-x-6 gap-y-8 lg:grid-cols-[1.4fr_1fr_1fr_1.2fr]">
           <div className="col-span-2 flex flex-col gap-3 lg:col-span-1">
