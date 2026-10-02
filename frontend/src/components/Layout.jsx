@@ -8,6 +8,7 @@ import { useAuth } from "../auth.jsx";
 import { lang, setLang, t } from "../i18n.js";
 import { useTheme } from "../theme.js";
 import { AnimatePresence, m } from "motion/react";
+import Footer from "./Footer.jsx";
 import { PageTransition } from "./motion.jsx";
 import { useOnline } from "../pwa.js";
 import { Skeleton } from "./ui.jsx";
@@ -235,8 +236,9 @@ export default function Layout() {
           </div>
         </header>
 
-        <main className="min-h-screen pb-24 pt-16 lg:pb-0 lg:pt-[72px]">
-          <div className="mx-auto max-w-6xl px-4 py-6 md:px-8 md:py-8">
+        {/* The footer stays at the bottom even on short pages; on phones it ends above the bottom tabs. */}
+        <main className="flex min-h-screen flex-col pt-16 lg:pt-[72px]">
+          <div className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 md:px-8 md:py-8">
             {!online && (
               <p role="status" className="mb-4 flex items-center gap-2 rounded-xl bg-warning-fixed px-4 py-3 text-label-md text-on-warning-fixed">
                 <WifiOff className="h-4 w-4 shrink-0" aria-hidden />
@@ -250,6 +252,7 @@ export default function Layout() {
               </PageTransition>
             </Suspense>
           </div>
+          <Footer />
         </main>
       </div>
 
