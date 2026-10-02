@@ -3,23 +3,29 @@ import { useId } from "react";
 // Papers and books drawn over the blue banners in thin white lines: a document with a folded corner,
 // an open book and a closed book, repeated in a slightly tilted grid. One 120×120 tile:
 const TILE = 120;
-// The papers drift slowly across the banner: one tile in this many seconds, then it starts again
-// exactly where it began, so the loop has no jump.
+// How the papers move. "drift" (banners): slowly across, one tile in DRIFT_SECONDS, then again from where
+// they began, so the loop has no jump. "float" (footer): they rise and sink a little in place and glow
+// brighter and dimmer, like breathing. "none": standing still.
 const DRIFT_SECONDS = 24;
+const FLOAT_SECONDS = 7;
 
 const reducedMotion = () => typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
-export default function Pattern({ opacity = 0.14, still = false }) {
+export default function Pattern({ opacity = 0.14, motion = "drift" }) {
   const id = useId().replace(/:/g, "");
-  const move = !still && !reducedMotion(); // people who turned animations off on the phone see it standing
+  const move = reducedMotion() ? "none" : motion; // people who turned animations off on the phone see it standing
   return (
     <svg aria-hidden className="pointer-events-none absolute inset-0 h-full w-full" style={{ opacity }}>
       <defs>
         <pattern id={`papers-${id}`} width={TILE} height={TILE} patternUnits="userSpaceOnUse" patternTransform="rotate(-8)">
-          {move && (
+          {move === "drift" && (
             <animateTransform attributeName="patternTransform" type="translate" from="0 0" to={`${TILE} ${-TILE}`} dur={`${DRIFT_SECONDS}s`} repeatCount="indefinite" additive="sum" />
           )}
+          {move === "float" && (
+            <animateTransform attributeName="patternTransform" type="translate" values="0 0; 4 -9; 0 0" keyTimes="0; 0.5; 1" calcMode="spline" keySplines="0.45 0 0.55 1; 0.45 0 0.55 1" dur={`${FLOAT_SECONDS}s`} repeatCount="indefinite" additive="sum" />
+          )}
           <g fill="none" stroke="#fff" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+            {move === "float" && <animate attributeName="opacity" values="1; 0.45; 1" dur={`${FLOAT_SECONDS * 0.8}s`} repeatCount="indefinite" />}
             {/* document: page, folded corner, text lines */}
             <path d="M12 8h22l9 9v33H12z" />
             <path d="M34 8v9h9" />
