@@ -3,13 +3,22 @@ import { useId } from "react";
 // Papers and books drawn over the blue banners in thin white lines: a document with a folded corner,
 // an open book and a closed book, repeated in a slightly tilted grid. One 120×120 tile:
 const TILE = 120;
+// The papers drift slowly across the banner: one tile in this many seconds, then it starts again
+// exactly where it began, so the loop has no jump.
+const DRIFT_SECONDS = 24;
 
-export default function Pattern({ opacity = 0.14 }) {
+const reducedMotion = () => typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+
+export default function Pattern({ opacity = 0.14, still = false }) {
   const id = useId().replace(/:/g, "");
+  const move = !still && !reducedMotion(); // people who turned animations off on the phone see it standing
   return (
     <svg aria-hidden className="pointer-events-none absolute inset-0 h-full w-full" style={{ opacity }}>
       <defs>
         <pattern id={`papers-${id}`} width={TILE} height={TILE} patternUnits="userSpaceOnUse" patternTransform="rotate(-8)">
+          {move && (
+            <animateTransform attributeName="patternTransform" type="translate" from="0 0" to={`${TILE} ${-TILE}`} dur={`${DRIFT_SECONDS}s`} repeatCount="indefinite" additive="sum" />
+          )}
           <g fill="none" stroke="#fff" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
             {/* document: page, folded corner, text lines */}
             <path d="M12 8h22l9 9v33H12z" />
