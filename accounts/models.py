@@ -38,8 +38,10 @@ class UserManager(BaseUserManager):
 
 class User(AbstractBaseUser, PermissionsMixin):
     # migrant: documents, reminders, payments, reviews of companies.
-    # admin: everything, including the blacklist of companies and news.
-    ROLES = (("migrant", "Migrant"), ("admin", "Admin"))
+    # editor: also the site's content (news, guides, exam questions, help sites, centers, patent prices),
+    #         in the admin panel and through the API; no access to users, their documents or payments.
+    # admin: everything, including users, roles and the blacklist of companies.
+    ROLES = (("migrant", "Migrant"), ("editor", "Editor"), ("admin", "Admin"))
     LANGUAGES = (("tg", "Тоҷикӣ"), ("ru", "Русский"))
 
     email = models.EmailField(unique=True)
@@ -70,6 +72,11 @@ class User(AbstractBaseUser, PermissionsMixin):
             self.phone = normalize_phone(self.phone)
         except ValidationError as e:
             raise ValidationError({"phone": e.messages})
+
+    def save(self, *args, **kwargs):
+        # Editors and admins work in the admin panel, so they are staff; a migrant never is.
+        self.is_staff = self.is_superuser or self.role in ("editor", "admin")
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.full_name or self.email

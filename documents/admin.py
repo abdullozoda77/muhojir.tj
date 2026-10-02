@@ -1,24 +1,26 @@
 from django.contrib import admin
 
+from core.admin_access import EditorAccess, EditorChangeOnly
+
 from .models import (
     DocumentType, ExamQuestion, GuideStep, LawNews, MigrationCenter, Payment, Region, ReminderLog, UserDocument,
 )
 
 
-class GuideStepInline(admin.StackedInline):
+class GuideStepInline(EditorAccess, admin.StackedInline):
     model = GuideStep
     extra = 0
 
 
 @admin.register(DocumentType)
-class DocumentTypeAdmin(admin.ModelAdmin):
+class DocumentTypeAdmin(EditorChangeOnly, admin.ModelAdmin):
     list_display = ["title", "slug", "default_validity_days", "order"]
     prepopulated_fields = {"slug": ["title"]}
     inlines = [GuideStepInline]
 
 
 @admin.register(Region)
-class RegionAdmin(admin.ModelAdmin):
+class RegionAdmin(EditorAccess, admin.ModelAdmin):
     list_display = ["name", "patent_monthly_price", "price_year"]
     list_editable = ["patent_monthly_price", "price_year"]
     search_fields = ["name"]
@@ -38,11 +40,17 @@ class ReminderLogAdmin(admin.ModelAdmin):
 
 
 @admin.register(LawNews)
-class LawNewsAdmin(admin.ModelAdmin):
+class LawNewsAdmin(EditorAccess, admin.ModelAdmin):
     list_display = ["title", "is_published", "published_at"]
     list_filter = ["is_published", "document_types"]
     search_fields = ["title", "summary"]
     filter_horizontal = ["document_types"]
+    exclude = ["created_by"]
+
+    def save_model(self, request, obj, form, change):
+        if not obj.created_by_id:
+            obj.created_by = request.user
+        super().save_model(request, obj, form, change)
 
 
 @admin.register(Payment)
@@ -55,7 +63,7 @@ class PaymentAdmin(admin.ModelAdmin):
 
 
 @admin.register(MigrationCenter)
-class MigrationCenterAdmin(admin.ModelAdmin):
+class MigrationCenterAdmin(EditorAccess, admin.ModelAdmin):
     list_display = ["name", "region", "address", "working_hours", "phone", "order"]
     list_filter = ["region"]
     list_editable = ["order"]
@@ -63,7 +71,7 @@ class MigrationCenterAdmin(admin.ModelAdmin):
 
 
 @admin.register(ExamQuestion)
-class ExamQuestionAdmin(admin.ModelAdmin):
+class ExamQuestionAdmin(EditorAccess, admin.ModelAdmin):
     list_display = ["question", "section", "answer", "is_active", "order"]
     list_filter = ["section", "is_active"]
     list_editable = ["is_active", "order"]

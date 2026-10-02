@@ -6,6 +6,8 @@ from django.contrib import admin
 from django.db.models import Count, Max, Sum
 from django.utils import timezone
 
+from core.permissions import is_admin
+
 from accounts.models import User
 from documents.models import ExamQuestion, LawNews, Payment, ReminderLog, UserDocument
 from jobs.models import Employer, EmployerReview, Job, JobAlert, SavedJob
@@ -57,6 +59,8 @@ def install(site=admin.site):
     show = site.index
 
     def index(request, extra_context=None):
-        return show(request, {**(extra_context or {}), "stats": stats()})
+        # The numbers (users, payments) are for admins only; editors see just their sections.
+        extra = {"stats": stats()} if is_admin(request.user) else {}
+        return show(request, {**(extra_context or {}), **extra})
 
     site.index = index

@@ -1,10 +1,12 @@
 from django.contrib import admin
 
+from core.admin_access import EditorAccess
+
 from .models import HelpContact, LegalQuestion
 
 
 @admin.register(HelpContact)
-class HelpContactAdmin(admin.ModelAdmin):
+class HelpContactAdmin(EditorAccess, admin.ModelAdmin):
     list_display = ["title", "kind", "phone", "region", "order", "is_active"]
     list_filter = ["kind", "is_active", "region"]
     list_editable = ["order", "is_active"]

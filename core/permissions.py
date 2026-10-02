@@ -2,7 +2,13 @@ from rest_framework import permissions
 
 
 def is_admin(user):
-    return bool(user and user.is_authenticated and (user.is_staff or user.role == "admin"))
+    # By role, not by is_staff: editors are staff too (they work in the admin panel) but are not admins.
+    return bool(user and user.is_authenticated and (user.is_superuser or user.role == "admin"))
+
+
+def is_editor(user):
+    """Editors manage the site's content (news, guides, exam questions, help sites, centers, prices); admins too."""
+    return bool(user and user.is_authenticated and user.is_active and (user.role == "editor" or is_admin(user)))
 
 
 class IsAdmin(permissions.BasePermission):
@@ -19,6 +25,11 @@ def owner_of(obj, path):
     for part in path.split("."):
         obj = getattr(obj, part)
     return obj
+
+
+class IsEditorOrReadOnly(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return request.method in permissions.SAFE_METHODS or is_editor(request.user)
 
 
 class IsOwnerOrAdminOrReadOnly(permissions.BasePermission):

@@ -2,28 +2,21 @@ from rest_framework import permissions, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
-
-from core.permissions import IsAdmin, IsAdminOrReadOnly, is_admin
+from core.permissions import IsAdmin, IsEditorOrReadOnly, is_admin, is_editor
 from .filters import HelpContactFilter, LegalQuestionFilter
 from .models import HelpContact, LegalQuestion
 from .serializers import HelpContactSerializer, LegalAnswerSerializer, LegalQuestionSerializer
 
-
 class HelpContactViewSet(viewsets.ModelViewSet):
-    """Help contacts: everyone reads the active ones, admins manage them."""
-
     serializer_class = HelpContactSerializer
-    permission_classes = [IsAdminOrReadOnly]
+    permission_classes = [IsEditorOrReadOnly]
     filterset_class = HelpContactFilter
 
     def get_queryset(self):
         contacts = HelpContact.objects.select_related("region")
-        return contacts if is_admin(self.request.user) else contacts.filter(is_active=True)
-
+        return contacts if is_editor(self.request.user) else contacts.filter(is_active=True)
 
 class LegalQuestionViewSet(viewsets.ModelViewSet):
-    """A worker sees and asks their own questions; admins see all of them and answer with POST .../answer/."""
-
     serializer_class = LegalQuestionSerializer
     permission_classes = [permissions.IsAuthenticated]
     filterset_class = LegalQuestionFilter
@@ -38,7 +31,6 @@ class LegalQuestionViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
 
     def perform_update(self, serializer):
-        # The question can be corrected only until the lawyer answers it.
         if serializer.instance.status != "new":
             raise PermissionDenied("The question already has an answer and can not be changed.")
         serializer.save()

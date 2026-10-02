@@ -5,7 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.parsers import JSONParser, MultiPartParser
 from rest_framework.response import Response
 
-from core.permissions import IsAdminOrReadOnly, is_admin
+from core.permissions import IsAdminOrReadOnly, IsEditorOrReadOnly, is_editor
 from .filters import (
     DocumentTypeFilter, ExamQuestionFilter, GuideStepFilter, LawNewsFilter, MigrationCenterFilter, PaymentFilter,
     RegionFilter, UserDocumentFilter,
@@ -29,14 +29,14 @@ class DocumentTypeViewSet(viewsets.ModelViewSet):
 class GuideStepViewSet(viewsets.ModelViewSet):
     queryset = GuideStep.objects.all()
     serializer_class = GuideStepSerializer
-    permission_classes = [IsAdminOrReadOnly]
+    permission_classes = [IsEditorOrReadOnly]
     filterset_class = GuideStepFilter
 
 
 class RegionViewSet(viewsets.ModelViewSet):
     queryset = Region.objects.all()
     serializer_class = RegionSerializer
-    permission_classes = [IsAdminOrReadOnly]
+    permission_classes = [IsEditorOrReadOnly]
     filterset_class = RegionFilter
 
 
@@ -115,7 +115,7 @@ class PaymentViewSet(viewsets.ModelViewSet):
 class MigrationCenterViewSet(viewsets.ModelViewSet):
     queryset = MigrationCenter.objects.select_related("region")
     serializer_class = MigrationCenterSerializer
-    permission_classes = [IsAdminOrReadOnly]
+    permission_classes = [IsEditorOrReadOnly]
     filterset_class = MigrationCenterFilter
 
 
@@ -128,15 +128,15 @@ def publish_date(serializer):
 
 
 class LawNewsViewSet(viewsets.ModelViewSet):
-    """Drafts (is_published off) are seen only by admins."""
+    """Drafts (is_published off) are seen only by editors and admins."""
 
     serializer_class = LawNewsSerializer
-    permission_classes = [IsAdminOrReadOnly]
+    permission_classes = [IsEditorOrReadOnly]
     filterset_class = LawNewsFilter
 
     def get_queryset(self):
         qs = LawNews.objects.all()
-        return qs if is_admin(self.request.user) else qs.filter(is_published=True)
+        return qs if is_editor(self.request.user) else qs.filter(is_published=True)
 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user, **publish_date(serializer))
@@ -146,12 +146,12 @@ class LawNewsViewSet(viewsets.ModelViewSet):
 
 
 class ExamQuestionViewSet(viewsets.ModelViewSet):
-    """Practice questions for the patent exam. Everyone reads the active ones; admins manage them."""
+    """Practice questions for the patent exam. Everyone reads the active ones; editors manage them."""
 
     serializer_class = ExamQuestionSerializer
-    permission_classes = [IsAdminOrReadOnly]
+    permission_classes = [IsEditorOrReadOnly]
     filterset_class = ExamQuestionFilter
 
     def get_queryset(self):
         qs = ExamQuestion.objects.all()
-        return qs if is_admin(self.request.user) else qs.filter(is_active=True)
+        return qs if is_editor(self.request.user) else qs.filter(is_active=True)
