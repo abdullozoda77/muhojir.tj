@@ -298,6 +298,7 @@ export default function Layout() {
           ))}
       </nav>
       <LiveToast notification={toast} onClose={closeToast} />
+      <div className="corner-lights" aria-hidden />
     </div>
   );
 }

@@ -165,6 +165,55 @@ html.dark {
   .paper-shine { display: none; }
 }
 
+/* Soft lights in the page corners, behind everything: blue at the top right, a little red at the bottom left
+   (the site's two colors). Radial gradients instead of blur, so phones draw them cheaply. They slowly "breathe";
+   stronger in the dark theme, faint in the light one. */
+.corner-lights {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+  --glow: 0.2;
+}
+html.dark .corner-lights {
+  --glow: 0.45;
+}
+.corner-lights::before,
+.corner-lights::after {
+  content: "";
+  position: absolute;
+  width: min(70vw, 760px);
+  aspect-ratio: 1;
+  border-radius: 9999px;
+  animation: corner-glow 14s ease-in-out infinite alternate;
+}
+.corner-lights::before {
+  top: max(-30vw, -320px);
+  right: max(-25vw, -280px);
+  background: radial-gradient(circle, rgb(var(--c-primary) / var(--glow)) 0%, rgb(var(--c-primary) / 0) 65%);
+}
+.corner-lights::after {
+  bottom: max(-30vw, -320px);
+  left: max(-20vw, -220px);
+  background: radial-gradient(circle, rgb(var(--c-secondary) / calc(var(--glow) * 0.85)) 0%, rgb(var(--c-secondary) / 0) 65%);
+  animation-delay: -7s;
+}
+/* On wide screens the left menu (260px) covers the page's left edge: the light starts next to it. */
+@media (min-width: 1024px) {
+  .corner-lights::after {
+    left: calc(260px - min(20vw, 220px));
+  }
+}
+@keyframes corner-glow {
+  from { transform: scale(0.9); opacity: 0.75; }
+  to { transform: scale(1.1); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .corner-lights::before,
+  .corner-lights::after { animation: none; }
+}
+
 /* "Print or PDF" on the calculator prints only the checklist (#print-area). */
 @media print {
   body * {
