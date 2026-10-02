@@ -100,6 +100,11 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = [o.strip() for o in os.getenv('CORS_ALLOWED_ORIGINS', 'http://localhost:3000,http://localhost:5173').split(',') if o.strip()]
 CSRF_TRUSTED_ORIGINS = [o.strip() for o in os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',') if o.strip()]
 
+# On the server Django sits behind nginx, which says in this header whether the visitor came over HTTPS.
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+if os.getenv('HTTPS') == 'True':
+    SESSION_COOKIE_SECURE = CSRF_COOKIE_SECURE = True  # the admin's login cookie only over HTTPS
+
 ROOT_URLCONF = 'core.urls'
 
 TEMPLATES = [

@@ -1,0 +1,17 @@
+# Muhojir backend: Django behind gunicorn, reachable only from nginx (127.0.0.1:8041).
+# Uvicorn workers run Django as ASGI, so the same process serves the API and the live-notification WebSocket.
+[Unit]
+Description=Muhojir — gunicorn (Django API + WebSocket)
+After=network.target redis-server.service
+Wants=redis-server.service
+
+[Service]
+User=romin
+Group=romin
+WorkingDirectory=/home/romin/muhojir
+ExecStart=/home/romin/muhojir/.venv/bin/gunicorn core.asgi:application --worker-class uvicorn_worker.UvicornWorker --bind 127.0.0.1:8041 --workers 3 --timeout 60 --access-logfile -
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
