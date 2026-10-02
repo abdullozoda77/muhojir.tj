@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { LogOut, Mail, Save } from "lucide-react";
+import { LogOut, Mail, PenSquare, Save } from "lucide-react";
 import { api } from "../api.js";
 import { useAuth } from "../auth.jsx";
 import { lang, setLang, t } from "../i18n.js";
 import PhoneApp from "../components/PhoneApp.jsx";
 import { Button, ErrorBox, Field, PageHeader } from "../components/ui.jsx";
+
+const ROLE_NAMES = { editor: () => t("Муҳаррир"), admin: () => t("Админ") };
 
 export default function Profile() {
   const { user, setUser, logout } = useAuth();
@@ -50,10 +52,13 @@ export default function Profile() {
       <form onSubmit={submit} className="card flex flex-col gap-4 p-4 md:p-8">
         <div className="flex items-center gap-3 rounded-xl bg-surface-container-low p-4">
           <Mail className="h-5 w-5 text-primary" aria-hidden />
-          <div>
+          <div className="flex-1">
             <span className="block text-body-sm text-on-surface-variant">{t("Почтаи электронӣ (барои воридшавӣ)")}</span>
             <span className="text-label-lg">{user.email}</span>
           </div>
+          {user.role !== "migrant" && (
+            <span className="rounded-full bg-primary-fixed px-3 py-1 text-label-md text-on-primary-fixed">{ROLE_NAMES[user.role]?.() || user.role}</span>
+          )}
         </div>
         <Field label={t("Ному насаб")} error={errors.full_name}>
           <input className="input" value={form.full_name} onChange={(e) => set("full_name", e.target.value)} autoComplete="name" />
@@ -83,6 +88,19 @@ export default function Profile() {
         {saved && <p role="status" className="rounded-xl bg-tertiary-fixed p-3 text-label-md text-on-tertiary-fixed">{t("Сабт шуд")}</p>}
         <Button type="submit" icon={Save} loading={busy}>{t("Сабт кардан")}</Button>
       </form>
+      {(user.role === "editor" || user.role === "admin") && (
+        <a href="/admin/" className="card flex items-center gap-4 p-4 transition-shadow hover:shadow-md md:p-6">
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary-fixed text-primary">
+            <PenSquare className="h-6 w-6" aria-hidden />
+          </span>
+          <span>
+            <span className="block text-label-lg">{t("Идораи мундариҷа")}</span>
+            <span className="text-body-sm text-on-surface-variant">
+              {user.role === "editor" ? t("Хабарҳо, роҳнамоҳо, саволҳои имтиҳон, сайтҳои ёрӣ, марказҳо ва нархҳои патент.") : t("Ҳамаи қисмҳои сайт, корбарон ва нақшҳо.")}
+            </span>
+          </span>
+        </a>
+      )}
       <PhoneApp />
       <Button
         variant="plain"

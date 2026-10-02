@@ -7,6 +7,9 @@ export default defineConfig({
   server: {
     port: 5174,
     proxy: {
+      // The admin panel and its styles are served by Django.
+      "/admin": "http://127.0.0.1:8001",
+      "/static": "http://127.0.0.1:8001",
       "/api": "http://127.0.0.1:8001",
       "/media": "http://127.0.0.1:8001",
     },
@@ -15,6 +18,9 @@ export default defineConfig({
   preview: {
     port: 4174,
     proxy: {
+      // The admin panel and its styles are served by Django.
+      "/admin": "http://127.0.0.1:8001",
+      "/static": "http://127.0.0.1:8001",
       "/api": "http://127.0.0.1:8001",
       "/media": "http://127.0.0.1:8001",
     },

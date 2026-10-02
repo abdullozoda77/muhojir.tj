@@ -3,7 +3,7 @@
 // Offline: pages and their files are kept after the first visit; the user's own data (documents, payments,
 // profile) and the guides are taken from the network when there is one and from the copy when there is not.
 // On logout the page asks to forget the user's data (message "clear-user-data").
-const VERSION = "muhojir-v3";
+const VERSION = "muhojir-v4";
 const SHELL = ["/", "/manifest.webmanifest", "/logo.png", "/icon-192.png"];
 
 // API lists kept for offline reading (GET only). Photos and receipts are not kept.
@@ -61,6 +61,8 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(request.url);
 
   if (url.origin === self.location.origin) {
+    // The admin panel and the API docs are Django's own pages: never cached, never replaced by the app.
+    if (/^\/(admin|static|swagger|redoc)(\/|$)/.test(url.pathname)) return;
     if (request.mode === "navigate") {
       // Every page is the same index.html; the app draws the rest.
       event.respondWith(networkFirst(request, "/"));

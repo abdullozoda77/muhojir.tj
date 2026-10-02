@@ -1,7 +1,7 @@
 import { Suspense, useEffect, useState } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import {
-  ArrowRight, Bell, BookOpen, Bookmark, Briefcase, Calculator, GraduationCap, Home, LifeBuoy, LogIn, Moon, ReceiptText, Scale, SearchCheck, Settings, ShieldCheck, Sun, WifiOff,
+  ArrowRight, Bell, BookOpen, Bookmark, Briefcase, Calculator, GraduationCap, Home, LifeBuoy, LogIn, Moon, PenSquare, ReceiptText, Scale, SearchCheck, Settings, ShieldCheck, Sun, WifiOff,
 } from "lucide-react";
 import { api, apiAll } from "../api.js";
 import { useAuth } from "../auth.jsx";
@@ -39,6 +39,8 @@ function navFor(user) {
     { to: "/profile", icon: Settings, label: t("Профил ва танзимот"), short: t("Профил") },
   ];
 }
+
+export const canEdit = (user) => user && (user.role === "editor" || user.role === "admin");
 
 // Counters for the menu: unread notifications and documents that need attention (ending soon or expired).
 function useCounters(user) {
@@ -176,6 +178,13 @@ export default function Layout() {
                   {i.badge && <Badge kind={i.badge} counts={counts} />}
                 </NavLink>
               ))}
+            {/* Editors and admins manage the content in the admin panel (served by Django, not by this app). */}
+            {canEdit(user) && (
+              <a href="/admin/" className="flex min-h-[48px] items-center gap-4 rounded-xl px-4 py-3 text-label-lg text-on-navy transition-colors hover:bg-white/10 hover:text-white">
+                <PenSquare className="h-5 w-5" aria-hidden />
+                {t("Идораи мундариҷа")}
+              </a>
+            )}
           </nav>
         </div>
         <div className="p-3">
