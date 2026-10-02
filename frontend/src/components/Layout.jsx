@@ -10,6 +10,7 @@ import { useTheme } from "../theme.js";
 import { AnimatePresence, m } from "motion/react";
 import Footer from "./Footer.jsx";
 import LiveToast from "./LiveToast.jsx";
+import Assistant from "./Assistant.jsx";
 import { PageTransition } from "./motion.jsx";
 import { useOnline } from "../pwa.js";
 import { useLiveNotifications } from "../live.js";
@@ -297,6 +298,7 @@ export default function Layout() {
             </NavLink>
           ))}
       </nav>
+      <Assistant />
       <LiveToast notification={toast} onClose={closeToast} />
       <div className="corner-lights" aria-hidden />
     </div>

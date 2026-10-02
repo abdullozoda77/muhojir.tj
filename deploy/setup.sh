@@ -40,6 +40,8 @@ else:
 open(path, "w").write("\n".join(lines) + "\n")
 PY
 }
+# Adds an empty KEY= line to .env only if it is not there; a key already written there is never touched.
+add_env_if_missing() { grep -q "^$1=" "$APP/.env" || echo "$1=" >> "$APP/.env"; }
 as_user() { sudo -u "$APP_USER" -H bash -c "cd '$APP' && $*"; }
 
 [ "$(id -u)" = 0 ] || { echo "Run this script as root."; exit 1; }
@@ -82,10 +84,17 @@ EMAIL_PORT=587
 EMAIL_USE_TLS=True
 EMAIL_HOST_USER=
 EMAIL_HOST_PASSWORD=
+
+# The AI assistant (the chat in the corner). One key is enough: Gemini from https://aistudio.google.com/apikey
+# or Claude from https://console.anthropic.com. While both are empty, the chat says it is not set up.
+GEMINI_API_KEY=
+ANTHROPIC_API_KEY=
 ENV
   echo "Created $APP/.env: add the email address and app password later (see the end of this script)."
 fi
 if [ -n "$DOMAIN" ]; then HOSTS="$DOMAIN,$SERVER_IP"; else HOSTS="$SERVER_IP"; fi
+add_env_if_missing GEMINI_API_KEY
+add_env_if_missing ANTHROPIC_API_KEY
 set_env DEBUG False
 set_env REDIS_URL "redis://127.0.0.1:6379/$REDIS_DB"
 set_env CELERY_BROKER_URL "redis://127.0.0.1:6379/$CELERY_DB"
@@ -184,4 +193,5 @@ echo
 echo "Muhojir:        http://$SERVER_IP:$PUBLIC_PORT/"
 echo "Admin account:  cd $APP && sudo -u $APP_USER .venv/bin/python manage.py createsuperuser"
 echo "Email password: nano $APP/.env   (EMAIL_HOST_USER, EMAIL_HOST_PASSWORD)   then   systemctl restart muhojir-gunicorn muhojir-celery"
+echo "AI assistant:   nano $APP/.env   (GEMINI_API_KEY or ANTHROPIC_API_KEY)   then   systemctl restart muhojir-gunicorn"
 echo "Logs:           journalctl -u muhojir-gunicorn -u muhojir-celery -u muhojir-celerybeat -f"

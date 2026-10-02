@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'documents',
     'jobs',
     'support',
+    'assistant',
 ]
 
 AUTH_USER_MODEL = 'accounts.User'
@@ -65,6 +66,8 @@ REST_FRAMEWORK = {
         'login_code': '5/hour',
         # Password tries: enough for typos, too few for guessing.
         'login': '20/hour',
+        # Questions to the AI assistant (each one costs a model call).
+        'assistant': '40/hour',
     },
 }
 
@@ -213,6 +216,16 @@ else:
 DEFAULT_FROM_EMAIL = os.getenv(
     'DEFAULT_FROM_EMAIL', f'"Muhojir" <{os.getenv("EMAIL_HOST_USER") or "noreply@muhojir.tj"}>'
 )
+
+# AI assistant. GEMINI_API_KEY (Google, has a free tier) is used first, otherwise ANTHROPIC_API_KEY (Claude).
+# Without either key the chat says it is not set up yet.
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', '')
+GEMINI_MODEL = os.getenv('GEMINI_MODEL', 'gemini-3.8-flash')
+# Tried in turn when the main model is overloaded or out of free quota.
+GEMINI_FALLBACK_MODELS = [m.strip() for m in os.getenv('GEMINI_FALLBACK_MODELS', 'gemini-3.7-flash,gemini-3.6-flash').split(',') if m.strip()]
+ANTHROPIC_API_KEY = os.getenv('ANTHROPIC_API_KEY', '')
+ASSISTANT_MODEL = os.getenv('ASSISTANT_MODEL', 'claude-opus-5')
+ASSISTANT_EFFORT = os.getenv('ASSISTANT_EFFORT', 'low')  # low answers fastest
 
 # Celery: emails are sent in the background and the daily jobs run on schedule. With CELERY_BROKER_URL in .env
 # (the server: Redis) a worker does them; without it (a laptop without Redis) every task simply runs at once,
