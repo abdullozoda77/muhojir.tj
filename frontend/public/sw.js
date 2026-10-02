@@ -3,8 +3,8 @@
 // Offline: pages and their files are kept after the first visit; the user's own data (documents, payments,
 // profile) and the guides are taken from the network when there is one and from the copy when there is not.
 // On logout the page asks to forget the user's data (message "clear-user-data").
-const VERSION = "muhojir-v2";
-const SHELL = ["/", "/manifest.webmanifest", "/logo.svg", "/icon-192.png"];
+const VERSION = "muhojir-v3";
+const SHELL = ["/", "/manifest.webmanifest", "/logo.png", "/icon-192.png"];
 
 // API lists kept for offline reading (GET only). Photos and receipts are not kept.
 const OFFLINE_API = [

@@ -63,8 +63,9 @@ function useCounters(user) {
 function Logo({ light = false }) {
   return (
     <Link to="/" className="flex items-center gap-2.5" aria-label="Muhojir">
-      <span className={`flex h-9 w-9 items-center justify-center rounded-[10px] ${light ? "bg-white" : "bg-banner"}`}>
-        <ShieldCheck className={`h-5 w-5 ${light ? "text-secondary" : "text-white"}`} strokeWidth={2.4} aria-hidden />
+      {/* The emblem sits on a white circle, so it reads on the dark menu as well as on white. */}
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white p-0.5 shadow-sm">
+        <img src="/logo.png" alt="" className="h-full w-full" />
       </span>
       <span className={`font-display text-[22px] font-bold ${light ? "text-white" : "text-navy"}`}>
         Muhojir

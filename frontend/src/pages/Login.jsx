@@ -118,7 +118,7 @@ export default function Login() {
     <div className="grid min-h-screen lg:grid-cols-2">
       <div className="relative hidden flex-col justify-between overflow-hidden bg-banner p-12 text-white lg:flex">
         <Link to="/" className="flex items-center gap-2">
-          <img src="/logo.svg" alt="" className="h-10 w-10 rounded-xl ring-2 ring-white/30" />
+          <span className="flex h-11 w-11 items-center justify-center rounded-full bg-white p-0.5"><img src="/logo.png" alt="" className="h-full w-full" /></span>
           <span className="text-headline-md font-bold">Muhojir</span>
         </Link>
         <div>
