@@ -6,6 +6,7 @@ import os
 from datetime import timedelta
 from pathlib import Path
 
+from celery.schedules import crontab
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -212,6 +213,20 @@ else:
 DEFAULT_FROM_EMAIL = os.getenv(
     'DEFAULT_FROM_EMAIL', f'"Muhojir" <{os.getenv("EMAIL_HOST_USER") or "noreply@muhojir.tj"}>'
 )
+
+# Celery: emails are sent in the background and the daily jobs run on schedule. With CELERY_BROKER_URL in .env
+# (the server: Redis) a worker does them; without it (a laptop without Redis) every task simply runs at once,
+# inside the request, so nothing else has to be started during development.
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', '')
+CELERY_TASK_ALWAYS_EAGER = not CELERY_BROKER_URL
+CELERY_TASK_EAGER_PROPAGATES = True
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_TASK_IGNORE_RESULT = True
+CELERY_BEAT_SCHEDULE = {
+    # Real vacancies from «Работа России» (and alerts about new ones), then the document reminders.
+    'daily-import-jobs': {'task': 'jobs.tasks.import_jobs', 'schedule': crontab(hour=6, minute=0)},
+    'daily-reminders': {'task': 'documents.tasks.send_reminders', 'schedule': crontab(hour=6, minute=30)},
+}
 
 LOGIN_CODE_LIFETIME = timedelta(minutes=10)
 LOGIN_CODE_MAX_ATTEMPTS = 5

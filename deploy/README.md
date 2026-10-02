@@ -5,7 +5,8 @@ Browser ──► nginx http://31.25.238.204:8040 ──► frontend/dist (React
                                             └► /api /admin /swagger /redoc and WebSocket /ws/
                                                ──► gunicorn 127.0.0.1:8041 (Django ASGI, Uvicorn workers)
 gunicorn workers ◄──► Redis (db 13) — live notifications reach every open tab
-muhojir-daily.timer, every day 06:00 ──► import_jobs (vacancies + alerts) and send_reminders
+Django ──► Redis (db 14) ──► Celery worker: emails in the background, daily jobs
+Celery beat: every day 06:00 import_jobs (vacancies + alerts), 06:30 send_reminders
 ```
 
 Runs next to Rohat (8030/8031) on the same server without touching it: own ports, own services, own Redis database.
@@ -22,7 +23,7 @@ Then put the email sender in `.env` (the codes for sign-up and password):
 
 ```bash
 nano /home/romin/muhojir/.env        # EMAIL_HOST_USER and EMAIL_HOST_PASSWORD
-systemctl restart muhojir-gunicorn
+systemctl restart muhojir-gunicorn muhojir-celery
 ```
 
 ## Update after new commits on GitHub
@@ -33,8 +34,9 @@ bash /home/romin/muhojir/deploy/update.sh
 
 ## Useful
 
-- Logs: `journalctl -u muhojir-gunicorn -f`, daily jobs: `journalctl -u muhojir-daily`
-- Run the daily jobs now: `systemctl start muhojir-daily`
+- Logs: `journalctl -u muhojir-gunicorn -u muhojir-celery -u muhojir-celerybeat -f`
+- Run the daily jobs now: `cd /home/romin/muhojir && sudo -u romin .venv/bin/celery -A core call jobs.tasks.import_jobs`
+  (and `documents.tasks.send_reminders`)
 - When there is a domain: set `DOMAIN=` at the top of `setup.sh` and run it again.
 
 The server database is separate from the laptop one: accounts are made again there.

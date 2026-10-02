@@ -1,0 +1,17 @@
+# Muhojir Celery Beat: the clock. Every day at 06:00 new vacancies (and alerts), at 06:30 document reminders
+# (CELERY_BEAT_SCHEDULE in core/settings.py). Only one beat may run.
+[Unit]
+Description=Muhojir — Celery beat (daily schedule)
+After=network.target redis-server.service
+Wants=redis-server.service
+
+[Service]
+User=romin
+Group=romin
+WorkingDirectory=/home/romin/muhojir
+ExecStart=/home/romin/muhojir/.venv/bin/celery -A core beat --loglevel=INFO --schedule=/home/romin/muhojir/celerybeat-schedule
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

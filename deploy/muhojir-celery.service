@@ -1,0 +1,17 @@
+# Muhojir Celery worker: sends emails (sign-up and password codes, reminders) in the background
+# and runs the daily jobs that Celery Beat hands it. Queue: Redis database 14.
+[Unit]
+Description=Muhojir — Celery worker (emails, daily jobs)
+After=network.target redis-server.service
+Wants=redis-server.service
+
+[Service]
+User=romin
+Group=romin
+WorkingDirectory=/home/romin/muhojir
+ExecStart=/home/romin/muhojir/.venv/bin/celery -A core worker --loglevel=INFO --concurrency=2
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

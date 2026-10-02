@@ -8,7 +8,8 @@
 #                →  /api /admin /swagger /redoc and the WebSocket /ws/  →  gunicorn 127.0.0.1:8041
 #   gunicorn runs Django as ASGI with Uvicorn workers, so the same process serves the API and live notifications;
 #   the workers share the notifications through Redis (database 13).
-#   A systemd timer runs the daily jobs at 06:00: new vacancies (import_jobs) and document reminders (send_reminders).
+#   Celery worker sends the emails in the background and runs the daily jobs; Celery Beat starts them every day
+#   (06:00 new vacancies, 06:30 document reminders). Their queue is Redis database 14.
 # Other projects on this server (Rohat on 8030/8031, other students' apps) are not touched.
 set -euo pipefail
 
@@ -16,7 +17,8 @@ APP_USER=romin
 APP=/home/$APP_USER/muhojir
 PUBLIC_PORT=8040   # the address people open: http://<server>:8040
 APP_PORT=8041      # gunicorn, reachable only from nginx
-REDIS_DB=13        # Rohat uses 12
+REDIS_DB=13        # live notifications (Rohat uses 12)
+CELERY_DB=14       # Celery's queue
 DOMAIN=""          # later, e.g. muhojir.khayrkhoh.tj (it must point to this server in DNS); empty = by port only
 NODE_DIR=/home/$APP_USER/.local/node22
 SERVER_IP=$(hostname -I | awk '{print $1}')
@@ -86,6 +88,7 @@ fi
 if [ -n "$DOMAIN" ]; then HOSTS="$DOMAIN,$SERVER_IP"; else HOSTS="$SERVER_IP"; fi
 set_env DEBUG False
 set_env REDIS_URL "redis://127.0.0.1:6379/$REDIS_DB"
+set_env CELERY_BROKER_URL "redis://127.0.0.1:6379/$CELERY_DB"
 set_env ALLOWED_HOSTS "$HOSTS,localhost,127.0.0.1"
 ORIGINS="http://$SERVER_IP:$PUBLIC_PORT"
 [ -n "$DOMAIN" ] && ORIGINS="https://$DOMAIN,http://$DOMAIN,$ORIGINS"
@@ -155,26 +158,30 @@ if command -v ufw >/dev/null && ufw status | grep -q "Status: active"; then
   ufw allow "$PUBLIC_PORT/tcp"
 fi
 
-step "Services: gunicorn and the daily jobs"
-cp "$APP"/deploy/muhojir-gunicorn.service "$APP"/deploy/muhojir-daily.service "$APP"/deploy/muhojir-daily.timer /etc/systemd/system/
+step "Services: gunicorn, Celery worker, Celery beat"
+# An earlier version used a systemd timer for the daily jobs; Celery Beat does them now.
+if [ -e /etc/systemd/system/muhojir-daily.timer ]; then
+  systemctl disable -q --now muhojir-daily.timer || true
+  rm -f /etc/systemd/system/muhojir-daily.timer /etc/systemd/system/muhojir-daily.service
+fi
+cp "$APP"/deploy/muhojir-gunicorn.service "$APP"/deploy/muhojir-celery.service "$APP"/deploy/muhojir-celerybeat.service /etc/systemd/system/
 systemctl daemon-reload
-systemctl enable -q muhojir-gunicorn muhojir-daily.timer
-systemctl restart muhojir-gunicorn
-systemctl start muhojir-daily.timer
-# The very first time there are no vacancies yet: import them now, in the background (takes a few minutes).
+systemctl enable -q muhojir-gunicorn muhojir-celery muhojir-celerybeat
+systemctl restart muhojir-gunicorn muhojir-celery muhojir-celerybeat
+# The very first time there are no vacancies yet: the worker imports them now, in the background (a few minutes).
 if ! as_user ".venv/bin/python manage.py shell -c 'from jobs.models import Job; import sys; sys.exit(0 if Job.objects.exists() else 1)'" 2>/dev/null; then
-  systemctl start --no-block muhojir-daily.service
-  echo "Importing the first vacancies in the background: journalctl -u muhojir-daily -f"
+  as_user ".venv/bin/celery -A core call jobs.tasks.import_jobs" >/dev/null
+  echo "Importing the first vacancies in the background: journalctl -u muhojir-celery -f"
 fi
 
 step "Check"
 sleep 4
-systemctl is-active muhojir-gunicorn
+systemctl is-active muhojir-gunicorn muhojir-celery muhojir-celerybeat
 curl -sS -o /dev/null -w "site: HTTP %{http_code}\n" "http://127.0.0.1:$PUBLIC_PORT/"
 curl -sS -o /dev/null -w "API:  HTTP %{http_code}\n" "http://127.0.0.1:$PUBLIC_PORT/api/documents/document-types/"
 
 echo
 echo "Muhojir:        http://$SERVER_IP:$PUBLIC_PORT/"
 echo "Admin account:  cd $APP && sudo -u $APP_USER .venv/bin/python manage.py createsuperuser"
-echo "Email password: nano $APP/.env   (EMAIL_HOST_USER, EMAIL_HOST_PASSWORD)   then   systemctl restart muhojir-gunicorn"
-echo "Logs:           journalctl -u muhojir-gunicorn -f        daily jobs: journalctl -u muhojir-daily"
+echo "Email password: nano $APP/.env   (EMAIL_HOST_USER, EMAIL_HOST_PASSWORD)   then   systemctl restart muhojir-gunicorn muhojir-celery"
+echo "Logs:           journalctl -u muhojir-gunicorn -u muhojir-celery -u muhojir-celerybeat -f"
