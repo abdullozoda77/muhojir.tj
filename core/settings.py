@@ -220,9 +220,10 @@ DEFAULT_FROM_EMAIL = os.getenv(
 # AI assistant. GEMINI_API_KEY (Google, has a free tier) is used first, otherwise ANTHROPIC_API_KEY (Claude).
 # Without either key the chat says it is not set up yet.
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', '')
-GEMINI_MODEL = os.getenv('GEMINI_MODEL', 'gemini-3.8-flash')
+# The newest free models are the most often overloaded; these answer in 1-2 s and handle the tools well.
+GEMINI_MODEL = os.getenv('GEMINI_MODEL', 'gemini-3.6-flash')
 # Tried in turn when the main model is overloaded or out of free quota.
-GEMINI_FALLBACK_MODELS = [m.strip() for m in os.getenv('GEMINI_FALLBACK_MODELS', 'gemini-3.7-flash,gemini-3.6-flash').split(',') if m.strip()]
+GEMINI_FALLBACK_MODELS = [m.strip() for m in os.getenv('GEMINI_FALLBACK_MODELS', 'gemini-3.5-flash,gemini-3.8-flash,gemini-3.5-flash-lite').split(',') if m.strip()]
 ANTHROPIC_API_KEY = os.getenv('ANTHROPIC_API_KEY', '')
 ASSISTANT_MODEL = os.getenv('ASSISTANT_MODEL', 'claude-opus-5')
 ASSISTANT_EFFORT = os.getenv('ASSISTANT_EFFORT', 'low')  # low answers fastest

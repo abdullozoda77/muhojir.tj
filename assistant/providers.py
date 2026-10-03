@@ -7,13 +7,15 @@ import json
 import logging
 
 from django.conf import settings
+from django.core.cache import cache
 
 from .tools import TOOLS, run_tool
 
 logger = logging.getLogger(__name__)
 
 MAX_TOOL_STEPS = 6  # model calls per answer (each tool round is one more call)
-GEMINI_TIMEOUT_MS = 25_000  # per call; a slow model is left for the next one
+GEMINI_TIMEOUT_MS = 15_000  # per call; a slow model is left for the next one
+RESTING = 300  # seconds an overloaded model is tried last, so visitors do not wait for it every time
 
 
 class AssistantError(Exception):
@@ -86,6 +88,7 @@ def _ask_gemini(system_text, visitor_note, messages, run):
             for tool in TOOLS
         ])],
         automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
+        thinking_config=types.ThinkingConfig(thinking_level="low"),  # short answers: long thinking only adds seconds
         max_output_tokens=2048,  # answers are short
     )
     question = [
@@ -96,6 +99,7 @@ def _ask_gemini(system_text, visitor_note, messages, run):
     # Free models are often overloaded (503) or out of quota (429) for a while. Then the answer starts again
     # on the next model: a model's tool-call turns carry its own thought signatures, so they are not mixed.
     models = list(dict.fromkeys([settings.GEMINI_MODEL, *settings.GEMINI_FALLBACK_MODELS]))
+    models.sort(key=lambda m: bool(cache.get(f"assistant:resting:{m}")))  # overloaded ones last, order kept
     for i, model in enumerate(models):
         try:
             return _gemini_answer(client, model, config, list(question), types, run)
@@ -103,13 +107,17 @@ def _ask_gemini(system_text, visitor_note, messages, run):
             logger.warning("AI assistant (Gemini %s): %s %s", model, e.code, e.message)
             if e.code in (401, 403) or (e.code == 400 and "API key" in (e.message or "")):
                 raise AssistantError(*NOT_CONFIGURED)
+            if e.code in (404, 429, 500, 503, 504):
+                cache.set(f"assistant:resting:{model}", True, RESTING)
             if e.code in (404, 429, 500, 503, 504) and i + 1 < len(models):
                 continue
             raise AssistantError(*(BUSY if e.code == 429 else UNAVAILABLE))
         except (httpx.HTTPError, OSError) as e:
             logger.warning("AI assistant (Gemini %s): network error: %r", model, e)
-            if isinstance(e, httpx.TimeoutException) and i + 1 < len(models):
-                continue
+            if isinstance(e, httpx.TimeoutException):
+                cache.set(f"assistant:resting:{model}", True, RESTING)
+                if i + 1 < len(models):
+                    continue
             raise AssistantError(*UNAVAILABLE)
 
 
